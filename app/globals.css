@@ -1,5 +1,6 @@
 @import 'tailwindcss';
-@plugin 'lightswind/plugin';
+@import '../lightswind.css';
+
 :root {
   /* Brand Identity */
   --brand-primary: #1A3B2E;
@@ -39,9 +40,32 @@
   --functional-error: #D32F2F;
   --functional-info: #0288D1;
 
-  /* Base Variables */
-  --background: var(--brand-background);
-  --foreground: var(--brand-text);
+  /* shadcn/ui & Lightswind compatible variables */
+  --background: 45 40% 98%;
+  /* #FAF9F6 approximation */
+  --foreground: 0 0% 16%;
+  /* #2A2A2A */
+  --card: 45 40% 98%;
+  --card-foreground: 0 0% 16%;
+  --popover: 45 40% 98%;
+  --popover-foreground: 0 0% 16%;
+  --primary: 156 38% 17%;
+  /* #1A3B2E */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 110 18% 60%;
+  /* #8BA888 approx */
+  --secondary-foreground: 156 38% 17%;
+  --muted: 156 10% 90%;
+  --muted-foreground: 0 0% 41%;
+  --accent: 156 18% 35%;
+  /* #4A6B5B */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 156 10% 85%;
+  --input: 156 10% 85%;
+  --ring: 156 38% 17%;
+  --radius: 0.75rem;
 }
 
 @theme inline {

@@ -11,6 +11,7 @@ import {
   ContactShadows,
   Center,
 } from "@react-three/drei";
+// @ts-ignore
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import * as THREE from "three";
 
@@ -32,15 +33,15 @@ export interface ViewerProps {
   fillLightIntensity?: number;
   rimLightIntensity?: number;
   environmentPreset?:
-    | "city"
-    | "sunset"
-    | "night"
-    | "dawn"
-    | "studio"
-    | "apartment"
-    | "forest"
-    | "park"
-    | "none";
+  | "city"
+  | "sunset"
+  | "night"
+  | "dawn"
+  | "studio"
+  | "apartment"
+  | "forest"
+  | "park"
+  | "none";
   autoRotate?: boolean;
   autoRotateSpeed?: number;
   onModelLoaded?: () => void;
@@ -73,7 +74,7 @@ const GltfContent: FC<{ url: string; onLoaded: () => void }> = ({
   const { scene } = useGLTF(url);
   useLayoutEffect(() => {
     if (scene) {
-      scene.traverse((o) => {
+      scene.traverse((o: THREE.Object3D) => {
         if ((o as THREE.Mesh).isMesh) {
           o.castShadow = true;
           o.receiveShadow = true;
@@ -93,7 +94,7 @@ const FbxContent: FC<{ url: string; onLoaded: () => void }> = ({
   const fbx = useFBX(url);
   useLayoutEffect(() => {
     if (fbx) {
-      fbx.traverse((o) => {
+      fbx.traverse((o: THREE.Object3D) => {
         if ((o as THREE.Mesh).isMesh) {
           o.castShadow = true;
           o.receiveShadow = true;
@@ -113,7 +114,7 @@ const ObjContent: FC<{ url: string; onLoaded: () => void }> = ({
   const obj = useLoader(OBJLoader as unknown as any, url);
   useLayoutEffect(() => {
     if (obj) {
-      obj.traverse((o) => {
+      obj.traverse((o: THREE.Object3D) => {
         if ((o as THREE.Mesh).isMesh) {
           o.castShadow = true;
           o.receiveShadow = true;
@@ -134,7 +135,7 @@ const SceneContent: FC<{
   const modelRef = useRef<THREE.Group>(null!);
   const ext = url.split(".").pop()?.toLowerCase();
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (autoRotate && modelRef.current) {
       modelRef.current.rotation.y += (autoRotateSpeed || 1) * delta;
     }
@@ -190,9 +191,6 @@ const ModelViewer: FC<ViewerProps> = ({
   onModelLoaded,
 }) => {
   // Preload hook calls should also be unconditional.
-  // The 'useGLTF.preload' hook is called here, but if you had other preloaders,
-  // they would need to be handled similarly.
-  // We'll call useGLTF.preload unconditionally, but it's only effective for gltf/glb files.
   useEffect(() => void useGLTF.preload(url), [url]);
 
   return (

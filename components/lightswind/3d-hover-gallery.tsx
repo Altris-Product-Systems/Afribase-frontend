@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
-const cn = (...classes) => classes.filter(Boolean).join(" ");
+const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
 
 export interface ThreeDHoverGalleryProps {
   images?: string[];
@@ -61,7 +61,7 @@ const ThreeDHoverGallery: React.FC<ThreeDHoverGalleryProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPlayRef = useRef<any>(null);
 
   // Effect for auto-play functionality
   useEffect(() => {

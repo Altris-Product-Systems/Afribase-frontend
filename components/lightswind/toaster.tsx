@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "../../hooks/use-toast";
 import {
   Toast,
   ToastClose,
@@ -21,16 +21,16 @@ export function Toaster() {
           // Map toast type to variant if variant is not provided
           const toastVariant = variant || (
             type === "success" ? "success" :
-            type === "warning" ? "warning" :
-            type === "info" ? "info" :
-            type === "destructive" ? "destructive" :
-            "default"
+              type === "warning" ? "warning" :
+                type === "info" ? "info" :
+                  type === "destructive" ? "destructive" :
+                    "default"
           );
-          
+
           return (
-            <Toast 
-              key={id} 
-              {...props} 
+            <Toast
+              key={id}
+              {...props}
               variant={toastVariant}
               duration={duration}
             >

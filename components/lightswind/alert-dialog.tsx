@@ -2,7 +2,7 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
 import { buttonVariants } from "./button";
-import { motion, AnimatePresence } from "framer-motion"; // Import motion and AnimatePresence
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AlertDialogContextType {
   open: boolean;
@@ -62,14 +62,9 @@ const AlertDialogTrigger = React.forwardRef<HTMLButtonElement, AlertDialogTrigge
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       setOpen(true);
-
-      // Call the original onClick if it exists
-      if (props.onClick) {
-        props.onClick(e);
-      }
+      if (props.onClick) props.onClick(e);
     };
 
-    // Remove onClick from props to avoid duplicate handlers
     const { onClick, ...otherProps } = props;
 
     if (asChild) {
@@ -78,7 +73,7 @@ const AlertDialogTrigger = React.forwardRef<HTMLButtonElement, AlertDialogTrigge
           {React.Children.map(children, child => {
             if (React.isValidElement(child)) {
               return React.cloneElement(child, {
-                ...child.props,
+                ...(child.props as any),
                 ref,
                 onClick: handleClick
               });
@@ -112,15 +107,8 @@ const AlertDialogOverlay = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const context = React.useContext(AlertDialogContext);
-  if (!context) {
-    throw new Error("AlertDialogOverlay must be used within an AlertDialog");
-  }
-
+  if (!context) return null;
   const { open } = context;
-
-  // It's less likely for AlertDialogOverlay to have conflicting props,
-  // but if the error points here, apply the same filtering.
-  // For now, we'll assume the primary issue is in AlertDialogContent.
   return (
     <AnimatePresence>
       {open && (
@@ -143,65 +131,42 @@ const AlertDialogContent = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const context = React.useContext(AlertDialogContext);
-  if (!context) {
-    throw new Error("AlertDialogContent must be used within an AlertDialog");
-  }
+  if (!context) return null;
 
   const { open, setOpen } = context;
-
-  // Add click outside functionality
   const contentRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     if (!open) return;
-
     const handleClickOutside = (event: MouseEvent) => {
       if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open, setOpen]);
 
-  // Use AnimatePresence and motion.div for animation
   return (
     <AnimatePresence>
       {open && (
         <AlertDialogPortal>
           <AlertDialogOverlay />
           <motion.div
-            ref={(node) => {
-              // Standard ref handling
-              if (typeof ref === "function") {
-                ref(node);
-              } else if (ref) {
-                (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-              }
-              // Content ref for click outside
-              (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            ref={(node: HTMLDivElement | null) => {
+              if (typeof ref === "function") ref(node);
+              else if (ref) (ref as any).current = node;
+              (contentRef as any).current = node;
             }}
             className={cn(
-              "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border   bg-background p-6 shadow-lg sm:rounded-lg",
+              "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
               className
             )}
             initial={{ y: "-48%", x: "-50%", opacity: 0, scale: 0.95 }}
             animate={{ y: "-50%", x: "-50%", opacity: 1, scale: 1 }}
             exit={{ y: "-48%", x: "-50%", opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            // Filter out properties that conflict with Framer Motion's types
-            // This is the crucial part for resolving the type error.
-            {...Object.keys(props).reduce((acc: { [key: string]: any }, key) => {
-                // Add any other conflicting HTML attributes you might discover here.
-                // 'onDrag' is the most common one.
-                if (key === 'onDrag' || key === 'onAnimationStart' || key === 'onTransitionEnd') {
-                    return acc; // Omit this property
-                }
-                acc[key] = (props as any)[key]; // Keep other properties
-                return acc;
-            }, {})}
+            {...(props as any)}
           >
             {children}
           </motion.div>
@@ -264,31 +229,20 @@ const AlertDialogDescription = React.forwardRef<
 ));
 AlertDialogDescription.displayName = "AlertDialogDescription";
 
-interface AlertDialogActionProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+interface AlertDialogActionProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 const AlertDialogAction = React.forwardRef<
   HTMLButtonElement,
   AlertDialogActionProps
 >(({ className, ...props }, ref) => {
   const context = React.useContext(AlertDialogContext);
-  if (!context) {
-    throw new Error("AlertDialogAction must be used within an AlertDialog");
-  }
-
+  if (!context) return null;
   const { setOpen } = context;
-
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setOpen(false);
-
-    // Call the original onClick if it exists
-    if (props.onClick) {
-      props.onClick(e);
-    }
+    if (props.onClick) props.onClick(e);
   };
-
-  // Remove onClick from props to avoid duplicate handlers
   const { onClick, ...otherProps } = props;
-
   return (
     <button
       ref={ref}
@@ -300,31 +254,20 @@ const AlertDialogAction = React.forwardRef<
 });
 AlertDialogAction.displayName = "AlertDialogAction";
 
-interface AlertDialogCancelProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+interface AlertDialogCancelProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 const AlertDialogCancel = React.forwardRef<
   HTMLButtonElement,
   AlertDialogCancelProps
 >(({ className, ...props }, ref) => {
   const context = React.useContext(AlertDialogContext);
-  if (!context) {
-    throw new Error("AlertDialogCancel must be used within an AlertDialog");
-  }
-
+  if (!context) return null;
   const { setOpen } = context;
-
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setOpen(false);
-
-    // Call the original onClick if it exists
-    if (props.onClick) {
-      props.onClick(e);
-    }
+    if (props.onClick) props.onClick(e);
   };
-
-  // Remove onClick from props to avoid duplicate handlers
   const { onClick, ...otherProps } = props;
-
   return (
     <button
       ref={ref}

@@ -8,8 +8,8 @@ import React, {
   TouchEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import { Card, CardContent } from "@/app/component2/ui/card";
-import { useIsMobile } from "../hooks/use-mobile";
+import { Card, CardContent } from "./card";
+import { useIsMobile } from "../../hooks/use-mobile";
 import Link from "next/link";
 
 export interface ThreeDCarouselItem {
@@ -214,11 +214,10 @@ const ThreeDCarousel = ({
             {items.map((_, idx) => (
               <button
                 key={idx}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  active === idx
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${active === idx
                     ? "bg-gray-500 w-5"
                     : "bg-gray-200 hover:bg-gray-300"
-                }`}
+                  }`}
                 onClick={() => setActive(idx)}
                 aria-label={`Go to item ${idx + 1}`}
               />
