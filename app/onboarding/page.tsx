@@ -13,6 +13,7 @@ export default function OnboardingPage() {
 
   // Organization data
   const [orgName, setOrgName] = useState('');
+  const [orgSlug, setOrgSlug] = useState('');
   const [organizationId, setOrganizationId] = useState('');
 
   // Project data
@@ -21,13 +22,26 @@ export default function OnboardingPage() {
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
 
+  const handleOrgNameChange = (name: string) => {
+    setOrgName(name);
+    // Auto-generate slug from name
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    setOrgSlug(slug);
+  };
+
   const handleCreateOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      const org = await createOrganization(orgName);
+      const org = await createOrganization({
+        name: orgName,
+        slug: orgSlug,
+      });
       setOrganizationId(org.id);
       setStep(2);
     } catch (err) {
@@ -138,7 +152,7 @@ export default function OnboardingPage() {
                   type="text"
                   id="orgName"
                   value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
+                  onChange={(e) => handleOrgNameChange(e.target.value)}
                   required
                   disabled={isLoading}
                   placeholder="Acme Inc"
@@ -146,9 +160,29 @@ export default function OnboardingPage() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="orgSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Organization slug
+                </label>
+                <input
+                  type="text"
+                  id="orgSlug"
+                  value={orgSlug}
+                  onChange={(e) => setOrgSlug(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  placeholder="acme-inc"
+                  pattern="[a-z0-9-]+"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Only lowercase letters, numbers, and hyphens
+                </p>
+              </div>
+
               <button
                 type="submit"
-                disabled={isLoading || !orgName}
+                disabled={isLoading || !orgName || !orgSlug}
                 className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isLoading ? (

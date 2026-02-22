@@ -98,14 +98,20 @@ export function isAuthenticated(): boolean {
 export interface Organization {
   id: string;
   name: string;
-  created_at?: string;
+  slug: string;
+  description?: string;
+  ownerId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateOrganizationRequest {
   name: string;
+  slug?: string;
+  description?: string;
 }
 
-export async function createOrganization(name: string): Promise<Organization> {
+export async function createOrganization(data: CreateOrganizationRequest): Promise<Organization> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
@@ -115,16 +121,16 @@ export async function createOrganization(name: string): Promise<Organization> {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(data),
   });
 
-  const data = await response.json();
+  const responseData = await response.json();
 
   if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to create organization');
+    throw new APIError(response.status, responseData.message || responseData.detail || 'Failed to create organization');
   }
 
-  return data;
+  return responseData;
 }
 
 export async function getOrganizations(): Promise<Organization[]> {
@@ -155,16 +161,23 @@ export interface Project {
   slug: string;
   region: string;
   plan: string;
-  organizationId: string;
-  created_at?: string;
+  organizationId?: string;
+  anonKey?: string;
+  serviceKey?: string;
+  databaseName?: string;
+  postgrestUrl?: string;
+  realtimeUrl?: string;
+  storageUrl?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateProjectRequest {
   name: string;
-  slug: string;
-  region: string;
-  plan: string;
+  description?: string;
   organizationId: string;
+  region: string;
 }
 
 export interface ProjectKeys {
@@ -195,11 +208,16 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
   return data;
 }
 
-export async function getProjects(): Promise<Project[]> {
+export async function getProjects(organizationId?: string): Promise<Project[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects`, {
+  // Build URL with optional organization_id query parameter
+  const url = organizationId 
+    ? `${API_BASE_URL}/api/projects?organization_id=${organizationId}`
+    : `${API_BASE_URL}/api/projects`;
+
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -212,7 +230,11 @@ export async function getProjects(): Promise<Project[]> {
     throw new APIError(response.status, data.message || data.detail || 'Failed to fetch projects');
   }
 
-  // Ensure we return an array
+  // Backend returns {projects: [...], total: number}
+  if (data.projects && Array.isArray(data.projects)) {
+    return data.projects;
+  }
+  // Fallback if API returns array directly
   return Array.isArray(data) ? data : [];
 }
 

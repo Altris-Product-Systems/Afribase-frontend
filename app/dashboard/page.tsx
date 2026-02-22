@@ -9,8 +9,11 @@ export default function DashboardPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -21,15 +24,25 @@ export default function DashboardPage() {
     loadData();
   }, [router]);
 
+  // Reload projects when selected organization changes
+  useEffect(() => {
+    if (selectedOrg) {
+      loadProjects(selectedOrg.id);
+    }
+  }, [selectedOrg]);
+
   const loadData = async () => {
     try {
-      const [orgsData, projectsData] = await Promise.all([
-        getOrganizations(),
-        getProjects(),
-      ]);
+      const orgsData = await getOrganizations();
       // Ensure we always have arrays
-      setOrganizations(Array.isArray(orgsData) ? orgsData : []);
-      setProjects(Array.isArray(projectsData) ? projectsData : []);
+      const orgs = Array.isArray(orgsData) ? orgsData : [];
+      
+      setOrganizations(orgs);
+      
+      // Set first organization as selected if available
+      if (orgs.length > 0 && !selectedOrg) {
+        setSelectedOrg(orgs[0]);
+      }
     } catch (err) {
       setError('Failed to load data');
       console.error(err);
@@ -38,6 +51,19 @@ export default function DashboardPage() {
       setProjects([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadProjects = async (orgId: string) => {
+    try {
+      const projectsData = await getProjects(orgId);
+      const projs = Array.isArray(projectsData) ? projectsData : [];
+      setProjects(projs);
+      setError('');
+    } catch (err) {
+      setError('Failed to load projects');
+      console.error(err);
+      setProjects([]);
     }
   };
 
@@ -77,56 +103,185 @@ export default function DashboardPage() {
         </div>
 
         {/* Organization Selector */}
-        <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800">
-          <button className="w-full px-3 py-2 flex items-center justify-between text-sm border border-gray-200 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
-            <span className="text-gray-700 dark:text-gray-300 font-medium">
-              {organizations[0]?.name || 'Select Organization'}
+        <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800 relative">
+          <button
+            onClick={() => setShowOrgDropdown(!showOrgDropdown)}
+            className="w-full px-3 py-2 flex items-center justify-between text-sm border border-gray-200 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+          >
+            <span className="text-gray-700 dark:text-gray-300 font-medium truncate">
+              {selectedOrg?.name || 'Select Organization'}
             </span>
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
             </svg>
           </button>
+
+          {/* Dropdown Menu */}
+          {showOrgDropdown && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowOrgDropdown(false)}
+              />
+              <div className="absolute left-4 right-4 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl z-20 max-h-80 overflow-y-auto">
+                {/* Search */}
+                <div className="p-2 border-b border-gray-200 dark:border-gray-800">
+                  <input
+                    type="text"
+                    placeholder="Find organization..."
+                    className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border-0 rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Selected Organization */}
+                {selectedOrg && (
+                  <div className="p-2 border-b border-gray-200 dark:border-gray-800">
+                    <button
+                      onClick={() => {
+                        setShowOrgDropdown(false);
+                      }}
+                      className="w-full px-3 py-2 flex items-center justify-between text-sm hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                    >
+                      <span className="text-gray-900 dark:text-white font-medium">{selectedOrg.name}</span>
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {/* All Organizations */}
+                <div className="p-2">
+                  <button
+                    onClick={() => {
+                      setSelectedOrg(null);
+                      setShowOrgDropdown(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                  >
+                    All Organizations
+                  </button>
+                </div>
+
+                {/* Organization List */}
+                {organizations.length > 0 && selectedOrg && (
+                  <div className="p-2 border-t border-gray-200 dark:border-gray-800">
+                    {organizations
+                      .filter(org => org.id !== selectedOrg?.id)
+                      .map((org) => (
+                        <button
+                          key={org.id}
+                          onClick={() => {
+                            setSelectedOrg(org);
+                            setShowOrgDropdown(false);
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                        >
+                          {org.name}
+                        </button>
+                      ))}
+                  </div>
+                )}
+
+                {/* New Organization */}
+                <div className="p-2 border-t border-gray-200 dark:border-gray-800">
+                  <Link
+                    href="/onboarding"
+                    onClick={() => setShowOrgDropdown(false)}
+                    className="w-full px-3 py-2 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    New organization
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-black dark:text-white bg-gray-100 dark:bg-gray-900 rounded-lg">
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'home'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Home
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('database')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'database'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
             </svg>
             Database
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('auth')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'auth'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Authentication
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('storage')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'storage'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Storage
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('functions')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'functions'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             Functions
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === 'settings'
+                ? 'text-black dark:text-white bg-gray-100 dark:bg-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+            }`}
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Settings
-          </a>
+          </button>
         </nav>
 
         {/* User Menu */}
@@ -148,7 +303,14 @@ export default function DashboardPage() {
         {/* Top Header */}
         <header className="h-16 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-black dark:text-white">All projects</h1>
+            <h1 className="text-xl font-semibold text-black dark:text-white">
+              {selectedOrg ? `${selectedOrg.name} projects` : 'All projects'}
+            </h1>
+            {projects.length > 0 && (
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                ({projects.length})
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <button className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors">
@@ -172,14 +334,17 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-black dark:text-white mb-2">
-                All projects
+                {selectedOrg ? selectedOrg.name : 'All projects'}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Manage and monitor all your Afribase projects
+                {selectedOrg 
+                  ? `${projects.length} project${projects.length !== 1 ? 's' : ''} in this organization`
+                  : 'Manage and monitor all your Afribase projects'
+                }
               </p>
             </div>
             <Link
-              href="/onboarding"
+              href="/projects/new"
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,13 +394,13 @@ export default function DashboardPage() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
-              No projects yet
+              {selectedOrg ? `No projects in ${selectedOrg.name}` : 'No projects yet'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Get started by creating your first project
             </p>
             <Link
-              href="/onboarding"
+              href="/projects/new"
               className="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
             >
               New project
