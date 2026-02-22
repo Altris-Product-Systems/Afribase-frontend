@@ -1,18 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { login, setAuthToken, APIError } from '@/lib/api';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { login, setAuthToken, getOrganizations, APIError } from '@/lib/api';
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
+
+  useEffect(() => {
+    // Check for session expiration or redirect messages
+    const reason = searchParams.get('reason');
+    if (reason === 'inactive') {
+      setInfoMessage('Your session expired due to inactivity. Please sign in again.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,19 +32,39 @@ export default function SignInPage() {
     try {
       const data = await login({ email, password });
 
+      // Ensure we actually received a valid token before proceeding
+      if (!data || !data.token) {
+        setError('Login failed. No authentication token received.');
+        setIsLoading(false);
+        return;
+      }
+
       // Store the JWT token
-      if (data.token) {
-        setAuthToken(data.token);
-        // Redirect to onboarding
+      setAuthToken(data.token);
+      
+      // Check if user already has organizations
+      try {
+        const orgs = await getOrganizations();
+        if (orgs && orgs.length > 0) {
+          // User has organizations, go to dashboard
+          router.push('/dashboard');
+        } else {
+          // New user, go to onboarding
+          router.push('/onboarding');
+        }
+      } catch (orgErr) {
+        // If we can't check organizations, default to onboarding
+        console.error('Failed to check organizations:', orgErr);
         router.push('/onboarding');
       }
     } catch (err) {
+      // Login failed - DO NOT redirect, just show error
       if (err instanceof APIError) {
         setError(err.message);
       } else {
         setError('An unexpected error occurred');
       }
-    } finally {
+      console.error('Login error:', err);
       setIsLoading(false);
     }
   };
@@ -98,6 +128,13 @@ export default function SignInPage() {
               </span>
             </div>
           </div>
+
+          {/* Info Message (e.g., session expired) */}
+          {infoMessage && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg animate-fade-in-up mb-5">
+              <p className="text-sm text-blue-600 dark:text-blue-400">{infoMessage}</p>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (

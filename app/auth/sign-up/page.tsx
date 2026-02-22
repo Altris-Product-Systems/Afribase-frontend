@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { signUp, setAuthToken, APIError } from '@/lib/api';
+import { signUp, setAuthToken, getOrganizations, APIError } from '@/lib/api';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -29,22 +29,39 @@ export default function SignUpPage() {
     try {
       const data = await signUp({ email, password });
 
-      // Store the JWT token if provided
-      if (data.token) {
-        setAuthToken(data.token);
-        // Redirect to onboarding
+      // Ensure we actually received a valid token before proceeding
+      if (!data || !data.token) {
+        setError('Signup failed. No authentication token received.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Store the JWT token
+      setAuthToken(data.token);
+      
+      // Check if user already has organizations (shouldn't happen for new signups, but good to check)
+      try {
+        const orgs = await getOrganizations();
+        if (orgs && orgs.length > 0) {
+          // User has organizations, go to dashboard
+          router.push('/dashboard');
+        } else {
+          // New user, go to onboarding
+          router.push('/onboarding');
+        }
+      } catch (orgErr) {
+        // If we can't check organizations, default to onboarding
+        console.error('Failed to check organizations:', orgErr);
         router.push('/onboarding');
-      } else {
-        // If no token, redirect to sign in
-        router.push('/auth/sign-in');
       }
     } catch (err) {
+      // Signup failed - DO NOT redirect, just show error
       if (err instanceof APIError) {
         setError(err.message);
       } else {
         setError('An unexpected error occurred');
       }
-    } finally {
+      console.error('Signup error:', err);
       setIsLoading(false);
     }
   };
