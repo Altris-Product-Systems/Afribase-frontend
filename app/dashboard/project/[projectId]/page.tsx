@@ -1,90 +1,244 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  getProjects, 
-  getProjectKeys, 
-  Project, 
-  ProjectKeys 
+import {
+  getProject,
+  getProjectKeys,
+  updateProject,
+  deleteProject,
+  runProjectQuery,
+  getProjectTables,
+  getProjectUsage,
+  Project,
+  ProjectKeys,
+  TableInfo,
+  ProjectUsage,
+  QueryResult,
 } from '@/lib/api';
-import StatCard from '@/components/StatCard';
-import EmptyState from '@/components/EmptyState';
-import { 
-  Database, 
-  Key, 
-  Activity, 
-  Shield, 
-  Zap, 
-  Copy, 
-  Check, 
-  Terminal, 
+import {
+  Database,
+  Key,
+  Activity,
+  Shield,
+  Zap,
+  Copy,
+  Check,
+  Terminal,
   Code,
   Globe,
   Server,
   Cpu,
   HardDrive,
   Users,
-  Plus
+  Play,
+  Trash2,
+  Save,
+  RefreshCw,
+  Table,
+  AlertTriangle,
+  ChevronRight,
+  BarChart3,
 } from 'lucide-react';
 
+// ─── Helpers ──────────────────────────────────────────────────────────────
+function formatBytes(bytes?: number): string {
+  if (bytes == null) return '—';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function usagePct(used?: number, limit?: number): number {
+  if (!used || !limit) return 0;
+  return Math.min(100, Math.round((used / limit) * 100));
+}
+
+const TABS = ['overview', 'tables', 'sql', 'api-keys', 'usage', 'settings'] as const;
+type Tab = (typeof TABS)[number];
+
+// ─── Main Page ─────────────────────────────────────────────────────────────
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.projectId as string;
 
+  // Core project state
   const [project, setProject] = useState<Project | null>(null);
   const [keys, setKeys] = useState<ProjectKeys | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
 
+  // Tables tab
+  const [tables, setTables] = useState<TableInfo[]>([]);
+  const [tablesLoading, setTablesLoading] = useState(false);
+  const [tablesError, setTablesError] = useState<string | null>(null);
+  const [selectedTable, setSelectedTable] = useState<TableInfo | null>(null);
+
+  // SQL tab
+  const [sqlQuery, setSqlQuery] = useState('SELECT * FROM public.users LIMIT 10;');
+  const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
+  const [queryRunning, setQueryRunning] = useState(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
+  const sqlRef = useRef<HTMLTextAreaElement>(null);
+
+  // Usage tab
+  const [usage, setUsage] = useState<ProjectUsage | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
+
+  // Settings tab
+  const [settingsName, setSettingsName] = useState('');
+  const [settingsDesc, setSettingsDesc] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  // ── Load project + keys ──────────────────────────────────────────────────
   useEffect(() => {
     loadProject();
   }, [projectId]);
 
   const loadProject = async () => {
     try {
-      const projects = await getProjects();
-      const found = projects.find(p => p.id === projectId);
-      if (found) {
-        setProject(found);
-        try {
-          const projectKeys = await getProjectKeys(projectId);
-          setKeys(projectKeys);
-        } catch (e) {
-          console.error("Failed to load keys");
-        }
-      } else {
-        // Handle not found
+      setError(null);
+      const found = await getProject(projectId);
+      setProject(found);
+      setSettingsName(found.name);
+      setSettingsDesc(found.description || '');
+      try {
+        const projectKeys = await getProjectKeys(projectId);
+        setKeys(projectKeys);
+      } catch {
+        console.error('Failed to load project keys');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      console.error('Failed to load project:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load project');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ── Tab-specific loaders ─────────────────────────────────────────────────
+  const loadTables = useCallback(async () => {
+    setTablesLoading(true);
+    setTablesError(null);
+    try {
+      const data = await getProjectTables(projectId);
+      setTables(data);
+    } catch (err: unknown) {
+      setTablesError(err instanceof Error ? err.message : 'Failed to fetch tables');
+    } finally {
+      setTablesLoading(false);
+    }
+  }, [projectId]);
+
+  const loadUsage = useCallback(async () => {
+    setUsageLoading(true);
+    try {
+      const data = await getProjectUsage(projectId);
+      setUsage(data);
+    } catch {
+      /* non-fatal */
+    } finally {
+      setUsageLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (activeTab === 'tables' && tables.length === 0 && !tablesLoading) loadTables();
+    if (activeTab === 'usage' && !usage && !usageLoading) loadUsage();
+  }, [activeTab]);
+
+  // ── Actions ───────────────────────────────────────────────────────────────
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(type);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  if (isLoading) return null;
-  if (!project) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-zinc-500">
-      <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
-        <Server size={32} />
-      </div>
-      <h3 className="text-white font-bold text-lg">Project not found</h3>
-      <button onClick={() => router.push('/dashboard')} className="mt-4 text-emerald-500 text-sm font-bold">Return to Dashboard</button>
-    </div>
-  );
+  const handleRunQuery = async () => {
+    if (!sqlQuery.trim()) return;
+    setQueryRunning(true);
+    setQueryError(null);
+    setQueryResult(null);
+    try {
+      const result = await runProjectQuery(projectId, sqlQuery);
+      setQueryResult(result);
+    } catch (err: unknown) {
+      setQueryError(err instanceof Error ? err.message : 'Query failed');
+    } finally {
+      setQueryRunning(false);
+    }
+  };
 
+  const handleSaveSettings = async () => {
+    if (!project) return;
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      const updated = await updateProject(projectId, {
+        name: settingsName,
+        description: settingsDesc,
+      });
+      setProject(updated);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (deleteConfirm !== project?.name) return;
+    setDeleting(true);
+    try {
+      await deleteProject(projectId);
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to delete project');
+      setDeleting(false);
+    }
+  };
+
+  // ── Guards ────────────────────────────────────────────────────────────────
+  if (isLoading)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-zinc-500">
+        <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 animate-pulse">
+          <Server size={32} />
+        </div>
+        <p className="text-zinc-400 text-sm font-bold uppercase tracking-widest">Loading project...</p>
+      </div>
+    );
+
+  if (error || !project)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-zinc-500">
+        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
+          <Server size={32} className="text-red-400" />
+        </div>
+        <h3 className="text-white font-bold text-lg">Project not found</h3>
+        {error && <p className="mt-2 text-zinc-500 text-sm text-center max-w-sm">{error}</p>}
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="mt-4 text-emerald-500 text-sm font-bold"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
-      {/* Header Section */}
+      {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -96,74 +250,118 @@ export default function ProjectDetailPage() {
                 <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">
                   {project.name}
                 </h1>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-800 text-zinc-500 border border-white/5'}`}>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active'
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-zinc-800 text-zinc-500 border border-white/5'
+                    }`}
+                >
                   {project.status || 'Active'}
                 </span>
               </div>
               <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">
-                Project ID: <span className="text-zinc-400">{project.id}</span> • Region: <span className="text-zinc-400">{project.region}</span>
+                ID: <span className="text-zinc-400">{project.id}</span> • Region:{' '}
+                <span className="text-zinc-400">{project.region}</span>
+                {project.description && (
+                  <span className="text-zinc-600 normal-case font-medium ml-2">— {project.description}</span>
+                )}
               </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => loadProject()}
+            className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-400 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2 active:scale-95 uppercase tracking-widest"
+          >
+            <RefreshCw size={14} />
+          </button>
           <button className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 active:scale-95 uppercase tracking-widest">
             <Zap size={16} className="text-amber-500" />
             Upgrade Plan
           </button>
-          <button className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 uppercase tracking-widest">
-            <Plus size={16} strokeWidth={3} />
-            Pause
-          </button>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* ── Tabs ── */}
       <div className="flex items-center gap-8 border-b border-white/5 overflow-x-auto scrollbar-hide">
-        {['overview', 'infrastructure', 'api-keys', 'usage', 'settings'].map((tab) => (
+        {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === tab ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
           >
             {tab.replace('-', ' ')}
-            {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />}
+            {activeTab === tab && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            )}
           </button>
         ))}
       </div>
 
+      {/* ════════════════════════════════════════════
+          OVERVIEW TAB
+      ════════════════════════════════════════════ */}
       {activeTab === 'overview' && (
         <div className="space-y-10">
-          {/* Main Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Database Size" value="24.4 MB" icon={HardDrive} trend="+2%" />
-            <StatCard label="Monthly Users" value="1,280" icon={Users} trend="12%" />
-            <StatCard label="CPU Usage" value="8%" icon={Cpu} trend="stable" />
-            <StatCard label="Mem Usage" value="142 MB" icon={Activity} trend="low" />
+            {[
+              { label: 'Database', value: project.databaseName || 'N/A', icon: HardDrive, color: 'text-emerald-400' },
+              { label: 'Plan', value: project.plan || 'Free', icon: Zap, color: 'text-amber-400' },
+              { label: 'Region', value: project.region, icon: Globe, color: 'text-cyan-400' },
+              { label: 'Status', value: project.status || 'Active', icon: Activity, color: 'text-green-400' },
+            ].map(({ label, value, icon: Icon, color }) => (
+              <div
+                key={label}
+                className="glass-card p-5 rounded-2xl border border-white/5 flex items-center gap-4"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                  <Icon size={18} className={color} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
+                  <p className="text-sm font-black text-white mt-0.5 truncate max-w-[120px]">{value}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Quick Start Card */}
+            {/* Quick Start */}
             <div className="lg:col-span-2 glass-card p-8 rounded-3xl border border-white/5 bg-gradient-to-br from-zinc-900/50 to-transparent relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Code size={120} />
               </div>
               <div className="relative z-10 space-y-6">
                 <div>
-                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Connect to Afribase</h3>
-                  <p className="text-zinc-500 text-sm max-w-md font-medium leading-relaxed">Instantly integrate your database using our high-performance client libraries.</p>
+                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">
+                    Connect to Afribase
+                  </h3>
+                  <p className="text-zinc-500 text-sm max-w-md font-medium leading-relaxed">
+                    Instantly integrate your database using our high-performance client libraries.
+                  </p>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 bg-white/[0.02] border-b border-white/5">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Node.js (Afribase-js)</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                          Node.js (Afribase-js)
+                        </span>
                       </div>
-                      <button onClick={() => handleCopy('npm install @afribase/afribase-js', 'npm')} className="text-zinc-500 hover:text-white transition-colors">
-                        {copiedKey === 'npm' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                      <button
+                        onClick={() => handleCopy('npm install @afribase/afribase-js', 'npm')}
+                        className="text-zinc-500 hover:text-white transition-colors"
+                      >
+                        {copiedKey === 'npm' ? (
+                          <Check size={14} className="text-emerald-500" />
+                        ) : (
+                          <Copy size={14} />
+                        )}
                       </button>
                     </div>
                     <div className="p-4 font-mono text-[11px] text-zinc-400 bg-[#0c0c0e]">
@@ -175,15 +373,42 @@ export default function ProjectDetailPage() {
                     <div className="flex items-center justify-between px-4 py-3 bg-white/[0.02] border-b border-white/5">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Initialize Client</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                          Initialize Client
+                        </span>
                       </div>
+                      <button
+                        onClick={() =>
+                          handleCopy(
+                            `import { createClient } from '@afribase/afribase-js'\nconst afribase = createClient('${keys?.postgrest_url || project.postgrestUrl || ''}', '${keys?.anon_key || project.anonKey || ''}')`,
+                            'init'
+                          )
+                        }
+                        className="text-zinc-500 hover:text-white transition-colors"
+                      >
+                        {copiedKey === 'init' ? (
+                          <Check size={14} className="text-emerald-500" />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                      </button>
                     </div>
                     <div className="p-4 font-mono text-[11px] text-zinc-500 space-y-1 bg-[#0c0c0e]">
-                      <p><span className="text-purple-500">import</span> {"{ createClient }"} <span className="text-purple-500">from</span> <span className="text-emerald-500">'@afribase/afribase-js'</span></p>
-                      <p><span className="text-zinc-500">// Initialize your project</span></p>
-                      <p><span className="text-purple-500">const</span> afribase = <span className="text-cyan-400">createClient</span>(</p>
-                      <p className="pl-4 text-emerald-500">'{keys?.postgrest_url || 'https://your-project.afribase.co'}'</p>
-                      <p className="pl-4 text-emerald-500">'{keys?.anon_key.slice(0, 20)}...[SECRET]'</p>
+                      <p>
+                        <span className="text-purple-500">import</span> {"{ createClient }"}{' '}
+                        <span className="text-purple-500">from</span>{' '}
+                        <span className="text-emerald-500">'@afribase/afribase-js'</span>
+                      </p>
+                      <p>
+                        <span className="text-purple-500">const</span> afribase ={' '}
+                        <span className="text-cyan-400">createClient</span>(
+                      </p>
+                      <p className="pl-4 text-emerald-500 truncate">
+                        '{keys?.postgrest_url || project.postgrestUrl || 'https://your-project.afribase.co'}'
+                      </p>
+                      <p className="pl-4 text-yellow-500">
+                        '{keys?.anon_key ? keys.anon_key.slice(0, 24) + '…' : 'your-anon-key'}'
+                      </p>
                       <p>)</p>
                     </div>
                   </div>
@@ -191,56 +416,48 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
-            {/* Project Info Side Card */}
+            {/* Side info */}
             <div className="space-y-6">
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-6">
-                <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-4">Infrastructure</h4>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-5">
+                <h4 className="text-xs font-black text-white uppercase tracking-[0.2em]">Infrastructure</h4>
+                {[
+                  { icon: Globe, label: 'Region', value: project.region || 'NG (Lagos)' },
+                  { icon: Shield, label: 'SSL Mode', value: 'Full (Trusted)', color: 'text-emerald-400' },
+                  { icon: Database, label: 'Database', value: project.databaseName || 'N/A' },
+                  { icon: Server, label: 'Postgres', value: 'PG 15.3' },
+                ].map(({ icon: Icon, label, value, color }) => (
+                  <div key={label} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-500">
-                        <Globe size={16} />
+                        <Icon size={14} />
                       </div>
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Region</span>
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase">{label}</span>
                     </div>
-                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{project.region || 'Nigeria (Lagos)'}</span>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${color || 'text-white'}`}>
+                      {value}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-500">
-                        <Shield size={16} />
-                      </div>
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">SSL Mode</span>
-                    </div>
-                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Full (Trusted)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-500">
-                        <Database size={16} />
-                      </div>
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase">Verison</span>
-                    </div>
-                    <span className="text-[10px] font-black text-white uppercase tracking-widest">PG 15.3</span>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-white/5">
-                  <button className="w-full h-11 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 rounded-xl text-[10px] font-black text-white uppercase tracking-widest transition-all">
-                    Restart Project
-                  </button>
-                </div>
+                ))}
               </div>
 
-              {/* API Shortcuts */}
-              <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => router.push('/dashboard/database/sql')} className="glass-card p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-2 group">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setActiveTab('sql')}
+                  className="glass-card p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-2 group"
+                >
                   <Terminal size={18} className="text-zinc-500 group-hover:text-emerald-500 transition-colors" />
-                  <span className="text-[9px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest">SQL Editor</span>
+                  <span className="text-[9px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest">
+                    SQL Editor
+                  </span>
                 </button>
-                <button onClick={() => router.push('/dashboard/database/tables')} className="glass-card p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-2 group">
-                  <Database size={18} className="text-zinc-500 group-hover:text-emerald-500 transition-colors" />
-                  <span className="text-[9px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest">Table Editor</span>
+                <button
+                  onClick={() => setActiveTab('tables')}
+                  className="glass-card p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all flex flex-col items-center gap-2 group"
+                >
+                  <Table size={18} className="text-zinc-500 group-hover:text-emerald-500 transition-colors" />
+                  <span className="text-[9px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest">
+                    Tables
+                  </span>
                 </button>
               </div>
             </div>
@@ -248,14 +465,343 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {activeTab === 'api-keys' && (
-        <div className="space-y-8 max-w-4xl animate-fade-in">
-          <div className="space-y-2">
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
-            <p className="text-zinc-500 text-sm font-medium">Your project comes with two keys: a public "anon" key and a secret "service_role" key.</p>
+      {/* ════════════════════════════════════════════
+          TABLES TAB
+      ════════════════════════════════════════════ */}
+      {activeTab === 'tables' && (
+        <div className="animate-fade-in space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Database Tables</h2>
+              <p className="text-zinc-500 text-sm font-medium mt-1">
+                All tables in your project&apos;s public schema.
+              </p>
+            </div>
+            <button
+              onClick={loadTables}
+              disabled={tablesLoading}
+              className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={tablesLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
           </div>
 
+          {tablesLoading && (
+            <div className="flex items-center justify-center py-20 text-zinc-500">
+              <RefreshCw size={20} className="animate-spin mr-3" />
+              <span className="text-sm font-bold">Loading tables…</span>
+            </div>
+          )}
+
+          {tablesError && (
+            <div className="flex items-center gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl text-red-400 text-sm">
+              <AlertTriangle size={16} />
+              {tablesError}
+            </div>
+          )}
+
+          {!tablesLoading && !tablesError && tables.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
+              <Table size={40} className="mb-4 opacity-30" />
+              <p className="text-sm font-bold">No tables found in the public schema.</p>
+              <button
+                onClick={() => {
+                  setSqlQuery('CREATE TABLE example (id SERIAL PRIMARY KEY, name TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());');
+                  setActiveTab('sql');
+                }}
+                className="mt-4 text-emerald-500 text-xs font-black uppercase tracking-widest hover:text-emerald-400 transition-colors"
+              >
+                Create your first table →
+              </button>
+            </div>
+          )}
+
+          {!tablesLoading && tables.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Table List */}
+              <div className="space-y-2">
+                {tables.map((tbl) => (
+                  <button
+                    key={tbl.name}
+                    onClick={() => setSelectedTable(tbl)}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedTable?.name === tbl.name
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Table size={14} />
+                      <span className="text-xs font-black uppercase tracking-widest">{tbl.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-right">
+                      {tbl.rowCount != null && (
+                        <span className="text-[10px] font-bold text-zinc-500">
+                          {tbl.rowCount.toLocaleString()} rows
+                        </span>
+                      )}
+                      <ChevronRight size={12} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Table Detail */}
+              <div className="lg:col-span-2">
+                {selectedTable ? (
+                  <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-black text-white uppercase italic">{selectedTable.name}</h3>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                          Schema: {selectedTable.schema || 'public'}
+                          {selectedTable.sizeBytes != null && (
+                            <span className="ml-3">· Size: {formatBytes(selectedTable.sizeBytes)}</span>
+                          )}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSqlQuery(`SELECT * FROM ${selectedTable.schema || 'public'}.${selectedTable.name} LIMIT 50;`);
+                          setActiveTab('sql');
+                        }}
+                        className="px-4 py-2 bg-emerald-500 text-black text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center gap-2"
+                      >
+                        <Terminal size={12} /> Query
+                      </button>
+                    </div>
+
+                    {selectedTable.columns && selectedTable.columns.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="border-b border-white/5">
+                              {['Column', 'Type', 'Nullable', 'Default'].map((h) => (
+                                <th
+                                  key={h}
+                                  className="pb-3 text-[10px] font-black text-zinc-500 uppercase tracking-widest pr-6"
+                                >
+                                  {h}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedTable.columns.map((col) => (
+                              <tr key={col.name} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                                <td className="py-3 text-xs font-bold text-white pr-6">{col.name}</td>
+                                <td className="py-3 text-[10px] font-mono text-cyan-400 pr-6">{col.type}</td>
+                                <td className="py-3 text-[10px] pr-6">
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${col.nullable
+                                        ? 'bg-zinc-800 text-zinc-500'
+                                        : 'bg-emerald-500/10 text-emerald-400'
+                                      }`}
+                                  >
+                                    {col.nullable ? 'YES' : 'NO'}
+                                  </span>
+                                </td>
+                                <td className="py-3 text-[10px] font-mono text-zinc-500">{col.default || '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-zinc-500 text-sm">No column details available.</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-zinc-600">
+                    <Table size={32} className="mb-3 opacity-30" />
+                    <p className="text-sm font-bold">Select a table to view its schema</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════
+          SQL TAB
+      ════════════════════════════════════════════ */}
+      {activeTab === 'sql' && (
+        <div className="animate-fade-in space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">SQL Editor</h2>
+              <p className="text-zinc-500 text-sm font-medium mt-1">
+                Run raw SQL against <span className="text-zinc-300">{project.databaseName || project.name}</span>
+              </p>
+            </div>
+            <button
+              onClick={handleRunQuery}
+              disabled={queryRunning}
+              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-black text-xs font-black rounded-lg transition-all flex items-center gap-2.5 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 uppercase tracking-widest"
+            >
+              {queryRunning ? (
+                <RefreshCw size={14} className="animate-spin" />
+              ) : (
+                <Play size={14} strokeWidth={3} />
+              )}
+              {queryRunning ? 'Running…' : 'Run Query'}
+            </button>
+          </div>
+
+          {/* Editor */}
+          <div className="bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.02] border-b border-white/5">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">SQL</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-zinc-600 font-mono">
+                  {sqlQuery.split('\n').length} lines
+                </span>
+                <button
+                  onClick={() => setSqlQuery('')}
+                  className="text-zinc-600 hover:text-zinc-400 text-[10px] font-bold uppercase tracking-widest transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            <textarea
+              ref={sqlRef}
+              value={sqlQuery}
+              onChange={(e) => setSqlQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                  e.preventDefault();
+                  handleRunQuery();
+                }
+              }}
+              rows={10}
+              spellCheck={false}
+              className="w-full bg-[#0c0c0e] text-zinc-300 font-mono text-sm p-4 focus:outline-none resize-y min-h-[180px]"
+              placeholder="SELECT * FROM public.users LIMIT 10;"
+            />
+            <div className="px-4 py-2 bg-white/[0.01] border-t border-white/5">
+              <span className="text-[10px] text-zinc-600">⌘ + Enter to run</span>
+            </div>
+          </div>
+
+          {/* Query Error */}
+          {queryError && (
+            <div className="flex items-start gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl text-red-400 text-sm">
+              <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="font-black uppercase tracking-widest text-[10px] mb-1">Query Error</p>
+                <p className="font-mono text-xs">{queryError}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Query Result */}
+          {queryResult && (
+            <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 bg-white/[0.02] border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <Check size={14} className="text-emerald-500" />
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Result</span>
+                </div>
+                <span className="text-[10px] text-zinc-500 font-bold">
+                  {queryResult.rowCount != null
+                    ? `${queryResult.rowCount} row${queryResult.rowCount !== 1 ? 's' : ''}`
+                    : queryResult.rows != null
+                      ? `${queryResult.rows.length} row${queryResult.rows.length !== 1 ? 's' : ''}`
+                      : 'OK'}
+                </span>
+              </div>
+
+              {queryResult.rows && queryResult.rows.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-white/[0.02] border-b border-white/5">
+                        {(queryResult.columns || Object.keys(queryResult.rows[0])).map((col) => (
+                          <th
+                            key={col}
+                            className="px-4 py-3 text-[10px] font-black text-zinc-500 uppercase tracking-widest whitespace-nowrap"
+                          >
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {queryResult.rows.map((row, i) => (
+                        <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                          {(queryResult.columns || Object.keys(row)).map((col) => (
+                            <td key={col} className="px-4 py-3 font-mono text-zinc-400 whitespace-nowrap max-w-[200px] truncate">
+                              {row[col] == null ? (
+                                <span className="text-zinc-600 italic">null</span>
+                              ) : (
+                                String(row[col])
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="px-5 py-6 text-zinc-500 text-sm font-medium">
+                  Query executed successfully. No rows returned.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════
+          API KEYS TAB
+      ════════════════════════════════════════════ */}
+      {activeTab === 'api-keys' && (
+        <div className="space-y-8 max-w-4xl animate-fade-in">
+          <div>
+            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
+            <p className="text-zinc-500 text-sm font-medium mt-1">
+              Your project comes with two keys: a public <em>anon</em> key and a secret{' '}
+              <em>service_role</em> key.
+            </p>
+          </div>
+
+          {/* Connection URLs */}
+          {(keys?.postgrest_url || project.postgrestUrl) && (
+            <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
+              <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest">Connection URLs</h4>
+              {[
+                { label: 'REST / PostgREST URL', value: keys?.postgrest_url || project.postgrestUrl },
+                { label: 'Realtime URL', value: project.realtimeUrl },
+                { label: 'Storage URL', value: project.storageUrl },
+              ]
+                .filter((u) => u.value)
+                .map(({ label, value }) => (
+                  <div key={label} className="space-y-1.5">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2.5 font-mono text-[11px] text-zinc-400 truncate">
+                        {value}
+                      </div>
+                      <button
+                        onClick={() => handleCopy(value!, label)}
+                        className="shrink-0 w-9 h-9 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg flex items-center justify-center text-zinc-400 transition-all"
+                      >
+                        {copiedKey === label ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+
           <div className="space-y-6">
+            {/* Anon Key */}
             <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -267,8 +813,8 @@ export default function ProjectDetailPage() {
                     <p className="text-[10px] text-zinc-500 font-medium">Safe to use in browsers and client-side code.</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleCopy(keys?.anon_key || '', 'anon')}
+                <button
+                  onClick={() => handleCopy(keys?.anon_key || project.anonKey || '', 'anon')}
                   className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
                 >
                   {copiedKey === 'anon' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
@@ -276,10 +822,11 @@ export default function ProjectDetailPage() {
                 </button>
               </div>
               <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all select-all">
-                {keys?.anon_key}
+                {keys?.anon_key || project.anonKey || 'Key not available'}
               </div>
             </div>
 
+            {/* Service Key */}
             <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -288,109 +835,187 @@ export default function ProjectDetailPage() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white uppercase">service_role (secret)</h4>
-                    <p className="text-[10px] text-rose-500/70 font-black uppercase tracking-tighter">Never expose this key in client-side code.</p>
+                    <p className="text-[10px] text-rose-500/70 font-black uppercase tracking-tighter">
+                      Never expose this key in client-side code.
+                    </p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleCopy(keys?.service_key || '', 'service')}
+                <button
+                  onClick={() => handleCopy(keys?.service_key || project.serviceKey || '', 'service')}
                   className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
                 >
                   {copiedKey === 'service' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
                   {copiedKey === 'service' ? 'Copied' : 'Copy Key'}
                 </button>
               </div>
-              <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all blur-sm hover:blur-none transition-all cursor-pointer">
-                {keys?.service_key}
+              <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all blur-sm hover:blur-none transition-all cursor-pointer select-all">
+                {keys?.service_key || project.serviceKey || 'Key not available'}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {activeTab === 'infrastructure' && (
-        <div className="animate-fade-in py-10">
-          <EmptyState
-            title="Infrastructure Insights"
-            description="Real-time monitoring of your database nodes, storage buckets, and edge runners. No incidents recorded in the last 24 hours."
-            icon={Activity}
-            actionLabel="View Logs"
-            onAction={() => router.push('/dashboard/logs')}
-            secondaryActionLabel="Status Page"
-            onSecondaryAction={() => console.log('Status')}
-          />
-        </div>
-      )}
-
+      {/* ════════════════════════════════════════════
+          USAGE TAB
+      ════════════════════════════════════════════ */}
       {activeTab === 'usage' && (
         <div className="animate-fade-in space-y-8 max-w-4xl">
-          <div className="space-y-2">
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Resource Usage</h2>
-            <p className="text-zinc-500 text-sm font-medium">Monthly resource consumption and allocation limits for your project.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Resource Usage</h2>
+              <p className="text-zinc-500 text-sm font-medium mt-1">
+                Monthly resource consumption and allocation limits.
+              </p>
+            </div>
+            <button
+              onClick={loadUsage}
+              disabled={usageLoading}
+              className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={usageLoading ? 'animate-spin' : ''} /> Refresh
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Database Storage</span>
-                <span className="text-xs font-bold text-white">24.4 MB / 500 MB</span>
-              </div>
-              <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-emerald-500 w-[5%] shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
-              </div>
+          {usageLoading && (
+            <div className="flex items-center justify-center py-16 text-zinc-500">
+              <BarChart3 size={20} className="animate-pulse mr-3" />
+              <span className="text-sm font-bold">Loading usage data…</span>
             </div>
+          )}
 
-            <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Egress Traffic</span>
-                <span className="text-xs font-bold text-white">1.2 GB / 5 GB</span>
-              </div>
-              <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-blue-500 w-[24%] shadow-[0_0_10px_rgba(59,130,246,0.3)]" />
-              </div>
+          {!usageLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  label: 'Database Storage',
+                  used: usage?.databaseSize,
+                  limit: usage?.databaseSizeLimit,
+                  fallbackUsed: '— MB',
+                  fallbackLimit: '500 MB',
+                  color: 'bg-emerald-500',
+                  shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.3)]',
+                  icon: HardDrive,
+                },
+                {
+                  label: 'Egress Traffic',
+                  used: usage?.egressBytes,
+                  limit: usage?.egressBytesLimit,
+                  fallbackUsed: '— GB',
+                  fallbackLimit: '5 GB',
+                  color: 'bg-blue-500',
+                  shadow: 'shadow-[0_0_10px_rgba(59,130,246,0.3)]',
+                  icon: Activity,
+                },
+                {
+                  label: 'Realtime Connections',
+                  used: usage?.realtimeConnections,
+                  limit: usage?.realtimeConnectionsLimit,
+                  fallbackUsed: '—',
+                  fallbackLimit: '200',
+                  color: 'bg-purple-500',
+                  shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.3)]',
+                  icon: Zap,
+                  raw: true,
+                },
+                {
+                  label: 'Monthly Active Users',
+                  used: usage?.monthlyActiveUsers,
+                  limit: usage?.monthlyActiveUsersLimit,
+                  fallbackUsed: '—',
+                  fallbackLimit: '50,000',
+                  color: 'bg-amber-500',
+                  shadow: '',
+                  icon: Users,
+                  raw: true,
+                },
+              ].map(({ label, used, limit, fallbackUsed, fallbackLimit, color, shadow, icon: Icon, raw }) => {
+                const pct = usagePct(used, limit);
+                const usedStr = used == null
+                  ? fallbackUsed
+                  : raw
+                    ? used.toLocaleString()
+                    : formatBytes(used);
+                const limitStr = limit == null
+                  ? fallbackLimit
+                  : raw
+                    ? limit.toLocaleString()
+                    : formatBytes(limit);
+                return (
+                  <div key={label} className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon size={14} className="text-zinc-500" />
+                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                          {label}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-white">
+                        {usedStr} / {limitStr}
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
+                      <div
+                        className={`h-full ${color} ${shadow} transition-all duration-700`}
+                        style={{ width: `${used == null ? 0 : pct}%` }}
+                      />
+                    </div>
+                    {used != null && (
+                      <p className="text-[10px] text-zinc-600">
+                        {pct}% used
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Realtime Connections</span>
-                <span className="text-xs font-bold text-white">12 / 200</span>
-              </div>
-              <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-purple-500 w-[6%] shadow-[0_0_10px_rgba(168,85,247,0.3)]" />
-              </div>
-            </div>
-
-            <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Monthly Active Users</span>
-                <span className="text-xs font-bold text-white">1,280 / 50,000</span>
-              </div>
-              <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-amber-500 w-[2.5%]" />
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
+      {/* ════════════════════════════════════════════
+          SETTINGS TAB
+      ════════════════════════════════════════════ */}
       {activeTab === 'settings' && (
         <div className="animate-fade-in space-y-10 max-w-4xl">
+          {/* Config */}
           <div className="glass-card p-8 rounded-3xl border border-white/5 space-y-8">
-            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Project Configuration</h3>
-            
+            <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">
+              Project Configuration
+            </h3>
+
             <div className="space-y-6">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Project Name</label>
-                <input 
-                  type="text" 
-                  defaultValue={project.name}
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  value={settingsName}
+                  onChange={(e) => setSettingsName(e.target.value)}
                   className="bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                 />
               </div>
 
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Description
+                </label>
+                <textarea
+                  value={settingsDesc}
+                  onChange={(e) => setSettingsDesc(e.target.value)}
+                  rows={3}
+                  className="bg-zinc-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
+                  placeholder="Brief description of this project…"
+                />
+              </div>
+
               <div className="flex flex-col gap-2 opacity-50 pointer-events-none">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Project Slug</label>
-                <input 
-                  type="text" 
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Project Slug
+                </label>
+                <input
+                  type="text"
                   defaultValue={project.slug}
                   disabled
                   className="bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-zinc-500"
@@ -398,18 +1023,54 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-white/5 flex gap-4">
-              <button className="px-6 py-2.5 bg-emerald-500 text-black text-[10px] font-black rounded-lg uppercase tracking-widest hover:scale-105 transition-all">
-                Save Changes
+            <div className="pt-6 border-t border-white/5 flex items-center gap-4">
+              <button
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="px-6 py-2.5 bg-emerald-500 text-black text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-emerald-400 hover:scale-105 transition-all disabled:opacity-60 flex items-center gap-2"
+              >
+                {saving ? <RefreshCw size={12} className="animate-spin" /> : <Save size={12} />}
+                {saving ? 'Saving…' : 'Save Changes'}
               </button>
+              {saveSuccess && (
+                <span className="text-emerald-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <Check size={12} /> Saved successfully
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="p-8 border border-red-500/20 bg-red-500/5 rounded-3xl space-y-4">
-            <h4 className="text-sm font-black text-red-500 uppercase tracking-widest">Danger Zone</h4>
-            <p className="text-xs text-zinc-500 font-medium">Permanently delete this project and all its data. This action is irreversible.</p>
-            <button className="px-6 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-[10px] font-black rounded-lg transition-all border border-red-500/20 uppercase tracking-widest">
-              Delete Project
+          {/* Danger Zone */}
+          <div className="p-8 border border-red-500/20 bg-red-500/5 rounded-3xl space-y-6">
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={16} className="text-red-500" />
+              <h4 className="text-sm font-black text-red-500 uppercase tracking-widest">Danger Zone</h4>
+            </div>
+            <p className="text-xs text-zinc-500 font-medium">
+              Permanently delete this project and all its data. This action is{' '}
+              <strong className="text-zinc-300">irreversible</strong>.
+            </p>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                Type <span className="text-white">{project.name}</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={project.name}
+                className="bg-zinc-950 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500/50 transition-all w-full max-w-sm"
+              />
+            </div>
+
+            <button
+              onClick={handleDeleteProject}
+              disabled={deleteConfirm !== project.name || deleting}
+              className="px-6 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-[10px] font-black rounded-lg transition-all border border-red-500/20 uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {deleting ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
+              {deleting ? 'Deleting…' : 'Delete Project'}
             </button>
           </div>
         </div>
@@ -417,4 +1078,3 @@ export default function ProjectDetailPage() {
     </div>
   );
 }
-

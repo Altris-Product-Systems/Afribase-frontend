@@ -205,6 +205,7 @@ export interface Project {
   id: string;
   name: string;
   slug: string;
+  description?: string;
   region: string;
   plan: string;
   organizationId?: string;
@@ -343,6 +344,225 @@ export async function getProjectKeys(projectId: string): Promise<ProjectKeys> {
     if (error instanceof APIError) {
       throw error;
     }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export async function getProject(projectId: string): Promise<Project> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || data.detail || 'Failed to fetch project');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── Update Project ────────────────────────────────────────────────────────
+export interface UpdateProjectRequest {
+  name?: string;
+  description?: string;
+}
+
+export async function updateProject(projectId: string, data: UpdateProjectRequest): Promise<Project> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, responseData.error || responseData.message || 'Failed to update project');
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── Delete Project ────────────────────────────────────────────────────────
+export async function deleteProject(projectId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const responseData = await response.json().catch(() => ({}));
+      throw new APIError(response.status, responseData.error || responseData.message || 'Failed to delete project');
+    }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── Run SQL Query ─────────────────────────────────────────────────────────
+export interface QueryResult {
+  columns?: string[];
+  rows?: Record<string, unknown>[];
+  rowCount?: number;
+  error?: string;
+  [key: string]: unknown;
+}
+
+export async function runProjectQuery(projectId: string, query: string): Promise<QueryResult> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Query failed');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── List Project Tables ───────────────────────────────────────────────────
+export interface ColumnInfo {
+  name: string;
+  type: string;
+  nullable?: boolean;
+  default?: string;
+}
+
+export interface TableInfo {
+  name: string;
+  schema?: string;
+  rowCount?: number;
+  sizeBytes?: number;
+  columns?: ColumnInfo[];
+  [key: string]: unknown;
+}
+
+export async function getProjectTables(projectId: string): Promise<TableInfo[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tables`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Failed to fetch tables');
+    }
+
+    return Array.isArray(data) ? data : (data.tables ?? []);
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── Get Project Usage ─────────────────────────────────────────────────────
+export interface ProjectUsage {
+  databaseSize?: number;
+  databaseSizeLimit?: number;
+  egressBytes?: number;
+  egressBytesLimit?: number;
+  realtimeConnections?: number;
+  realtimeConnectionsLimit?: number;
+  monthlyActiveUsers?: number;
+  monthlyActiveUsersLimit?: number;
+  storageSize?: number;
+  storageSizeLimit?: number;
+  [key: string]: unknown;
+}
+
+export async function getProjectUsage(projectId: string): Promise<ProjectUsage> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/usage`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Failed to fetch usage');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
     throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
 }
