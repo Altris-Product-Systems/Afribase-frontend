@@ -203,6 +203,9 @@ export interface CreateProjectRequest {
   description?: string;
   organizationId: string;
   region: string;
+  databasePassword?: string;
+  enableDataApi?: boolean;
+  enableRls?: boolean;
 }
 
 export interface ProjectKeys {
@@ -225,6 +228,9 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
       name: projectData.name,
       description: projectData.description,
       region: projectData.region,
+      databasePassword: projectData.databasePassword,
+      enableDataApi: projectData.enableDataApi,
+      enableRls: projectData.enableRls,
     }),
   });
 

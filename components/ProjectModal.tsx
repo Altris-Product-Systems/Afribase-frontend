@@ -19,9 +19,21 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
   const [description, setDescription] = useState('');
   const [region, setRegion] = useState('lagos-01');
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+  const [databasePassword, setDatabasePassword] = useState('');
+  const [enableDataApi, setEnableDataApi] = useState(true);
+  const [enableRls, setEnableRls] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [orgSearch, setOrgSearch] = useState('');
+
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 16; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setDatabasePassword(password);
+  };
 
   const regions = [
     { id: 'lagos-01', name: 'Lagos, Nigeria', flag: '🇳🇬' },
@@ -50,7 +62,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
     try {
       const orgs = await getOrganizations();
       setOrganizations(orgs);
-      
+
       // If preselected org ID is provided, select it
       if (preselectedOrgId) {
         const org = orgs.find(o => o.id === preselectedOrgId);
@@ -70,7 +82,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedOrg) {
       setError('Please select an organization');
       return;
@@ -90,8 +102,11 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
         description: description || undefined,
         region: region,
         organizationId: selectedOrg.id,
+        databasePassword: databasePassword,
+        enableDataApi: enableDataApi,
+        enableRls: enableRls,
       });
-      
+
       resetModal();
       onSuccess();
     } catch (err) {
@@ -108,6 +123,9 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
     setProjectName('');
     setDescription('');
     setRegion('lagos-01');
+    setDatabasePassword('');
+    setEnableDataApi(true);
+    setEnableRls(false);
     setError('');
     setIsSubmitting(false);
     setOrgSearch('');
@@ -171,8 +189,8 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
 
               {showOrgDropdown && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => setShowOrgDropdown(false)}
                   />
                   <div className="absolute z-20 w-full mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden">
@@ -243,6 +261,38 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
             />
           </div>
 
+          {/* Database Password */}
+          <div>
+            <label className="block text-sm font-medium text-black dark:text-white mb-2">
+              Database password
+            </label>
+            <div className="relative">
+              <input
+                type="password"
+                value={databasePassword}
+                onChange={(e) => setDatabasePassword(e.target.value)}
+                placeholder="••••••••••••••••"
+                disabled={isSubmitting}
+                required
+                className="w-full px-4 py-2.5 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed pr-24"
+              />
+              <button
+                type="button"
+                onClick={generatePassword}
+                disabled={isSubmitting}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-500 bg-gray-100 dark:bg-gray-800 rounded transition-colors"
+              >
+                Generate
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500 flex items-center gap-1">
+              <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              This password is required to access your full Postgres database.
+            </p>
+          </div>
+
           {/* Region */}
           <div>
             <label className="block text-sm font-medium text-black dark:text-white mb-2">
@@ -268,8 +318,8 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
 
               {showRegionDropdown && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => setShowRegionDropdown(false)}
                   />
                   <div className="absolute z-20 w-full mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden">
@@ -290,6 +340,54 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
                   </div>
                 </>
               )}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Select the region closest to your users for the best performance.
+            </p>
+          </div>
+
+          {/* Security & Advanced Configuration */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-4">
+            <h3 className="text-sm font-medium text-black dark:text-white">Security Configuration</h3>
+
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative mt-0.5">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={enableDataApi}
+                  onChange={(e) => setEnableDataApi(e.target.checked)}
+                  disabled={isSubmitting}
+                />
+                <div className={`block w-10 h-6 rounded-full transition-colors ${enableDataApi ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableDataApi ? 'transform translate-x-4' : ''}`}></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-black dark:text-white">Enable Data API</p>
+                <p className="text-xs text-gray-500 mt-1">Autogenerate a RESTful API for your public schema using PostgREST.</p>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative mt-0.5">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={enableRls}
+                  onChange={(e) => setEnableRls(e.target.checked)}
+                  disabled={isSubmitting}
+                />
+                <div className={`block w-10 h-6 rounded-full transition-colors ${enableRls ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableRls ? 'transform translate-x-4' : ''}`}></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-black dark:text-white">Enable automatic RLS</p>
+                <p className="text-xs text-gray-500 mt-1">Enforce Row Level Security heavily on your databases automatically.</p>
+              </div>
+            </label>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-xs mt-4">
+              <p><strong>Note:</strong> These settings cannot be changed easily after the project is created without manual intervention.</p>
             </div>
           </div>
 
