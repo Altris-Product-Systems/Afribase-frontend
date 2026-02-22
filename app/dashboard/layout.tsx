@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { getOrganizations, isAuthenticated, Organization } from '@/lib/api';
+import { getOrganizations, isAuthenticated, Organization, getUser, User } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
@@ -19,6 +19,7 @@ export default function DashboardLayout({
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -43,7 +44,14 @@ export default function DashboardLayout({
   const loadSidebarData = async () => {
     try {
       setGlobalLoading(true, 'Accessing Grid Console');
-      const orgsData = await getOrganizations();
+
+      // Load user and organizations in parallel
+      const [userData, orgsData] = await Promise.all([
+        getUser(),
+        getOrganizations()
+      ]);
+
+      setUser(userData);
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
 
@@ -167,8 +175,15 @@ export default function DashboardLayout({
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
               <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Platform Healthy</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-[10px] font-bold text-zinc-400">
-              RY
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                  {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) ||
+                    user?.email?.slice(0, 2).toUpperCase() || '??'}
+                </span>
+              )}
             </div>
           </div>
         </header>

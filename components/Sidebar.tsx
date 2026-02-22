@@ -65,7 +65,7 @@ export default function Sidebar({
 
   const handleSignOut = () => {
     removeAuthToken();
-    router.push('/');
+    router.push('/auth/sign-in');
   };
 
   const toggleSection = (id: string) => {

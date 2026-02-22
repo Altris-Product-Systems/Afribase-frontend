@@ -6,8 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 
 const TOKEN_NAME = 'authToken';
 const LAST_ACTIVITY_NAME = 'lastActivity';
-const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
-const CHECK_INTERVAL = 30 * 1000; // Check every 30 seconds
+const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 hour in milliseconds
+const CHECK_INTERVAL = 60 * 1000; // Check every 1 minute
 
 // Cookie-based token management
 export function getAuthToken(): string | undefined {
@@ -17,15 +17,15 @@ export function getAuthToken(): string | undefined {
 
 export function setAuthToken(token: string): void {
   if (typeof window === 'undefined') return;
-  
-  // Set cookie with secure options (expires in 10 minutes)
+
+  // Set cookie with secure options (expires in 7 days)
   Cookies.set(TOKEN_NAME, token, {
-    expires: 10 / (24 * 60), // 10 minutes in days
+    expires: 7, // 7 days
     path: '/',
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
-  
+
   // Track initial activity
   updateLastActivity();
 }
@@ -45,7 +45,7 @@ export function updateLastActivity(): void {
   if (typeof window === 'undefined') return;
   const now = Date.now().toString();
   Cookies.set(LAST_ACTIVITY_NAME, now, {
-    expires: 10 / (24 * 60),
+    expires: 7, // 7 days
     path: '/',
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -61,10 +61,10 @@ export function getLastActivity(): number | null {
 export function checkInactivity(): boolean {
   const lastActivity = getLastActivity();
   if (!lastActivity) return false;
-  
+
   const now = Date.now();
   const timeSinceLastActivity = now - lastActivity;
-  
+
   return timeSinceLastActivity >= INACTIVITY_TIMEOUT;
 }
 
@@ -75,7 +75,7 @@ export function useAuthInactivity() {
 
   const logout = useCallback(() => {
     removeAuthToken();
-    
+
     // Only redirect if not already on auth page
     if (!pathname?.startsWith('/auth')) {
       router.push('/auth/sign-in?reason=inactive');
@@ -84,10 +84,10 @@ export function useAuthInactivity() {
 
   const checkAndLogout = useCallback(() => {
     const token = getAuthToken();
-    
+
     // Only check if user is authenticated
     if (!token) return;
-    
+
     // Check if session expired due to inactivity
     if (checkInactivity()) {
       logout();
@@ -107,7 +107,7 @@ export function useAuthInactivity() {
 
     // Set up activity listeners
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
-    
+
     events.forEach((event) => {
       window.addEventListener(event, handleActivity);
     });

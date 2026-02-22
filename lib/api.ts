@@ -11,16 +11,25 @@ export interface SignUpRequest {
   password: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+    name?: string;
+    user_name?: string;
+  };
+}
+
 export interface AuthResponse {
   token?: string;
   access_token?: string;
   token_type?: string;
   message?: string;
   detail?: string;
-  user?: {
-    id: string;
-    email: string;
-  };
+  user?: User;
 }
 
 // ─── Per-Project Auth Config ──────────────────────────────────────────────
@@ -133,6 +142,40 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
     // Handle other errors
     throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
+}
+
+export async function getUser(): Promise<User> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/user`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Failed to fetch user');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export function signInWithGitHub(): void {
+  const redirectTo = `${window.location.origin}/auth/callback`;
+  const githubUrl = `${API_BASE_URL}/auth/authorize?provider=github&redirect_to=${encodeURIComponent(redirectTo)}`;
+  window.location.href = githubUrl;
 }
 
 export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> {

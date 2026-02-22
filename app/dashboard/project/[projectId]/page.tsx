@@ -48,6 +48,8 @@ import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
+import toast, { Toaster } from 'react-hot-toast';
+import { Modal } from '@/components/ui/Modal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function formatBytes(bytes?: number): string {
@@ -114,6 +116,8 @@ export default function ProjectDetailPage() {
   const [usage, setUsage] = useState<ProjectUsage | null>(null);
   const [usageLoading, setUsageLoading] = useState(false);
   const [deletingTable, setDeletingTable] = useState<string | null>(null);
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [tableToDelete, setTableToDelete] = useState<{ schema: string, name: string } | null>(null);
 
   // Settings tab
   const [settingsName, setSettingsName] = useState('');
@@ -122,6 +126,7 @@ export default function ProjectDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // ── Load project + keys ──────────────────────────────────────────────────
   useEffect(() => {
@@ -217,21 +222,54 @@ export default function ProjectDetailPage() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to save');
+      toast.error(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteProject = async () => {
+  const confirmDeleteProject = async () => {
     if (deleteConfirm !== project?.name) return;
     setDeleting(true);
     try {
       await deleteProject(projectId);
+      toast.success('Project deleted successfully');
       router.push('/dashboard');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to delete project');
+      toast.error(err instanceof Error ? err.message : 'Failed to delete project');
       setDeleting(false);
+    } finally {
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleDeleteProject = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteTable = (schema: string, tableName: string) => {
+    setTableToDelete({ schema, name: tableName });
+    setIsTableModalOpen(true);
+  };
+
+  const confirmDeleteTable = async () => {
+    if (!tableToDelete) return;
+    const { schema, name: tableName } = tableToDelete;
+
+    setDeletingTable(tableName);
+    try {
+      await deleteProjectTable(projectId, schema, tableName);
+      setTables(tables.filter((t) => t.name !== tableName));
+      if (selectedTable?.name === tableName) {
+        setSelectedTable(null);
+      }
+      toast.success(`Table ${tableName} deleted successfully`);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete table');
+    } finally {
+      setDeletingTable(null);
+      setIsTableModalOpen(false);
+      setTableToDelete(null);
     }
   };
 
@@ -552,7 +590,13 @@ export default function ProjectDetailPage() {
                 {tables.map((tbl, i) => (
                   <button
                     key={tbl.name || `table-${i}`}
-                    onClick={() => setSelectedTable(tbl)}
+                    onClick={() => {
+                      if (selectedTable?.name === tbl.name) {
+                        setSelectedTable(null);
+                      } else {
+                        setSelectedTable(tbl);
+                      }
+                    }}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedTable?.name === tbl.name
                       ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                       : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
@@ -588,15 +632,29 @@ export default function ProjectDetailPage() {
                           )}
                         </p>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSqlQuery(`SELECT * FROM ${selectedTable.schema || 'public'}.${selectedTable.name} LIMIT 50;`);
-                          handleTabChange('sql');
-                        }}
-                        className="px-4 py-2 bg-emerald-500 text-black text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center gap-2"
-                      >
-                        <Terminal size={12} /> Query
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSqlQuery(`SELECT * FROM ${selectedTable.schema || 'public'}.${selectedTable.name} LIMIT 50;`);
+                            handleTabChange('sql');
+                          }}
+                          className="px-4 py-2 bg-emerald-500 text-black text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center gap-2"
+                        >
+                          <Terminal size={12} /> Query
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTable(selectedTable.schema || 'public', selectedTable.name)}
+                          disabled={deletingTable === selectedTable.name}
+                          className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 text-[10px] font-black rounded-lg uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {deletingTable === selectedTable.name ? (
+                            <RefreshCw size={12} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={12} />
+                          )}
+                          Delete
+                        </button>
+                      </div>
                     </div>
 
                     {selectedTable.columns && selectedTable.columns.length > 0 ? (
@@ -1137,6 +1195,91 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Project"
+        variant="danger"
+        footer={
+          <>
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-lg uppercase tracking-widest hover:text-white transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteProject}
+              disabled={deleting || deleteConfirm !== project?.name}
+              className="px-4 py-2 bg-red-500 text-white text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-red-400 transition-all disabled:opacity-50"
+            >
+              {deleting ? 'Deleting...' : 'Confirm Delete'}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            Are you sure you want to delete <span className="text-white font-bold">{project?.name}</span>? This action cannot be undone. All database data, auth configurations, and keys will be permanently destroyed.
+          </p>
+          <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl">
+            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">To confirm, type the project name below</p>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={project?.name}
+              className="w-full bg-black/40 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition-all"
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Table Delete Confirmation Modal */}
+      <Modal
+        isOpen={isTableModalOpen}
+        onClose={() => setIsTableModalOpen(false)}
+        title="Delete Table"
+        variant="danger"
+        footer={
+          <>
+            <button
+              onClick={() => setIsTableModalOpen(false)}
+              className="px-4 py-2 bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-lg uppercase tracking-widest hover:text-white transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteTable}
+              disabled={!!deletingTable}
+              className="px-4 py-2 bg-red-500 text-white text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-red-400 transition-all disabled:opacity-50"
+            >
+              {deletingTable ? 'Deleting...' : 'Confirm Delete'}
+            </button>
+          </>
+        }
+      >
+        <p className="text-zinc-400 text-sm leading-relaxed">
+          Are you sure you want to delete the table <span className="text-white font-bold">{tableToDelete?.schema}.{tableToDelete?.name}</span>? This action is irreversible and all data within this table will be lost forever.
+        </p>
+      </Modal>
+
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.05)',
+            fontSize: '12px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            borderRadius: '12px'
+          },
+        }}
+      />
     </div>
   )
 }
