@@ -4,13 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getProjects, getOrganizations, Organization, Project } from '@/lib/api';
 import ProjectModal from '@/components/ProjectModal';
-import StatCard from '@/components/StatCard';
-import { LayoutGrid, Users, Globe, Zap, Plus, ChevronRight, Activity } from 'lucide-react';
+import { LayoutGrid, Users, Plus, ChevronRight } from 'lucide-react';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function ProjectsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orgId = searchParams.get('orgId');
+  const { setIsLoading: setGlobalLoading } = useLoader();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -24,6 +25,8 @@ export default function ProjectsPage() {
   }, [orgId]);
 
   const loadData = async () => {
+    setGlobalLoading(true, 'Accessing Environments');
+    setIsLoading(true);
     try {
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
@@ -35,9 +38,9 @@ export default function ProjectsPage() {
       } else if (orgs.length > 0) {
         targetOrg = orgs[0];
       }
-      
+
       setSelectedOrg(targetOrg);
-      
+
       if (targetOrg) {
         const projectsData = await getProjects(targetOrg.id);
         setProjects(Array.isArray(projectsData) ? projectsData : []);
@@ -46,6 +49,7 @@ export default function ProjectsPage() {
       setError('Failed to load projects');
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -89,7 +93,7 @@ export default function ProjectsPage() {
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Active Environments</h2>
         </div>
-        
+
         {projects.length === 0 ? (
           <div className="py-20 border border-zinc-800/50 border-dashed rounded-3xl bg-zinc-900/20 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-6 border border-white/5">

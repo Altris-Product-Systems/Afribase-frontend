@@ -346,8 +346,12 @@ export async function getProjects(organizationId?: string): Promise<Project[]> {
   try {
     // Build URL with organization-scoped projects endpoint
     if (!organizationId) {
-      // If no org ID, return empty as backend currently only supports org-scoped list
-      return [];
+      // If no org ID, fetch projects for all organizations
+      const orgs = await getOrganizations();
+      const allProjects = await Promise.all(
+        orgs.map(org => getProjects(org.id))
+      );
+      return allProjects.flat();
     }
 
     const url = `${API_BASE_URL}/api/organizations/${organizationId}/projects`;

@@ -1,77 +1,101 @@
 'use client';
 
-import React from 'react';
-import { ShieldCheck, Lock, Unlock, Zap, Shield } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ShieldCheck, Lock, Database, ChevronRight } from 'lucide-react';
+import { getProjects, Project } from '@/lib/api';
 import EmptyState from '@/components/EmptyState';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function PoliciesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
+  const { setIsLoading: setGlobalLoading } = useLoader();
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadProjects();
+  }, [orgId]);
+
+  const loadProjects = async () => {
+    setGlobalLoading(true, 'Auditing Security Layers');
+    setIsLoading(true);
+    try {
+      const data = await getProjects();
+      const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
+      setProjects(filtered);
+    } catch (err) {
+      console.error('Failed to load projects for policies', err);
+    } finally {
+      setIsLoading(false);
+      setGlobalLoading(false);
+    }
+  };
+
+  const handleSelectProject = (projectId: string) => {
+    router.push(`/dashboard/project/${projectId}?tab=overview`);
+  };
+
+  if (isLoading) return null;
+
+  if (projects.length === 0) {
+    return (
+      <div className="p-8 lg:p-10">
+        <EmptyState
+          title="Create a project first"
+          description="Row Level Security policies are defined at the database layer for each project. Create a project to start managing access control."
+          icon={ShieldCheck}
+          actionLabel="Back to Projects"
+          onAction={() => router.push(`/dashboard/projects${orgId ? `?orgId=${orgId}` : ''}`)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tighter text-white">
-            Auth Policies
-          </h1>
-          <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">
-            Define fine-grained Row Level Security (RLS) policies for your database access.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 uppercase tracking-widest">
-            <Lock size={16} strokeWidth={3} />
-            Enable RLS
-          </button>
-        </div>
+    <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-12 animate-fade-in">
+      <div className="space-y-4">
+        <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">
+          Access Policies
+        </h1>
+        <p className="text-zinc-400 text-sm max-w-xl leading-relaxed font-medium">
+          Select a project node to define Row Level Security (RLS) rules. Policies ensure that your data is secure and only accessible by authorized users.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-10">
-        <div className="lg:col-span-2">
-          <EmptyState
-            title="No policies defined"
-            description="Protect your data by defining who can read, update or delete rows. Policies use SQL expressions to filter access."
-            icon={ShieldCheck}
-            actionLabel="Create Policy"
-            onAction={() => console.log('Create policy')}
-            secondaryActionLabel="RLS Documentation"
-            onSecondaryAction={() => console.log('Docs')}
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((project) => (
+          <button
+            key={project.id}
+            onClick={() => handleSelectProject(project.id)}
+            className="glass-card p-6 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all text-left flex flex-col group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ChevronRight className="text-emerald-500" size={20} />
+            </div>
 
-        <div className="space-y-6">
-          <div className="glass-card p-6 rounded-2xl border border-white/5 space-y-6">
-            <div className="space-y-2">
-              <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-4">RLS Status</h4>
-              <div className="flex items-center justify-between p-3 bg-zinc-900/50 rounded-xl border border-rose-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
-                  <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Database Vulnerable</span>
-                </div>
-                <Unlock size={14} className="text-rose-500" />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-emerald-500 transition-colors">
+                <Database size={20} />
+              </div>
+              <div>
+                <h3 className="text-white font-bold group-hover:text-emerald-400 transition-colors">{project.name}</h3>
+                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{project.region}</p>
               </div>
             </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-emerald-500 flex-shrink-0">
-                  <Zap size={14} />
-                </div>
-                <div>
-                  <h5 className="text-[10px] font-bold text-white uppercase">Fastest Access</h5>
-                  <p className="text-[9px] text-zinc-500 leading-tight">Policies are executed at the database level for maximum performance.</p>
-                </div>
+
+            <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">RLS Active</span>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center text-emerald-500 flex-shrink-0">
-                  <Shield size={14} />
-                </div>
-                <div>
-                  <h5 className="text-[10px] font-bold text-white uppercase">Secure Defaults</h5>
-                  <p className="text-[9px] text-zinc-500 leading-tight">By default, all rows are hidden until you grant explicit access.</p>
-                </div>
-              </div>
+              <Lock size={14} className="text-zinc-600 group-hover:text-emerald-500 transition-colors" />
             </div>
-          </div>
-        </div>
+          </button>
+        ))}
       </div>
     </div>
   );

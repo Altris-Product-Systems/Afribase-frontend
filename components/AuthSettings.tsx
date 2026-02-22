@@ -196,7 +196,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
 
                         <div className="grid grid-cols-1 gap-4">
                             {providers.map((provider) => {
-                                const isEnabled = config?.providers[provider.id]?.enabled;
+                                const isEnabled = config?.providers ? config.providers[provider.id]?.enabled : false;
                                 const isEditing = editingProvider === provider.id;
 
                                 return (
@@ -239,7 +239,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                                         <input
                                                             type="password"
                                                             value={providerForm.secret}
-                                                            placeholder={config?.providers[provider.id]?.secretSet ? "••••••••••••••••" : "Enter client secret"}
+                                                            placeholder={config?.providers && config.providers[provider.id]?.secretSet ? "••••••••••••••••" : "Enter client secret"}
                                                             onChange={(e) => setProviderForm({ ...providerForm, secret: e.target.value })}
                                                             className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
                                                         />
@@ -309,7 +309,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                             <div className="relative group">
                                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
-                                        onClick={() => copyToClipboard(config?.sdkSnippet.javascript || '', 'sdk')}
+                                        onClick={() => copyToClipboard(config?.sdkSnippet?.javascript || '', 'sdk')}
                                         className="p-2 bg-zinc-900/80 backdrop-blur border border-white/10 rounded-lg text-zinc-400 hover:text-white"
                                     >
                                         {copiedStates['sdk'] ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
@@ -318,7 +318,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                 <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed">
                                     {`// Initialize
 const client = createClient(
-  '${window.location.host}',
+  '${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}',
   'ANON_KEY'
 );
 

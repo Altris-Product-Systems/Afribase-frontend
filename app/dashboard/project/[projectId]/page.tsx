@@ -41,6 +41,8 @@ import {
   BarChart3,
 } from 'lucide-react';
 
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function formatBytes(bytes?: number): string {
   if (bytes == null) return '—';
@@ -63,6 +65,7 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.projectId as string;
+  const { setIsLoading: setGlobalLoading } = useLoader();
 
   // Core project state
   const [project, setProject] = useState<Project | null>(null);
@@ -105,6 +108,7 @@ export default function ProjectDetailPage() {
   const loadProject = async () => {
     try {
       setError(null);
+      setGlobalLoading(true, 'Fetching Project Data');
       const found = await getProject(projectId);
       setProject(found);
       setSettingsName(found.name);
@@ -120,6 +124,7 @@ export default function ProjectDetailPage() {
       setError(err instanceof Error ? err.message : 'Failed to load project');
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -252,8 +257,8 @@ export default function ProjectDetailPage() {
                 </h1>
                 <span
                   className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active'
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-zinc-800 text-zinc-500 border border-white/5'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-zinc-800 text-zinc-500 border border-white/5'
                     }`}
                 >
                   {project.status || 'Active'}
@@ -526,8 +531,8 @@ export default function ProjectDetailPage() {
                     key={tbl.name}
                     onClick={() => setSelectedTable(tbl)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedTable?.name === tbl.name
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                        : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                      : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -594,8 +599,8 @@ export default function ProjectDetailPage() {
                                 <td className="py-3 text-[10px] pr-6">
                                   <span
                                     className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${col.nullable
-                                        ? 'bg-zinc-800 text-zinc-500'
-                                        : 'bg-emerald-500/10 text-emerald-400'
+                                      ? 'bg-zinc-800 text-zinc-500'
+                                      : 'bg-emerald-500/10 text-emerald-400'
                                       }`}
                                   >
                                     {col.nullable ? 'YES' : 'NO'}

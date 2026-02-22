@@ -8,10 +8,13 @@ import OnboardingModal from '@/components/OnboardingModal';
 import StatCard from '@/components/StatCard';
 import { LayoutGrid, Users, Zap, ChevronRight, Activity } from 'lucide-react';
 
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orgId = searchParams.get('orgId');
+  const { setIsLoading: setGlobalLoading } = useLoader();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -24,12 +27,13 @@ export default function DashboardPage() {
   }, [orgId]);
 
   const loadData = async () => {
+    setGlobalLoading(true, 'Accessing Infrastructure');
     setIsLoading(true);
     try {
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
-      
+
       if (orgId) {
         const found = orgs.find(o => o.id === orgId);
         setSelectedOrg(found || null);
@@ -45,7 +49,7 @@ export default function DashboardPage() {
           try {
             const projs = await getProjects(org.id);
             if (Array.isArray(projs)) allProjectsCount += projs.length;
-          } catch (e) {}
+          } catch (e) { }
         }
         setProjects(new Array(allProjectsCount).fill({ id: 'temp' } as Project));
       }
@@ -53,6 +57,7 @@ export default function DashboardPage() {
       setError('Failed to load dashboard data');
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -84,7 +89,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Your Organizations</h2>
         </div>
-        
+
         {organizations.length === 0 ? (
           <div className="py-20 border border-zinc-800/50 border-dashed rounded-3xl bg-zinc-900/20 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-6 border border-white/5">

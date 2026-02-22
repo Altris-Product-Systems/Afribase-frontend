@@ -8,19 +8,21 @@ import Sidebar from '@/components/Sidebar';
 import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
+import ApiDocs from '@/components/ApiDocs';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const projectId = params.id as string;
 
+  const searchParams = useSearchParams();
   const [project, setProject] = useState<Project | null>(null);
   const [keys, setKeys] = useState<ProjectKeys | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
   const [showApiKeys, setShowApiKeys] = useState(false);
 
   useEffect(() => {
@@ -29,14 +31,18 @@ export default function ProjectDetailsPage() {
       return;
     }
 
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+
     loadProjectData();
-  }, [projectId, router]);
+  }, [projectId, router, searchParams]);
 
   const loadProjectData = async () => {
     try {
-      // Fetch all projects and find the one with matching ID
-      const projects = await getProjects();
-      const foundProject = projects.find(p => p.id === projectId);
+      const projectsList = await getProjects();
+      const foundProject = projectsList.find(p => p.id === projectId || p.slug === projectId);
 
       if (!foundProject) {
         setError('Project not found');
@@ -61,7 +67,7 @@ export default function ProjectDetailsPage() {
 
       // Try to fetch keys
       try {
-        const projectKeys = await getProjectKeys(projectId);
+        const projectKeys = await getProjectKeys(foundProject.id);
         setKeys(projectKeys);
       } catch (err) {
         console.error('Failed to load project keys:', err);
@@ -119,7 +125,10 @@ export default function ProjectDetailsPage() {
           router.push('/dashboard');
         }}
         activeId={activeTab}
-        onNavigate={setActiveTab}
+        onNavigate={(id) => {
+          setActiveTab(id);
+          router.push(`/project/${projectId}?tab=${id}`);
+        }}
         showOrgSelector={false}
         projectName={project.name}
         projectPlan={project.plan || 'FREE'}
@@ -336,23 +345,33 @@ export default function ProjectDetailsPage() {
 
           {activeTab === 'auth' && (
             <div className="max-w-6xl mx-auto">
-              <AuthSettings projectId={projectId} />
+              <AuthSettings projectId={project.id} />
             </div>
           )}
 
           {activeTab === 'users' && (
             <div className="max-w-6xl mx-auto">
-              <AuthUsers projectId={projectId} />
+              <AuthUsers projectId={project.id} />
             </div>
           )}
 
           {activeTab === 'policies' && (
             <div className="max-w-6xl mx-auto">
-              <AuthPolicies projectId={projectId} />
+              <AuthPolicies projectId={project.id} />
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && (
+          {activeTab === 'api' && (
+            <div className="max-w-6xl mx-auto">
+              <ApiDocs
+                projectId={project.id}
+                projectSlug={project.slug}
+                anonKey={keys?.anon_key}
+              />
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

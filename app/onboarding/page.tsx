@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createOrganization, createProject, getOrganizations, isAuthenticated, APIError } from '@/lib/api';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { setIsLoading: setGlobalLoading } = useLoader();
   const [step, setStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   // Organization data
@@ -22,7 +25,6 @@ export default function OnboardingPage() {
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
 
-  // Check if user already has organizations on mount
   useEffect(() => {
     const checkExistingOrganizations = async () => {
       if (!isAuthenticated()) {
@@ -30,351 +32,287 @@ export default function OnboardingPage() {
         return;
       }
 
+      setGlobalLoading(true, 'Verifying Node Access');
       try {
         const orgs = await getOrganizations();
         if (orgs.length > 0) {
-          // User already has organizations, redirect to dashboard
           router.push('/dashboard');
           return;
         }
-        // User has no organizations, show onboarding
-        setIsLoading(false);
+        setIsDataLoading(false);
       } catch (err) {
         console.error('Failed to check organizations:', err);
-        setIsLoading(false);
+        setIsDataLoading(false);
+      } finally {
+        setGlobalLoading(false);
       }
     };
 
     checkExistingOrganizations();
-  }, [router]);
+  }, [router, setGlobalLoading]);
 
   const handleOrgNameChange = (name: string) => {
     setOrgName(name);
-    // Auto-generate slug from name
-    const slug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     setOrgSlug(slug);
   };
 
   const handleCreateOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
+    setGlobalLoading(true, 'Initializing Org Namespace');
 
     try {
-      const org = await createOrganization({
-        name: orgName,
-        slug: orgSlug,
-      });
+      const org = await createOrganization({ name: orgName, slug: orgSlug });
       setOrganizationId(org.id);
       setStep(2);
     } catch (err) {
-      if (err instanceof APIError) {
-        setError(err.message);
-      } else {
-        setError('Failed to create organization');
-      }
+      setError(err instanceof APIError ? err.message : 'Failed to create organization');
+    } finally {
+      setIsSubmitting(false);
+      setGlobalLoading(false);
     }
   };
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
+    setIsSubmitting(true);
+    setGlobalLoading(true, 'Provisioning New Instance');
 
     try {
-      await createProject({
-        name: projectName,
-        region,
-        organizationId,
-      });
+      await createProject({ name: projectName, region, organizationId });
       setStep(3);
     } catch (err) {
-      if (err instanceof APIError) {
-        setError(err.message);
-      } else {
-        setError('Failed to create project');
-      }
+      setError(err instanceof APIError ? err.message : 'Failed to create project');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
+      setGlobalLoading(false);
     }
   };
 
   const handleProjectNameChange = (name: string) => {
     setProjectName(name);
-    // Auto-generate slug from name
-    const slug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     setProjectSlug(slug);
   };
 
-  // Show loading screen while checking for existing organizations
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Checking your account...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isDataLoading) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-8">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen bg-[#0c0c0e] flex items-center justify-center p-8 text-white relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-1/4 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="w-full max-w-xl relative z-10">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 mb-12 justify-center">
-          <div className="w-8 h-8 bg-black dark:bg-white rounded-md flex items-center justify-center">
-            <span className="text-white dark:text-black font-bold text-xl">A</span>
+        <Link href="/" className="flex items-center space-x-2 mb-12 justify-center group">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+            <span className="text-black font-black text-xl italic">A</span>
           </div>
-          <span className="text-xl font-semibold text-black dark:text-white">
+          <span className="text-2xl font-black text-white tracking-tighter uppercase italic">
             Afribase
           </span>
         </Link>
 
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${step >= 1 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-              }`}>
-              {step > 1 ? '✓' : '1'}
-            </div>
-            <div className={`w-20 h-1 ${step >= 2 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${step >= 2 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-              }`}>
-              {step > 2 ? '✓' : '2'}
-            </div>
-            <div className={`w-20 h-1 ${step >= 3 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${step >= 3 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-              }`}>
-              3
-            </div>
+        <div className="flex items-center justify-center mb-16 px-4">
+          <div className="flex items-center gap-4">
+            <StepIndicator current={step >= 1} success={step > 1} number={1} label="Identity" />
+            <div className={`w-16 h-[2px] mb-6 transition-colors duration-500 ${step >= 2 ? 'bg-emerald-500' : 'bg-white/5'}`} />
+            <StepIndicator current={step >= 2} success={step > 2} number={2} label="Namespace" />
+            <div className={`w-16 h-[2px] mb-6 transition-colors duration-500 ${step >= 3 ? 'bg-emerald-500' : 'bg-white/5'}`} />
+            <StepIndicator current={step >= 3} success={step >= 3} number={3} label="Global" />
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-fade-in-up">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mb-8 p-4 bg-red-500/5 border border-red-500/20 rounded-xl animate-gelatinous-in">
+            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">{error}</p>
           </div>
         )}
 
-        {/* Step 1: Create Organization */}
-        {step === 1 && (
-          <div className="animate-fade-in-up">
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3 text-center">
-              Create your organization
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
-              Organizations help you manage your team and projects
-            </p>
-
-            <form onSubmit={handleCreateOrganization} className="space-y-6">
-              <div>
-                <label htmlFor="orgName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Organization name
-                </label>
-                <input
-                  type="text"
-                  id="orgName"
-                  value={orgName}
-                  onChange={(e) => handleOrgNameChange(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  placeholder="Acme Inc"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="orgSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Organization slug
-                </label>
-                <input
-                  type="text"
-                  id="orgSlug"
-                  value={orgSlug}
-                  onChange={(e) => setOrgSlug(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  placeholder="acme-inc"
-                  pattern="[a-z0-9\-]+"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Only lowercase letters, numbers, and hyphens
+        <div className="bg-[#09090b] border border-white/5 p-8 lg:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
+          {/* Step 1: Create Organization */}
+          {step === 1 && (
+            <div className="animate-fade-in space-y-8">
+              <div className="text-center space-y-2">
+                <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">
+                  Establish Org
+                </h1>
+                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Management <span className="text-emerald-500 underline underline-offset-4">Cluster Unit</span>
                 </p>
               </div>
 
-              <button
-                type="submit"
-                disabled={isLoading || !orgName || !orgSlug}
-                className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating...
-                  </span>
-                ) : (
-                  'Continue'
-                )}
-              </button>
-            </form>
-          </div>
-        )}
+              <form onSubmit={handleCreateOrganization} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Legal Entity Name</label>
+                  <input
+                    type="text"
+                    value={orgName}
+                    onChange={(e) => handleOrgNameChange(e.target.value)}
+                    required
+                    placeholder="e.g. Atlas Logistics"
+                    className="w-full px-5 py-4 border border-white/5 rounded-xl bg-white/[0.02] text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all"
+                  />
+                </div>
 
-        {/* Step 2: Create Project */}
-        {step === 2 && (
-          <div className="animate-fade-in-up">
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3 text-center">
-              Create your first project
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
-              Projects contain your databases, APIs, and storage
-            </p>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Routing Slug</label>
+                  <input
+                    type="text"
+                    value={orgSlug}
+                    onChange={(e) => setOrgSlug(e.target.value)}
+                    required
+                    className="w-full px-5 py-4 border border-white/5 rounded-xl bg-white/[0.02] text-zinc-400 focus:border-emerald-500/50 focus:outline-none transition-all"
+                  />
+                </div>
 
-            <form onSubmit={handleCreateProject} className="space-y-6">
-              <div>
-                <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Project name
-                </label>
-                <input
-                  type="text"
-                  id="projectName"
-                  value={projectName}
-                  onChange={(e) => handleProjectNameChange(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  placeholder="My Awesome App"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="projectSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Project slug
-                </label>
-                <input
-                  type="text"
-                  id="projectSlug"
-                  value={projectSlug}
-                  onChange={(e) => setProjectSlug(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  placeholder="my-awesome-app"
-                  pattern="[a-z0-9\-]+"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Only lowercase letters, numbers, and hyphens
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="region" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Region
-                </label>
-                <select
-                  id="region"
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="lagos-01">Lagos, Nigeria</option>
-                  <option value="nairobi-01">Nairobi, Kenya</option>
-                  <option value="cairo-01">Cairo, Egypt</option>
-                  <option value="johannesburg-01">Johannesburg, South Africa</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="plan" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Plan
-                </label>
-                <select
-                  id="plan"
-                  value={plan}
-                  onChange={(e) => setPlan(e.target.value)}
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="free">Free - Get started</option>
-                  <option value="pro">Pro - $25/month</option>
-                  <option value="team">Team - $100/month</option>
-                </select>
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  disabled={isLoading}
-                  className="w-1/3 py-3 border-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Back
-                </button>
                 <button
                   type="submit"
-                  disabled={isLoading || !projectName || !projectSlug}
-                  className="w-2/3 py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  disabled={isSubmitting || !orgName || !orgSlug}
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl transition-all duration-300 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] uppercase tracking-widest text-xs active:scale-95 disabled:opacity-50"
                 >
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating...
-                    </span>
-                  ) : (
-                    'Create project'
-                  )}
+                  Allocate Resources
                 </button>
-              </div>
-            </form>
-          </div>
-        )}
+              </form>
+            </div>
+          )}
 
-        {/* Step 3: Success */}
-        {step === 3 && (
-          <div className="text-center animate-fade-in-up">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+          {/* Step 2: Create Project */}
+          {step === 2 && (
+            <div className="animate-fade-in space-y-8">
+              <div className="text-center space-y-2">
+                <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">
+                  Init Environment
+                </h1>
+                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Provisioning <span className="text-emerald-500 underline underline-offset-4">Project Node</span>
+                </p>
+              </div>
+
+              <form onSubmit={handleCreateProject} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Node Name</label>
+                  <input
+                    type="text"
+                    value={projectName}
+                    onChange={(e) => handleProjectNameChange(e.target.value)}
+                    required
+                    placeholder="Production Cluster A"
+                    className="w-full px-5 py-4 border border-white/5 rounded-xl bg-white/[0.02] text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">A-Z Region</label>
+                    <select
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      className="w-full px-5 py-4 border border-white/5 rounded-xl bg-[#0c0c0e] text-zinc-300 focus:border-emerald-500/50 focus:outline-none transition-all"
+                    >
+                      <option value="lagos-01">Lagos, NG</option>
+                      <option value="nairobi-01">Nairobi, KE</option>
+                      <option value="cairo-01">Cairo, EG</option>
+                      <option value="johannesburg-01">Joburg, ZA</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tier</label>
+                    <select
+                      value={plan}
+                      onChange={(e) => setPlan(e.target.value)}
+                      className="w-full px-5 py-4 border border-white/5 rounded-xl bg-[#0c0c0e] text-zinc-300 focus:border-emerald-500/50 focus:outline-none transition-all"
+                    >
+                      <option value="free">Community (Free)</option>
+                      <option value="pro">Base (Pro)</option>
+                      <option value="team">Carrier (Team)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex-1 py-4 border border-white/5 text-zinc-500 font-black rounded-xl hover:text-white transition-all uppercase tracking-widest text-xs"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !projectName}
+                    className="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl transition-all shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] uppercase tracking-widest text-xs active:scale-95 disabled:opacity-50"
+                  >
+                    Commit Instance
+                  </button>
+                </div>
+              </form>
             </div>
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3">
-              You're all set!
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Your project is being provisioned. This may take a few moments.
-            </p>
-            <div className="space-y-4">
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95"
-              >
-                Go to dashboard
-              </button>
-              <button
-                onClick={() => router.push('/')}
-                className="w-full py-3 border-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-              >
-                Back to home
-              </button>
+          )}
+
+          {/* Step 3: Success */}
+          {step === 3 && (
+            <div className="text-center animate-gelatinous-in py-8 space-y-10">
+              <div className="relative inline-block">
+                <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
+                  <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 animate-pulse" />
+              </div>
+
+              <div className="space-y-3">
+                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+                  Node Live
+                </h1>
+                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] max-w-xs mx-auto">
+                  Global provisioning <span className="text-emerald-500">successfully completed</span>. Your infrastructure is active.
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-6">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full py-5 bg-white text-black font-black rounded-xl hover:scale-105 transition-all shadow-xl uppercase tracking-widest text-xs"
+                >
+                  Enter Command Center
+                </button>
+                <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                  <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest italic">
+                    Connected to AFR-GRID-BRAVO : {region.toUpperCase()}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function StepIndicator({ current, success, number, label }: { current: boolean; success: boolean; number: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all duration-500 border-2 ${success ? 'bg-emerald-500 border-emerald-500 text-black' :
+          current ? 'bg-zinc-900 border-emerald-500 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' :
+            'bg-zinc-900 border-white/5 text-zinc-700'
+        }`}>
+        {success ? '✓' : number}
+      </div>
+      <span className={`text-[8px] font-black uppercase tracking-widest transition-colors duration-500 ${current ? 'text-white' : 'text-zinc-700'}`}>
+        {label}
+      </span>
     </div>
   );
 }

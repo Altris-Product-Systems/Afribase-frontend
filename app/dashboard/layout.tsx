@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { getOrganizations, isAuthenticated, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,8 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { setIsLoading: setGlobalLoading } = useLoader();
+
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +42,7 @@ export default function DashboardLayout({
 
   const loadSidebarData = async () => {
     try {
+      setGlobalLoading(true, 'Accessing Grid Console');
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
@@ -57,6 +61,7 @@ export default function DashboardLayout({
       console.error('Failed to load organizations', err);
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -100,19 +105,9 @@ export default function DashboardLayout({
     router.push(finalRoute);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-xl bg-emerald-500/20 animate-pulse" />
-          <svg className="animate-spin h-12 w-12 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-10" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-            <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-      </div>
-    );
-  }
+  // While the global loader handles the initial technical reveal, we check isLoading here
+  // to avoid rendering the heavy dashboard UI before sidebar data is ready.
+  if (isLoading) return null;
 
   return (
     <div className="min-h-screen bg-[#09090b] flex overflow-hidden">
