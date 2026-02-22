@@ -9,6 +9,7 @@ import {
   deleteProject,
   runProjectQuery,
   getProjectTables,
+  deleteProjectTable,
   getProjectUsage,
   Project,
   ProjectKeys,
@@ -112,6 +113,7 @@ export default function ProjectDetailPage() {
   // Usage tab
   const [usage, setUsage] = useState<ProjectUsage | null>(null);
   const [usageLoading, setUsageLoading] = useState(false);
+  const [deletingTable, setDeletingTable] = useState<string | null>(null);
 
   // Settings tab
   const [settingsName, setSettingsName] = useState('');
