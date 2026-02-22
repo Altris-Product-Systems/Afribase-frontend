@@ -3,11 +3,20 @@
 
 :root {
   /* Brand Identity */
-  --brand-primary: #18181b;
+  /* Brand Identity - Refined Dark Theme */
+  --brand-primary: #09090b;
   --brand-secondary: #10b981;
   --brand-accent: #06b6d4;
-  --brand-background: #fafafa;
-  --brand-text: #09090b;
+  --brand-background: #09090b;
+  --brand-text: #fafafa;
+
+  /* Neutral Family */
+  --neutral-charcoal: #2A2A2A;
+  --neutral-gray-dark: #4A4A4A;
+  --neutral-gray: #6B6B6B;
+  --neutral-gray-light: #A0A0A0;
+  --neutral-gray-soft: #E5E5E5;
+  --neutral-gray-bg: #F5F5F5;
 
   /* Functional */
   --functional-success: #10b981;
@@ -116,90 +125,26 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Smooth entrance animations */
-@keyframes fadeInUp {
-  from {
+@keyframes gelatinousFadeIn {
+  0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px) scale(0.95);
   }
-
-  to {
+  60% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-4px) scale(1.02);
   }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
   100% {
     opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
+    transform: translateY(0) scale(1);
   }
 }
 
 /* Animation utility classes */
+.animate-gelatinous-in {
+  animation: gelatinousFadeIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
@@ -228,35 +173,15 @@ html {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Delay utilities */
-.delay-100 {
-  animation-delay: 0.1s;
-}
-
-.delay-200 {
-  animation-delay: 0.2s;
-}
-
-.delay-300 {
-  animation-delay: 0.3s;
-}
-
-.delay-400 {
-  animation-delay: 0.4s;
-}
-
-.delay-500 {
-  animation-delay: 0.5s;
-}
-
-.delay-600 {
-  animation-delay: 0.6s;
-}
-
-.delay-700 {
-  animation-delay: 0.7s;
-}
-
-.delay-800 {
-  animation-delay: 0.8s;
-}
+/* Delay utilities - More granular for staggered effects */
+.animation-delay-none { animation-delay: 0ms; }
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-600 { animation-delay: 600ms; }
+.animation-delay-700 { animation-delay: 700ms; }
+.animation-delay-800 { animation-delay: 800ms; }
+.animation-delay-900 { animation-delay: 900ms; }
+.animation-delay-1000 { animation-delay: 1000ms; }

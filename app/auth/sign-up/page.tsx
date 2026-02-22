@@ -17,13 +17,13 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     // Basic validation
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
-    
+
     setIsLoading(true);
 
     try {
@@ -38,7 +38,7 @@ export default function SignUpPage() {
 
       // Store the JWT token
       setAuthToken(data.token);
-      
+
       // Check if user already has organizations (shouldn't happen for new signups, but good to check)
       try {
         const orgs = await getOrganizations();
@@ -67,39 +67,42 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex">
+    <div className="min-h-screen bg-[#161616] flex text-white relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute -top-1/4 -right-1/4 w-[800px] h-[800px] bg-forest/20 rounded-full blur-[120px] opacity-50" />
+        <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-sage/10 rounded-full blur-[100px] opacity-30" />
+      </div>
+
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
         <div className="w-full max-w-md animate-fade-in-up">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 mb-12">
-            <div className="w-8 h-8 bg-black dark:bg-white rounded-md flex items-center justify-center">
-              <span className="text-white dark:text-black font-bold text-xl">A</span>
+          <Link href="/" className="flex items-center space-x-2 mb-12 group">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-shadow">
+              <span className="text-[#161616] font-black text-2xl">A</span>
             </div>
-            <span className="text-xl font-semibold text-black dark:text-white">
+            <span className="text-2xl font-black text-white tracking-tighter uppercase">
               Afribase
             </span>
           </Link>
 
           {/* Heading */}
-          <h1 className="text-2xl font-bold text-black dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
             Get started
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-white/60 mb-8 font-medium">
             Create a new account
           </p>
 
           {/* Social Login */}
-          <div className="space-y-3 mb-6">
-            <button className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-200 hover:scale-[1.01]">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <div className="space-y-3 mb-8">
+            <button className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border border-white/10 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 hover:border-white/20 active:scale-[0.98]">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
               </svg>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-semibold text-white">
                 Continue with GitHub
-              </span>
-              <span className="ml-auto px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 rounded">
-                LAST USED
               </span>
             </button>
           </div>
@@ -107,11 +110,11 @@ export default function SignUpPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-800" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-black text-gray-500 dark:text-gray-400">
-                or
+              <span className="px-4 bg-[#161616] text-white/50 text-xs font-medium tracking-widest uppercase">
+                Or continue with email
               </span>
             </div>
           </div>
@@ -134,8 +137,8 @@ export default function SignUpPage() {
           {/* Email Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
+              <label htmlFor="email" className="block text-sm font-semibold text-white/80 mb-2">
+                Email Address
               </label>
               <input
                 type="email"
@@ -145,12 +148,12 @@ export default function SignUpPage() {
                 required
                 disabled={isLoading}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3.5 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/30 focus:border-sage focus:ring-1 focus:ring-sage focus:outline-none transition-all disabled:opacity-50"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-white/80 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -163,12 +166,12 @@ export default function SignUpPage() {
                   disabled={isLoading}
                   minLength={8}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-all duration-200 focus:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3.5 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/30 focus:border-sage focus:ring-1 focus:ring-sage focus:outline-none transition-all disabled:opacity-50 pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +185,7 @@ export default function SignUpPage() {
                   )}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-xs text-white/40">
                 Must be at least 8 characters
               </p>
             </div>
@@ -190,7 +193,7 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-4 bg-white text-[#161616] font-bold rounded-xl hover:bg-white/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:transform-none mt-2"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -201,28 +204,28 @@ export default function SignUpPage() {
                   Creating account...
                 </span>
               ) : (
-                'Sign up'
+                'Sign Up'
               )}
             </button>
           </form>
 
           {/* Terms */}
-          <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400">
+          <p className="mt-6 text-xs text-center text-white/50">
             By continuing, you agree to Afribase's{' '}
-            <Link href="/legal/terms" className="underline hover:text-black dark:hover:text-white">
+            <Link href="/legal/terms" className="underline hover:text-sage transition-colors">
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link href="/legal/privacy" className="underline hover:text-black dark:hover:text-white">
+            <Link href="/legal/privacy" className="underline hover:text-sage transition-colors">
               Privacy Policy
             </Link>
             , and to receive periodic emails with updates.
           </p>
 
           {/* Sign In Link */}
-          <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-8 text-center text-sm text-white/60">
             Have an account?{' '}
-            <Link href="/auth/sign-in" className="font-medium text-black dark:text-white hover:underline">
+            <Link href="/auth/sign-in" className="font-bold text-white hover:text-sage transition-colors">
               Sign in
             </Link>
           </p>
@@ -230,24 +233,36 @@ export default function SignUpPage() {
       </div>
 
       {/* Right Side - Testimonial */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 dark:bg-gray-900 items-center justify-center p-16">
-        <div className="max-w-lg animate-slide-in-right">
-          <svg className="w-12 h-12 text-gray-400 mb-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-          </svg>
-          <blockquote className="text-2xl font-medium text-gray-900 dark:text-white mb-6">
-            Very impressed by Afribase's growth. For new startups, they seem to have gone from "promising" to "standard" in remarkably short order.
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-16 overflow-hidden">
+        <div className="absolute inset-0 bg-[#1A1A1A] border-l border-white/5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(44,95,45,0.1),transparent_80%)]" />
+          <div className="absolute w-full h-full bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        </div>
+
+        <div className="max-w-xl relative z-10 animate-slide-in-right">
+          <div className="mb-8">
+            <svg className="w-16 h-16 text-white/20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+          </div>
+          <blockquote className="text-3xl font-medium text-white mb-10 leading-relaxed">
+            "Very impressed by Afribase's growth. For new startups, they seem to have gone from 'promising' to <span className="text-sage">'standard'</span> in remarkably short order."
           </blockquote>
-          <div className="flex items-center gap-3">
-            <Image 
-              src="https://randomuser.me/api/portraits/women/44.jpg" 
+          <div className="flex items-center gap-4">
+            <Image
+              src="https://randomuser.me/api/portraits/women/44.jpg"
               alt="User avatar"
-              width={40}
-              height={40}
-              className="rounded-full"
+              width={48}
+              height={48}
+              className="rounded-full ring-2 ring-white/10"
             />
-            <div className="text-gray-700 dark:text-gray-300 font-medium">
-              @techfounder
+            <div>
+              <div className="text-white font-semibold text-lg">
+                Sarah Jenkins
+              </div>
+              <div className="text-white/50 text-sm">
+                Tech Founder
+              </div>
             </div>
           </div>
         </div>
