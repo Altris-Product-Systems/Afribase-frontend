@@ -25,6 +25,18 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
   const [projectSlug, setProjectSlug] = useState('');
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
+  const [databasePassword, setDatabasePassword] = useState('');
+  const [enableDataApi, setEnableDataApi] = useState(true);
+  const [enableRls, setEnableRls] = useState(false);
+
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 16; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setDatabasePassword(password);
+  };
 
   const handleOrgNameChange = (name: string) => {
     setOrgName(name);
@@ -69,6 +81,9 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
         name: projectName,
         region,
         organizationId,
+        databasePassword,
+        enableDataApi,
+        enableRls,
       });
       setStep(3);
       // Call onSuccess after a short delay to show the success message
@@ -106,6 +121,9 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
     setProjectSlug('');
     setRegion('lagos-01');
     setPlan('free');
+    setDatabasePassword('');
+    setEnableDataApi(true);
+    setEnableRls(false);
     setIsLoading(false);
   };
 
@@ -295,6 +313,47 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                 </select>
               </div>
 
+              {/* Security & Advanced Configuration */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-4">
+                <h3 className="text-sm font-medium text-black dark:text-white">Security Configuration</h3>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={enableDataApi}
+                      onChange={(e) => setEnableDataApi(e.target.checked)}
+                      disabled={isLoading}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableDataApi ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableDataApi ? 'transform translate-x-4' : ''}`}></div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-black dark:text-white">Enable Data API</p>
+                    <p className="text-xs text-gray-500 mt-1">Autogenerate a RESTful API for your public schema using PostgREST.</p>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={enableRls}
+                      onChange={(e) => setEnableRls(e.target.checked)}
+                      disabled={isLoading}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableRls ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableRls ? 'transform translate-x-4' : ''}`}></div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-black dark:text-white">Enable automatic RLS</p>
+                    <p className="text-xs text-gray-500 mt-1">Enforce Row Level Security heavily on your databases automatically.</p>
+                  </div>
+                </label>
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -324,25 +383,28 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
               </div>
             </form>
           </div>
-        )}
+        )
+        }
 
         {/* Step 3: Success */}
-        {step === 3 && (
-          <div className="text-center py-4">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+        {
+          step === 3 && (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-black dark:text-white mb-3">
+                You're all set!
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Your organization and project have been created successfully.
+              </p>
             </div>
-            <h2 className="text-2xl font-bold text-black dark:text-white mb-3">
-              You're all set!
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Your organization and project have been created successfully.
-            </p>
-          </div>
-        )}
-      </div>
-    </Modal>
+          )
+        }
+      </div >
+    </Modal >
   );
 }
