@@ -74,6 +74,18 @@ export interface UpdateAuthConfigRequest {
   discord?: OAuthProviderConfig;
 }
 
+export interface ProjectUser {
+  id: string;
+  email: string;
+  phone: string;
+  confirmedAt?: string;
+  lastSignInAt?: string;
+  appMetadata?: string;
+  userMetadata?: string;
+  createdAt: string;
+  provider: string;
+}
+
 export class APIError extends Error {
   constructor(public statusCode: number, message: string) {
     super(message);
@@ -704,6 +716,34 @@ export async function updateAuthProvider(
     }
 
     return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Connect failed at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export async function getProjectUsers(projectId: string): Promise<ProjectUser[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Failed to fetch project users');
+    }
+
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new APIError(0, `Connect failed at ${API_BASE_URL}.`);

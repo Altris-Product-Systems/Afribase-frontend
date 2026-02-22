@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { getProjects, getProjectKeys, getOrganizations, isAuthenticated, Project, ProjectKeys, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AuthSettings from '@/components/AuthSettings';
+import AuthUsers from '@/components/AuthUsers';
+import AuthPolicies from '@/components/AuthPolicies';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -338,7 +340,19 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'auth' && (
+          {activeTab === 'users' && (
+            <div className="max-w-6xl mx-auto">
+              <AuthUsers projectId={projectId} />
+            </div>
+          )}
+
+          {activeTab === 'policies' && (
+            <div className="max-w-6xl mx-auto">
+              <AuthPolicies projectId={projectId} />
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">
