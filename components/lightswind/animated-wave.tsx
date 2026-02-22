@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import * as THREE from 'three';
-import { createNoise2D } from 'simplex-noise';
+import { createNoise2D, createNoise3D } from 'simplex-noise';
 import { cn } from '../../lib/utils'; // Assuming this utility is correctly set up
 
 export interface AnimatedWaveProps {
@@ -263,7 +263,8 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
       geometry: null as THREE.PlaneGeometry | null,
       material: null as THREE.MeshLambertMaterial | null,
       plane: null as THREE.Mesh | null,
-      simplex: null as ReturnType<typeof createNoise2D> | null, // Simplex noise generator
+      simplex: null as ReturnType<typeof createNoise2D> | null,
+      simplex3D: null as ReturnType<typeof createNoise3D> | null,
       factor: smoothness, // Controls the "wavelength" of the noise
       scale: amplitude, // Controls the "height" of the noise
       speed: speed, // Controls how fast the wave moves over time
@@ -323,8 +324,9 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
         this.plane = new THREE.Mesh(this.geometry, this.material);
         this.plane.position.set(0, 0, 0); // Position the plane at the center of its group
 
-        // Initialize Simplex noise generator
+        // Initialize Simplex noise generators
         this.simplex = createNoise2D();
+        this.simplex3D = createNoise3D();
 
         // Perform initial noise calculation (no mouse influence initially)
         this.moveNoise({ x: 0, y: 0 });
@@ -372,11 +374,11 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
 
             // Generate a 3D Simplex noise value for the ripple.
             // `this.distortionTime` makes the ripple evolve over time.
-            const mouseRippleNoise = this.simplex(
-              distX_mouse / this.mouseDistortionSmoothness, // Smoothness of the mouse ripple
+            const mouseRippleNoise = this.simplex3D!(
+              distX_mouse / this.mouseDistortionSmoothness,
               distY_mouse / this.mouseDistortionSmoothness,
-              this.distortionTime // Third dimension for time-based evolution
-            ) * this.mouseDistortionStrength; // Overall strength of the mouse ripple
+              this.distortionTime
+            ) * this.mouseDistortionStrength;
 
             // Apply a falloff (diminishing effect) as the vertex gets further from the mouse.
             // The effect diminishes further from the mouse. Factor of 2 on radius for wider spread.
