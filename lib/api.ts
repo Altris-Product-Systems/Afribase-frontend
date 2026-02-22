@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'http://192.168.1.113:8000';
+// Use environment variable or fallback to localhost
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export interface LoginRequest {
   email: string;
@@ -30,49 +31,87 @@ export class APIError extends Error {
 }
 
 export async function login(credentials: LoginRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/token?grant_type=password`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to sign in');
+    if (!response.ok) {
+      // Handle specific error cases
+      if (response.status === 401) {
+        throw new APIError(401, 'Invalid email or password. Please check your credentials.');
+      } else if (response.status === 404) {
+        throw new APIError(404, 'User not found. Please sign up first.');
+      }
+      throw new APIError(response.status, data.message || data.detail || 'Failed to sign in');
+    }
+
+    // Backend returns access_token, normalize it to token for consistency
+    if (data.access_token && !data.token) {
+      data.token = data.access_token;
+    }
+
+    return data;
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    // Re-throw APIError as-is
+    if (error instanceof APIError) {
+      throw error;
+    }
+    // Handle other errors
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  // Backend returns access_token, normalize it to token for consistency
-  if (data.access_token && !data.token) {
-    data.token = data.access_token;
-  }
-
-  return data;
 }
 
 export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to create account');
+    if (!response.ok) {
+      // Handle specific error cases
+      if (response.status === 400) {
+        throw new APIError(400, data.message || 'Invalid signup data. Please check your information.');
+      } else if (response.status === 409) {
+        throw new APIError(409, 'An account with this email already exists. Please sign in instead.');
+      }
+      throw new APIError(response.status, data.message || data.detail || 'Failed to create account');
+    }
+
+    // Normalize access_token to token if needed
+    if (data.access_token && !data.token) {
+      data.token = data.access_token;
+    }
+
+    return data;
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    // Re-throw APIError as-is
+    if (error instanceof APIError) {
+      throw error;
+    }
+    // Handle other errors
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  // Normalize access_token to token if needed
-  if (data.access_token && !data.token) {
-    data.token = data.access_token;
-  }
-
-  return data;
 }
 
 export function getAuthToken(): string | null {

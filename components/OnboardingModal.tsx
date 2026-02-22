@@ -1,14 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createOrganization, createProject, getOrganizations, isAuthenticated, APIError } from '@/lib/api';
+import React, { useState } from 'react';
+import Modal from './Modal';
+import { createOrganization, createProject, APIError } from '@/lib/api';
 
-export default function OnboardingPage() {
-  const router = useRouter();
+interface OnboardingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function OnboardingModal({ isOpen, onClose, onSuccess }: OnboardingModalProps) {
   const [step, setStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Organization data
@@ -21,32 +25,6 @@ export default function OnboardingPage() {
   const [projectSlug, setProjectSlug] = useState('');
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
-
-  // Check if user already has organizations on mount
-  useEffect(() => {
-    const checkExistingOrganizations = async () => {
-      if (!isAuthenticated()) {
-        router.push('/auth/sign-in');
-        return;
-      }
-
-      try {
-        const orgs = await getOrganizations();
-        if (orgs.length > 0) {
-          // User already has organizations, redirect to dashboard
-          router.push('/dashboard');
-          return;
-        }
-        // User has no organizations, show onboarding
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Failed to check organizations:', err);
-        setIsLoading(false);
-      }
-    };
-
-    checkExistingOrganizations();
-  }, [router]);
 
   const handleOrgNameChange = (name: string) => {
     setOrgName(name);
@@ -61,6 +39,7 @@ export default function OnboardingPage() {
   const handleCreateOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
       const org = await createOrganization({
@@ -75,6 +54,8 @@ export default function OnboardingPage() {
       } else {
         setError('Failed to create organization');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,13 +71,17 @@ export default function OnboardingPage() {
         organizationId,
       });
       setStep(3);
+      // Call onSuccess after a short delay to show the success message
+      setTimeout(() => {
+        resetModal();
+        onSuccess();
+      }, 2000);
     } catch (err) {
       if (err instanceof APIError) {
         setError(err.message);
       } else {
         setError('Failed to create project');
       }
-    } finally {
       setIsLoading(false);
     }
   };
@@ -111,47 +96,50 @@ export default function OnboardingPage() {
     setProjectSlug(slug);
   };
 
-  // Show loading screen while checking for existing organizations
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Checking your account...</p>
-        </div>
-      </div>
-    );
-  }
+  const resetModal = () => {
+    setStep(1);
+    setError('');
+    setOrgName('');
+    setOrgSlug('');
+    setOrganizationId('');
+    setProjectName('');
+    setProjectSlug('');
+    setRegion('lagos-01');
+    setPlan('free');
+    setIsLoading(false);
+  };
+
+  const handleClose = () => {
+    if (!isLoading) {
+      resetModal();
+      onClose();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-8">
-      <div className="w-full max-w-2xl">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 mb-12 justify-center">
-          <div className="w-8 h-8 bg-black dark:bg-white rounded-md flex items-center justify-center">
-            <span className="text-white dark:text-black font-bold text-xl">A</span>
-          </div>
-          <span className="text-xl font-semibold text-black dark:text-white">
-            Afribase
-          </span>
-        </Link>
-
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={step === 1 ? 'Create Organization' : step === 2 ? 'Create Project' : 'Success'}
+      size="lg"
+    >
+      <div>
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center mb-12">
+        <div className="flex items-center justify-center mb-8">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
               step >= 1 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
             }`}>
               {step > 1 ? '✓' : '1'}
             </div>
-            <div className={`w-20 h-1 ${step >= 2 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
+            <div className={`w-16 h-1 ${step >= 2 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
               step >= 2 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
             }`}>
               {step > 2 ? '✓' : '2'}
             </div>
-            <div className={`w-20 h-1 ${step >= 3 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
+            <div className={`w-16 h-1 ${step >= 3 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
               step >= 3 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
             }`}>
               3
@@ -161,22 +149,19 @@ export default function OnboardingPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-fade-in-up">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* Step 1: Create Organization */}
         {step === 1 && (
-          <div className="animate-fade-in-up">
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3 text-center">
-              Create your organization
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
+          <div>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
               Organizations help you manage your team and projects
             </p>
 
-            <form onSubmit={handleCreateOrganization} className="space-y-6">
+            <form onSubmit={handleCreateOrganization} className="space-y-5">
               <div>
                 <label htmlFor="orgName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Organization name
@@ -189,7 +174,7 @@ export default function OnboardingPage() {
                   required
                   disabled={isLoading}
                   placeholder="Acme Inc"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -206,7 +191,7 @@ export default function OnboardingPage() {
                   disabled={isLoading}
                   placeholder="acme-inc"
                   pattern="[a-z0-9-]+"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Only lowercase letters, numbers, and hyphens
@@ -216,7 +201,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={isLoading || !orgName || !orgSlug}
-                className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -236,15 +221,12 @@ export default function OnboardingPage() {
 
         {/* Step 2: Create Project */}
         {step === 2 && (
-          <div className="animate-fade-in-up">
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3 text-center">
-              Create your first project
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
+          <div>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
               Projects contain your databases, APIs, and storage
             </p>
 
-            <form onSubmit={handleCreateProject} className="space-y-6">
+            <form onSubmit={handleCreateProject} className="space-y-5">
               <div>
                 <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Project name
@@ -257,7 +239,7 @@ export default function OnboardingPage() {
                   required
                   disabled={isLoading}
                   placeholder="My Awesome App"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -274,7 +256,7 @@ export default function OnboardingPage() {
                   disabled={isLoading}
                   placeholder="my-awesome-app"
                   pattern="[a-z0-9-]+"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Only lowercase letters, numbers, and hyphens
@@ -290,7 +272,7 @@ export default function OnboardingPage() {
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="lagos-01">Lagos, Nigeria</option>
                   <option value="nairobi-01">Nairobi, Kenya</option>
@@ -308,7 +290,7 @@ export default function OnboardingPage() {
                   value={plan}
                   onChange={(e) => setPlan(e.target.value)}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="free">Free - Get started</option>
                   <option value="pro">Pro - $25/month</option>
@@ -316,19 +298,19 @@ export default function OnboardingPage() {
                 </select>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
                   disabled={isLoading}
-                  className="w-1/3 py-3 border-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !projectName || !projectSlug}
-                  className="w-2/3 py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="flex-[2] py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -349,35 +331,21 @@ export default function OnboardingPage() {
 
         {/* Step 3: Success */}
         {step === 3 && (
-          <div className="text-center animate-fade-in-up">
+          <div className="text-center py-4">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-black dark:text-white mb-3">
+            <h2 className="text-2xl font-bold text-black dark:text-white mb-3">
               You're all set!
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Your project is being provisioned. This may take a few moments.
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Your organization and project have been created successfully.
             </p>
-            <div className="space-y-4">
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-95"
-              >
-                Go to dashboard
-              </button>
-              <button
-                onClick={() => router.push('/')}
-                className="w-full py-3 border-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-              >
-                Back to home
-              </button>
-            </div>
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

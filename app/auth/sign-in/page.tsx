@@ -101,8 +101,16 @@ export default function SignInPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-fade-in-up">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-fade-in-up mb-5">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              {(error.includes('not found') || error.includes('Invalid email')) && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  Don't have an account?{' '}
+                  <Link href="/auth/sign-up" className="text-green-600 hover:underline font-medium">
+                    Sign up here
+                  </Link>
+                </p>
+              )}
             </div>
           )}
 
