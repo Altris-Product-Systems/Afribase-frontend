@@ -239,27 +239,28 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      name: projectData.name,
-      description: projectData.description,
-      region: projectData.region,
-      databasePassword: projectData.databasePassword,
-      enableDataApi: projectData.enableDataApi,
-      enableRls: projectData.enableRls,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: projectData.name,
+        description: projectData.description,
+        region: projectData.region,
+        databasePassword: projectData.databasePassword,
+        enableDataApi: projectData.enableDataApi,
+        enableRls: projectData.enableRls,
+      }),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to create project');
-  }
+    if (!response.ok) {
+      throw new APIError(response.status, data.message || data.detail || 'Failed to create project');
+    }
 
     return data;
   } catch (error) {

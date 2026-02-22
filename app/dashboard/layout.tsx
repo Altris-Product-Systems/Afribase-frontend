@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { getOrganizations, isAuthenticated, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
@@ -13,12 +13,21 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+
+  useEffect(() => {
+    const orgId = searchParams.get('orgId');
+    if (orgId && organizations.length > 0) {
+      const found = organizations.find(o => o.id === orgId);
+      if (found) setSelectedOrg(found);
+    }
+  }, [searchParams, organizations]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -33,13 +42,33 @@ export default function DashboardLayout({
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
-      if (orgs.length > 0 && !selectedOrg) {
+      
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlOrgId = searchParams.get('orgId');
+      
+      if (urlOrgId) {
+        const found = orgs.find(o => o.id === urlOrgId);
+        if (found) setSelectedOrg(found);
+        else if (orgs.length > 0) setSelectedOrg(orgs[0]);
+      } else if (orgs.length > 0 && !selectedOrg) {
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
       console.error('Failed to load organizations', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOrgChange = (org: Organization) => {
+    setSelectedOrg(org);
+    
+    if (pathname.startsWith('/dashboard/project/')) {
+      // Switching orgs while in a project detail should go to the projects list of the new org
+      router.push(`/dashboard/projects?orgId=${org.id}`);
+    } else {
+      // Maintain current path but update the orgId
+      router.push(`${pathname}?orgId=${org.id}`);
     }
   };
 
@@ -64,7 +93,10 @@ export default function DashboardLayout({
       logs: '/dashboard/logs',
       settings: '/dashboard/settings',
     };
-    router.push(routes[id] || '/dashboard');
+    
+    const baseRoute = routes[id] || '/dashboard';
+    const finalRoute = selectedOrg ? `${baseRoute}?orgId=${selectedOrg.id}` : baseRoute;
+    router.push(finalRoute);
   };
 
   if (isLoading) {
@@ -86,7 +118,7 @@ export default function DashboardLayout({
       <Sidebar
         organizations={organizations}
         selectedOrg={selectedOrg}
-        onOrgChange={setSelectedOrg}
+        onOrgChange={handleOrgChange}
         activeId={getActiveId()}
         onNavigate={handleNavigate}
         isCollapsed={isSidebarCollapsed}
