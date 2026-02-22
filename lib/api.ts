@@ -116,8 +116,11 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> 
   }
 }
 
+// Import auth functions from auth.ts
+import { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated } from './auth';
+
 // Re-export auth functions from auth.ts
-export { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated } from './auth';
+export { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated };
 
 // Organization interfaces and functions
 export interface Organization {
@@ -140,43 +143,63 @@ export async function createOrganization(data: CreateOrganizationRequest): Promi
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/organizations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-  const responseData = await response.json();
+    const responseData = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, responseData.message || responseData.detail || 'Failed to create organization');
+    if (!response.ok) {
+      throw new APIError(response.status, responseData.message || responseData.detail || 'Failed to create organization');
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  return responseData;
 }
 
 export async function getOrganizations(): Promise<Organization[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/organizations`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to fetch organizations');
+    if (!response.ok) {
+      throw new APIError(response.status, data.message || data.detail || 'Failed to fetch organizations');
+    }
+
+    // Ensure we return an array
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  // Ensure we return an array
-  return Array.isArray(data) ? data : [];
 }
 
 // Project interfaces and functions
@@ -215,78 +238,107 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      name: projectData.name,
-      description: projectData.description,
-      region: projectData.region,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: projectData.name,
+        description: projectData.description,
+        region: projectData.region,
+      }),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to create project');
+    if (!response.ok) {
+      throw new APIError(response.status, data.message || data.detail || 'Failed to create project');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  return data;
 }
 
 export async function getProjects(organizationId?: string): Promise<Project[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  // Build URL with organization-scoped projects endpoint
-  if (!organizationId) {
-    // If no org ID, fallback to global list if exists, otherwise return empty
-    // Backend currently only supports org-scoped list
-    return [];
+  try {
+    // Build URL with organization-scoped projects endpoint
+    if (!organizationId) {
+      // If no org ID, return empty as backend currently only supports org-scoped list
+      return [];
+    }
+
+    const url = `${API_BASE_URL}/api/organizations/${organizationId}/projects`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.message || data.detail || 'Failed to fetch projects');
+    }
+
+    // Backend returns {projects: [...], total: number}
+    if (data.projects && Array.isArray(data.projects)) {
+      return data.projects;
+    }
+    // Fallback if API returns array directly
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  const url = `${API_BASE_URL}/api/organizations/${organizationId}/projects`;
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to fetch projects');
-  }
-
-  // Backend returns {projects: [...], total: number}
-  if (data.projects && Array.isArray(data.projects)) {
-    return data.projects;
-  }
-  // Fallback if API returns array directly
-  return Array.isArray(data) ? data : [];
 }
 
 export async function getProjectKeys(projectId: string): Promise<ProjectKeys> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/keys`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/keys`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new APIError(response.status, data.message || data.detail || 'Failed to fetch project keys');
+    if (!response.ok) {
+      throw new APIError(response.status, data.message || data.detail || 'Failed to fetch project keys');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+    }
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
-
-  return data;
 }
