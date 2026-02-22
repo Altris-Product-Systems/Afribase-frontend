@@ -194,8 +194,8 @@ export default function Sidebar({
         <nav className={`flex-1 overflow-y-auto py-6 space-y-6 scrollbar-hide ${isCollapsed ? 'px-3' : 'px-4'}`}>
           {/* General Section */}
           <div className="space-y-1">
-            <NavigationItem id="projects" label="Projects" icon={LayoutGrid} />
-            <NavigationItem id="settings" label="Settings" icon={Settings} />
+            <NavigationItem id="dashboard" label="Dashboard" icon={LayoutGrid} />
+            <NavigationItem id="projects" label="Projects" icon={Activity} />
           </div>
 
           {/* Development Section */}
@@ -235,7 +235,8 @@ export default function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className={`p-4 border-t border-white/5 ${isCollapsed ? 'flex flex-col items-center px-2' : ''}`}>
+        <div className={`p-4 border-t border-white/5 space-y-1 ${isCollapsed ? 'flex flex-col items-center px-2' : ''}`}>
+          <NavigationItem id="settings" label="Settings" icon={Settings} />
           <button
             onClick={handleSignOut}
             className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group ${isCollapsed ? 'justify-center' : ''}`}

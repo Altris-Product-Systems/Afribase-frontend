@@ -44,13 +44,15 @@ export default function DashboardLayout({
   };
 
   const getActiveId = () => {
-    if (pathname === '/dashboard') return 'projects';
-    return pathname.split('/').pop() || 'projects';
+    if (pathname === '/dashboard') return 'dashboard';
+    if (pathname.startsWith('/dashboard/projects')) return 'projects';
+    return pathname.split('/').pop() || 'dashboard';
   };
 
   const handleNavigate = (id: string) => {
     const routes: Record<string, string> = {
-      projects: '/dashboard',
+      dashboard: '/dashboard',
+      projects: '/dashboard/projects',
       database: '/dashboard/database',
       tables: '/dashboard/database/tables',
       sql: '/dashboard/database/sql',
