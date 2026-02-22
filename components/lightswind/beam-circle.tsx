@@ -107,9 +107,8 @@ const BeamCircle: React.FC<BeamCircleProps> = ({
             <React.Fragment key={orbit.id}>
               {/* Orbit Line */}
               <div
-                className={`absolute rounded-full border border-dashed ${
-                  orbit.orbitColor ? "" : "border-foreground/30 dark:border-foreground/40"
-                }`}
+                className={`absolute rounded-full border border-dashed ${orbit.orbitColor ? "" : "border-foreground/30 dark:border-foreground/40"
+                  }`}
                 style={{
                   width: orbitDiameter,
                   height: orbitDiameter,
@@ -144,7 +143,7 @@ const BeamCircle: React.FC<BeamCircleProps> = ({
                   >
                     {React.cloneElement(orbit.icon as React.ReactElement, {
                       size: orbit.iconSize * 0.6,
-                    })}
+                    } as any)}
                   </motion.div>
                 </div>
               </motion.div>

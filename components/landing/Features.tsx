@@ -87,7 +87,7 @@ const features = [
 
 export default function Features() {
     return (
-        <section className="py-24 bg-brand-background">
+        <section className="py-24 bg--brand-background">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <motion.h2
