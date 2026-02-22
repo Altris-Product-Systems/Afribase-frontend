@@ -175,10 +175,10 @@ export default function ProjectDetailsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded text-sm text-black dark:text-white">
-                    {project.postgrestUrl || `https://${project.slug}.afribase.co`}
+                    {project.postgrestUrl || `https://${project.slug}.afriibase.co`}
                   </code>
                   <button
-                    onClick={() => copyToClipboard(project.postgrestUrl || `https://${project.slug}.afribase.co`)}
+                    onClick={() => copyToClipboard(project.postgrestUrl || `https://${project.slug}.afriibase.co`)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded transition-colors"
                   >
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

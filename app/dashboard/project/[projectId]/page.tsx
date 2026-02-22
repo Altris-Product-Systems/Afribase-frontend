@@ -403,7 +403,7 @@ export default function ProjectDetailPage() {
               <div className="relative z-10 space-y-6">
                 <div>
                   <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">
-                    Connect to Afribase
+                    Connect to Afriibase
                   </h3>
                   <p className="text-zinc-500 text-sm max-w-md font-medium leading-relaxed">
                     Instantly integrate your database using our high-performance client libraries.
@@ -416,11 +416,11 @@ export default function ProjectDetailPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                          Node.js (Afribase-js)
+                          Node.js (Afriibase-js)
                         </span>
                       </div>
                       <button
-                        onClick={() => handleCopy('npm install @afribase/afribase-js', 'npm')}
+                        onClick={() => handleCopy('npm install @afriibase/afriibase-js', 'npm')}
                         className="text-zinc-500 hover:text-white transition-colors"
                       >
                         {copiedKey === 'npm' ? (
@@ -431,7 +431,7 @@ export default function ProjectDetailPage() {
                       </button>
                     </div>
                     <div className="p-4 font-mono text-[11px] text-zinc-400 bg-[#0c0c0e]">
-                      <span className="text-emerald-500">npm</span> install @afribase/afribase-js
+                      <span className="text-emerald-500">npm</span> install @afriibase/afriibase-js
                     </div>
                   </div>
 
@@ -446,7 +446,7 @@ export default function ProjectDetailPage() {
                       <button
                         onClick={() =>
                           handleCopy(
-                            `import { createClient } from '@afribase/afribase-js'\nconst afribase = createClient('${keys?.postgrest_url || project.postgrestUrl || ''}', '${keys?.anon_key || project.anonKey || ''}')`,
+                            `import { createClient } from '@afriibase/afriibase-js'\nconst afriibase = createClient('${keys?.postgrest_url || project.postgrestUrl || ''}', '${keys?.anon_key || project.anonKey || ''}')`,
                             'init'
                           )
                         }
@@ -463,14 +463,14 @@ export default function ProjectDetailPage() {
                       <p>
                         <span className="text-purple-500">import</span> {"{ createClient }"}{' '}
                         <span className="text-purple-500">from</span>{' '}
-                        <span className="text-emerald-500">'@afribase/afribase-js'</span>
+                        <span className="text-emerald-500">'@afriibase/afriibase-js'</span>
                       </p>
                       <p>
-                        <span className="text-purple-500">const</span> afribase ={' '}
+                        <span className="text-purple-500">const</span> afriibase ={' '}
                         <span className="text-cyan-400">createClient</span>(
                       </p>
                       <p className="pl-4 text-emerald-500 truncate">
-                        '{keys?.postgrest_url || project.postgrestUrl || 'https://your-project.afribase.co'}'
+                        '{keys?.postgrest_url || project.postgrestUrl || 'https://your-project.afriibase.co'}'
                       </p>
                       <p className="pl-4 text-yellow-500">
                         '{keys?.anon_key ? keys.anon_key.slice(0, 24) + '…' : 'your-anon-key'}'

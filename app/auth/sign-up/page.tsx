@@ -75,7 +75,7 @@ export default function SignUpPage() {
               <span className="text-black font-black text-lg italic">A</span>
             </div>
             <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-              Afribase
+              Afriibase
             </span>
           </Link>
 
@@ -116,7 +116,7 @@ export default function SignUpPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                placeholder="developer@afribase.io"
+                placeholder="developer@afriibase.io"
                 className="w-full px-4 py-3.5 border border-white/5 rounded-xl bg-white/[0.02] text-sm text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all disabled:opacity-50"
               />
             </div>

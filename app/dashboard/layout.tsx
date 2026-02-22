@@ -167,7 +167,7 @@ export default function DashboardLayout({
               </svg>
             </button>
             <h1 className="text-sm font-bold text-white/90 uppercase tracking-widest">
-              {selectedOrg?.name || 'Afribase'}
+              {selectedOrg?.name || 'Afriibase'}
             </h1>
           </div>
           <div className="flex items-center gap-4">

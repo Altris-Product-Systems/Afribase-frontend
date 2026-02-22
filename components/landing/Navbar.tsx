@@ -29,7 +29,7 @@ export default function Navbar() {
                         <span className="text-black font-black text-xl">A</span>
                     </div>
                     <span className="text-xl font-black text-white tracking-tighter uppercase">
-                        Afribase
+                        Afriibase
                     </span>
                 </Link>
 
