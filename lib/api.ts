@@ -23,6 +23,57 @@ export interface AuthResponse {
   };
 }
 
+// ─── Per-Project Auth Config ──────────────────────────────────────────────
+
+export interface OAuthProviderConfig {
+  enabled: boolean;
+  clientId: string;
+  secret?: string;
+  redirectUri?: string;
+}
+
+export interface ProviderSummary {
+  enabled: boolean;
+  clientId: string;
+  secretSet: boolean;
+  redirectUri: string;
+}
+
+export interface ProjectAuthConfig {
+  emailEnabled: boolean;
+  emailAutoConfirm: boolean;
+  phoneEnabled: boolean;
+  google: OAuthProviderConfig;
+  github: OAuthProviderConfig;
+  facebook: OAuthProviderConfig;
+  apple: OAuthProviderConfig;
+  twitter: OAuthProviderConfig;
+  discord: OAuthProviderConfig;
+}
+
+export interface AuthConfigResponse {
+  emailEnabled: boolean;
+  emailAutoConfirm: boolean;
+  phoneEnabled: boolean;
+  providers: Record<string, ProviderSummary>;
+  sdkSnippet: {
+    javascript: string;
+    dart: string;
+  };
+}
+
+export interface UpdateAuthConfigRequest {
+  emailEnabled?: boolean;
+  emailAutoConfirm?: boolean;
+  phoneEnabled?: boolean;
+  google?: OAuthProviderConfig;
+  github?: OAuthProviderConfig;
+  facebook?: OAuthProviderConfig;
+  apple?: OAuthProviderConfig;
+  twitter?: OAuthProviderConfig;
+  discord?: OAuthProviderConfig;
+}
+
 export class APIError extends Error {
   constructor(public statusCode: number, message: string) {
     super(message);
@@ -215,6 +266,7 @@ export interface Project {
   postgrestUrl?: string;
   realtimeUrl?: string;
   storageUrl?: string;
+  authUrl?: string;
   status?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -561,6 +613,100 @@ export async function getProjectUsage(projectId: string): Promise<ProjectUsage> 
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+// ─── Project Auth Configuration ────────────────────────────────────────────
+
+export async function getAuthConfig(projectId: string): Promise<AuthConfigResponse> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || data.message || 'Failed to fetch auth config');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Connect failed at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export async function updateAuthConfig(projectId: string, data: UpdateAuthConfigRequest): Promise<AuthConfigResponse> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, responseData.error || responseData.message || 'Failed to update auth config');
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Connect failed at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export async function updateAuthProvider(
+  projectId: string,
+  provider: string,
+  data: OAuthProviderConfig
+): Promise<AuthConfigResponse> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/providers/${provider}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(response.status, responseData.error || responseData.message || 'Failed to update provider');
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Connect failed at ${API_BASE_URL}.`);
     }
     if (error instanceof APIError) throw error;
     throw new APIError(500, 'An unexpected error occurred. Please try again.');

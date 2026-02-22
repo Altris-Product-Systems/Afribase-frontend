@@ -5,19 +5,20 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getProjects, getProjectKeys, getOrganizations, isAuthenticated, Project, ProjectKeys, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import AuthSettings from '@/components/AuthSettings';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const projectId = params.id as string;
-  
+
   const [project, setProject] = useState<Project | null>(null);
   const [keys, setKeys] = useState<ProjectKeys | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showApiKeys, setShowApiKeys] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function ProjectDetailsPage() {
       // Fetch all projects and find the one with matching ID
       const projects = await getProjects();
       const foundProject = projects.find(p => p.id === projectId);
-      
+
       if (!foundProject) {
         setError('Project not found');
         setIsLoading(false);
@@ -42,7 +43,7 @@ export default function ProjectDetailsPage() {
       }
 
       setProject(foundProject);
-      
+
       // Load organizations
       try {
         const orgs = await getOrganizations();
@@ -55,7 +56,7 @@ export default function ProjectDetailsPage() {
       } catch (err) {
         console.error('Failed to load organizations:', err);
       }
-      
+
       // Try to fetch keys
       try {
         const projectKeys = await getProjectKeys(projectId);
@@ -99,11 +100,11 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  const statusColor = project.status === 'active' || project.status === 'ACTIVE' 
-    ? 'bg-green-500' 
-    : project.status === 'paused' 
-    ? 'bg-yellow-500' 
-    : 'bg-gray-500';
+  const statusColor = project.status === 'active' || project.status === 'ACTIVE'
+    ? 'bg-green-500'
+    : project.status === 'paused'
+      ? 'bg-yellow-500'
+      : 'bg-gray-500';
 
   return (
     <div className="min-h-screen bg-white dark:bg-black flex">
@@ -115,8 +116,8 @@ export default function ProjectDetailsPage() {
           setSelectedOrg(org);
           router.push('/dashboard');
         }}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        activeId={activeTab}
+        onNavigate={setActiveTab}
         showOrgSelector={false}
         projectName={project.name}
         projectPlan={project.plan || 'FREE'}
@@ -151,7 +152,7 @@ export default function ProjectDetailsPage() {
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-6">
-          {activeTab === 'overview' && (
+          {activeTab === 'dashboard' && (
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Project URL */}
               <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
@@ -262,7 +263,7 @@ export default function ProjectDetailsPage() {
                       {showApiKeys ? 'Hide' : 'Show'} keys
                     </button>
                   </div>
-                  
+
                   {showApiKeys && (
                     <div className="space-y-4">
                       {/* Anon Key */}
@@ -331,7 +332,13 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {activeTab !== 'overview' && (
+          {activeTab === 'auth' && (
+            <div className="max-w-6xl mx-auto">
+              <AuthSettings projectId={projectId} />
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'auth' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

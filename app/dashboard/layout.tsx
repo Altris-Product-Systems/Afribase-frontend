@@ -42,10 +42,10 @@ export default function DashboardLayout({
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
-      
+
       const searchParams = new URLSearchParams(window.location.search);
       const urlOrgId = searchParams.get('orgId');
-      
+
       if (urlOrgId) {
         const found = orgs.find(o => o.id === urlOrgId);
         if (found) setSelectedOrg(found);
@@ -62,7 +62,7 @@ export default function DashboardLayout({
 
   const handleOrgChange = (org: Organization) => {
     setSelectedOrg(org);
-    
+
     if (pathname.startsWith('/dashboard/project/')) {
       // Switching orgs while in a project detail should go to the projects list of the new org
       router.push(`/dashboard/projects?orgId=${org.id}`);
@@ -86,6 +86,7 @@ export default function DashboardLayout({
       tables: '/dashboard/database/tables',
       sql: '/dashboard/database/sql',
       api: '/dashboard/database/api',
+      auth: '/dashboard/auth',
       users: '/dashboard/auth/users',
       policies: '/dashboard/auth/policies',
       storage: '/dashboard/storage',
@@ -93,7 +94,7 @@ export default function DashboardLayout({
       logs: '/dashboard/logs',
       settings: '/dashboard/settings',
     };
-    
+
     const baseRoute = routes[id] || '/dashboard';
     const finalRoute = selectedOrg ? `${baseRoute}?orgId=${selectedOrg.id}` : baseRoute;
     router.push(finalRoute);
@@ -132,7 +133,7 @@ export default function DashboardLayout({
         {/* Shared Top Header */}
         <header className="h-16 flex items-center justify-between px-8 border-b border-white/5 bg-[#09090b]/50 backdrop-blur-xl z-20">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsMobileSidebarOpen(true)}
               className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors"
             >

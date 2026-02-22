@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { removeAuthToken, Organization } from '@/lib/api';
-import { 
-  LayoutGrid, 
-  Database, 
-  Users, 
-  FolderLock, 
-  Zap, 
-  Settings, 
-  LogOut, 
-  ChevronDown, 
+import {
+  LayoutGrid,
+  Database,
+  Users,
+  FolderLock,
+  Zap,
+  Settings,
+  LogOut,
+  ChevronDown,
   ChevronRight,
   Plus,
   Terminal,
@@ -34,6 +34,11 @@ interface SidebarProps {
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
   onNewOrganization?: () => void;
+  // Project context props
+  projectName?: string;
+  projectPlan?: string;
+  projectRegion?: string;
+  projectStatus?: string;
 }
 
 export default function Sidebar({
@@ -48,6 +53,10 @@ export default function Sidebar({
   isMobileOpen = false,
   onMobileClose,
   onNewOrganization,
+  projectName,
+  projectPlan,
+  projectRegion,
+  projectStatus,
 }: SidebarProps) {
   const router = useRouter();
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
@@ -60,19 +69,19 @@ export default function Sidebar({
   };
 
   const toggleSection = (id: string) => {
-    setExpandedSections(prev => 
+    setExpandedSections(prev =>
       prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
     );
   };
 
-  const NavigationItem = ({ 
-    id, 
-    label, 
+  const NavigationItem = ({
+    id,
+    label,
     icon: Icon,
-    isSubItem = false 
-  }: { 
-    id: string; 
-    label: string; 
+    isSubItem = false
+  }: {
+    id: string;
+    label: string;
     icon: any;
     isSubItem?: boolean;
   }) => (
@@ -81,11 +90,10 @@ export default function Sidebar({
         onNavigate?.(id);
         if (isMobileOpen) onMobileClose?.();
       }}
-      className={`relative w-full flex items-center gap-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${
-        activeId === id
-          ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]'
-          : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
-      } ${isCollapsed ? 'justify-center px-2' : isSubItem ? 'pl-9 pr-3' : 'px-3'}`}
+      className={`relative w-full flex items-center gap-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${activeId === id
+        ? 'text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]'
+        : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
+        } ${isCollapsed ? 'justify-center px-2' : isSubItem ? 'pl-9 pr-3' : 'px-3'}`}
     >
       <Icon className={`w-4 h-4 transition-colors duration-200 ${activeId === id ? 'text-emerald-400' : 'group-hover:text-zinc-100'}`} />
       {!isCollapsed && <span className="truncate">{label}</span>}
@@ -201,7 +209,7 @@ export default function Sidebar({
           {/* Development Section */}
           <div className="space-y-4">
             {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Development</div>}
-            
+
             <div className="space-y-1">
               <SectionHeader id="database" label="Database" icon={Database} />
               {(!isCollapsed && expandedSections.includes('database')) && (
@@ -217,6 +225,7 @@ export default function Sidebar({
               <SectionHeader id="auth" label="Authentication" icon={Users} />
               {(!isCollapsed && expandedSections.includes('auth')) && (
                 <div className="space-y-0.5">
+                  <NavigationItem id="auth" label="Configuration" icon={Settings} isSubItem />
                   <NavigationItem id="users" label="Users" icon={Users} isSubItem />
                   <NavigationItem id="policies" label="Policies" icon={ShieldCheck} isSubItem />
                 </div>
