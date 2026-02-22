@@ -596,6 +596,31 @@ export async function getProjectTables(projectId: string): Promise<TableInfo[]> 
   }
 }
 
+export async function deleteProjectTable(projectId: string, schema: string, table: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tables/${schema}/${table}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new APIError(response.status, data.error || data.message || 'Failed to delete table');
+    }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
 // ─── Get Project Usage ─────────────────────────────────────────────────────
 export interface ProjectUsage {
   databaseSize?: number;

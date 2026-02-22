@@ -9,6 +9,7 @@ import {
     OAuthProviderConfig
 } from '@/lib/api';
 import { Shield, Mail, Phone, Github, Globe, Save, Check, Copy, ExternalLink, Key, Code } from 'lucide-react';
+import { FaGoogle, FaGithub, FaDiscord, FaFacebook, FaApple, FaTwitter } from 'react-icons/fa';
 
 interface AuthSettingsProps {
     projectId: string;
@@ -111,12 +112,12 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
     }
 
     const providers = [
-        { id: 'google', name: 'Google', icon: Globe, color: 'text-blue-500', portal: 'https://console.cloud.google.com/' },
-        { id: 'github', name: 'GitHub', icon: Github, color: 'text-zinc-100', portal: 'https://github.com/settings/developers' },
-        { id: 'discord', name: 'Discord', icon: Shield, color: 'text-indigo-500', portal: 'https://discord.com/developers/applications' },
-        { id: 'facebook', name: 'Facebook', icon: Globe, color: 'text-blue-600', portal: 'https://developers.facebook.com/' },
-        { id: 'apple', name: 'Apple', icon: Shield, color: 'text-zinc-100', portal: 'https://developer.apple.com/' },
-        { id: 'twitter', name: 'Twitter', icon: Globe, color: 'text-sky-500', portal: 'https://developer.twitter.com/' },
+        { id: 'google', name: 'Google', icon: FaGoogle, color: 'text-rose-500', portal: 'https://console.cloud.google.com/' },
+        { id: 'github', name: 'GitHub', icon: FaGithub, color: 'text-zinc-100', portal: 'https://github.com/settings/developers' },
+        { id: 'discord', name: 'Discord', icon: FaDiscord, color: 'text-indigo-500', portal: 'https://discord.com/developers/applications' },
+        { id: 'facebook', name: 'Facebook', icon: FaFacebook, color: 'text-blue-600', portal: 'https://developers.facebook.com/' },
+        { id: 'apple', name: 'Apple', icon: FaApple, color: 'text-zinc-100', portal: 'https://developer.apple.com/' },
+        { id: 'twitter', name: 'Twitter', icon: FaTwitter, color: 'text-sky-500', portal: 'https://developer.twitter.com/' },
     ];
 
     return (
