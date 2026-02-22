@@ -1,4 +1,6 @@
 // Use environment variable or fallback to localhost
+import { getAuthToken } from './auth';
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export interface LoginRequest {
@@ -213,13 +215,17 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects`, {
+  const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(projectData),
+    body: JSON.stringify({
+      name: projectData.name,
+      description: projectData.description,
+      region: projectData.region,
+    }),
   });
 
   const data = await response.json();
@@ -235,10 +241,14 @@ export async function getProjects(organizationId?: string): Promise<Project[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  // Build URL with optional organization_id query parameter
-  const url = organizationId 
-    ? `${API_BASE_URL}/api/projects?organization_id=${organizationId}`
-    : `${API_BASE_URL}/api/projects`;
+  // Build URL with organization-scoped projects endpoint
+  if (!organizationId) {
+    // If no org ID, fallback to global list if exists, otherwise return empty
+    // Backend currently only supports org-scoped list
+    return [];
+  }
+
+  const url = `${API_BASE_URL}/api/organizations/${organizationId}/projects`;
 
   const response = await fetch(url, {
     method: 'GET',

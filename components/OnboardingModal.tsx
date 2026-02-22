@@ -127,21 +127,18 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
         {/* Progress Indicator */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-              step >= 1 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 1 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+              }`}>
               {step > 1 ? '✓' : '1'}
             </div>
             <div className={`w-16 h-1 ${step >= 2 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-              step >= 2 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 2 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+              }`}>
               {step > 2 ? '✓' : '2'}
             </div>
             <div className={`w-16 h-1 ${step >= 3 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-              step >= 3 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 3 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+              }`}>
               3
             </div>
           </div>
@@ -190,7 +187,7 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   required
                   disabled={isLoading}
                   placeholder="acme-inc"
-                  pattern="[a-z0-9-]+"
+                  pattern="[a-z0-9\-]+"
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -255,7 +252,7 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   required
                   disabled={isLoading}
                   placeholder="my-awesome-app"
-                  pattern="[a-z0-9-]+"
+                  pattern="[a-z0-9\-]+"
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
