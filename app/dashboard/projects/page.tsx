@@ -111,7 +111,7 @@ export default function ProjectsPage() {
                 key={project.id}
                 className="group glass-card rounded-2xl p-6 relative overflow-hidden flex flex-col h-full cursor-pointer animate-fade-in"
                 style={{ animationDelay: `${idx * 0.1}s` }}
-                onClick={() => router.push(`/project/${project.id}`)}
+                onClick={() => router.push(`/dashboard/project/${project.id}`)}
               >
                 <div className="flex items-start justify-between mb-8 relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-lg font-black text-white group-hover:border-emerald-500/50 transition-colors">
