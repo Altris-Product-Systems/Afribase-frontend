@@ -1,53 +1,72 @@
-@import "tailwindcss";
-
+@import 'tailwindcss';
+@plugin 'lightswind/plugin';
 :root {
-  /* Brand Colors */
-  --brand-primary: #0066FF;
-  --brand-secondary: #FFD700;
-  --brand-tertiary: #CD7F32;
+  /* Brand Identity */
+  --brand-primary: #1A3B2E;
+  --brand-secondary: #8BA888;
+  --brand-accent: #4A6B5B;
+  --brand-background: #FAF9F6;
+  --brand-text: #2A2A2A;
 
-  /* Background Tokens */
-  --bg-primary: #0A0A0A;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1A1A1A;
-  
-  /* Text Colors */
-  --text-primary: #FFFFFF;
-  --text-secondary: #CCCCCC;
-  --text-tertiary: #888888;
-  --text-accent: #FFD700;
-  --text-link: #0066FF;
-  --text-link-hover: #0052CC;
+  /* Green Family */
+  --green-deep-forest: #1A3B2E;
+  --green-forest: #2C5F2D;
+  --green-sage: #8BA888;
+  --green-moss: #5E7A6B;
+  --green-olive: #6B7F4C;
+  --green-mint: #C5E0D4;
+  --green-seafoam: #D1F0E3;
 
-  /* Gradients */
-  --gradient-hero: linear-gradient(180deg, #0A0A0A 0%, #1A1A2E 100%);
-  --gradient-orb-glow: radial-gradient(circle at 50% 50%, #0066FF20 0%, transparent 70%);
+  /* Off-White Family */
+  --white-pure: #FFFFFF;
+  --white-off: #FAF9F6;
+  --white-cream: #FFF8E7;
+  --white-ivory: #FFFFF0;
+  --white-eggshell: #F0EAD6;
+  --white-pearl: #F5F0E6;
+
+  /* Neutral Family */
+  --neutral-charcoal: #2A2A2A;
+  --neutral-gray-dark: #4A4A4A;
+  --neutral-gray: #6B6B6B;
+  --neutral-gray-light: #A0A0A0;
+  --neutral-gray-soft: #E5E5E5;
+  --neutral-gray-bg: #F5F5F5;
+
+  /* Functional */
+  --functional-success: #2E7D32;
+  --functional-warning: #ED6C02;
+  --functional-error: #D32F2F;
+  --functional-info: #0288D1;
 
   /* Base Variables */
-  --background: var(--bg-primary);
-  --foreground: var(--text-primary);
+  --background: var(--brand-background);
+  --foreground: var(--brand-text);
 }
 
 @theme inline {
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
-  --color-brand-tertiary: var(--brand-tertiary);
-  
-  --color-bg-primary: var(--bg-primary);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-bg-tertiary: var(--bg-tertiary);
-  
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary: var(--text-tertiary);
-  --color-text-accent: var(--text-accent);
+  --color-brand-accent: var(--brand-accent);
+
+  --color-bg-primary: var(--brand-background);
+  --color-text-primary: var(--brand-text);
+
+  /* Greens */
+  --color-forest: var(--green-forest);
+  --color-sage: var(--green-sage);
+  --color-moss: var(--green-moss);
+
+  /* Neutrals */
+  --color-charcoal: var(--neutral-charcoal);
+  --color-gray-soft: var(--neutral-gray-soft);
 
   --font-sans: var(--font-poppins);
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--brand-background);
+  color: var(--brand-text);
   font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -62,6 +81,7 @@ html {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -72,6 +92,7 @@ html {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -82,6 +103,7 @@ html {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -93,6 +115,7 @@ html {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -104,6 +127,7 @@ html {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -111,18 +135,24 @@ html {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
