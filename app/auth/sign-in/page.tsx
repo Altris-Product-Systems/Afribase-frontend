@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-
-const API_BASE_URL = 'http://192.168.1.113:8000';
+import { login, setAuthToken, APIError } from '@/lib/api';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -21,31 +20,20 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to sign in');
-      }
+      const data = await login({ email, password });
 
       // Store the JWT token
       if (data.token) {
-        localStorage.setItem('authToken', data.token);
-        // Redirect to home page
-        router.push('/');
+        setAuthToken(data.token);
+        // Redirect to onboarding
+        router.push('/onboarding');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      if (err instanceof APIError) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }

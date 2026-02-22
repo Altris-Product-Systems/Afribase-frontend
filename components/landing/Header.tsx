@@ -1,11 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { isAuthenticated, removeAuthToken } from '@/lib/api';
 
 export default function Header() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
+  }, []);
+
+  const handleSignOut = () => {
+    removeAuthToken();
+    setIsLoggedIn(false);
+    router.push('/');
+  };
 
   const navLinks = [
     {
@@ -102,21 +116,43 @@ export default function Header() {
               <span className="text-sm">1.2k</span>
             </a>
 
-            {/* Sign In */}
-            <a
-              href="/auth/sign-in"
-              className="text-sm text-gray-300 hover:text-white transition-colors px-3 py-2"
-            >
-              Sign in
-            </a>
+            {isLoggedIn ? (
+              <>
+                {/* Dashboard Link */}
+                <a
+                  href="/dashboard"
+                  className="text-sm text-gray-300 hover:text-white transition-colors px-3 py-2"
+                >
+                  Dashboard
+                </a>
+                
+                {/* Sign Out */}
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-gray-300 hover:text-white transition-colors px-3 py-2"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Sign In */}
+                <a
+                  href="/auth/sign-in"
+                  className="text-sm text-gray-300 hover:text-white transition-colors px-3 py-2"
+                >
+                  Sign in
+                </a>
 
-            {/* Start Project Button */}
-            <a
-              href="/auth/sign-up"
-              className="px-4 py-2 bg-white hover:bg-gray-200 text-black text-sm font-medium rounded-md transition-colors"
-            >
-              Start your project
-            </a>
+                {/* Start Project Button */}
+                <a
+                  href="/auth/sign-up"
+                  className="px-4 py-2 bg-white hover:bg-gray-200 text-black text-sm font-medium rounded-md transition-colors"
+                >
+                  Start your project
+                </a>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
