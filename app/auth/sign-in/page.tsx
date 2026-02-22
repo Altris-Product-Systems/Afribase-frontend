@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { login, setAuthToken, getOrganizations, APIError } from '@/lib/api';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +41,7 @@ export default function SignInPage() {
 
       // Store the JWT token
       setAuthToken(data.token);
-      
+
       // Check if user already has organizations
       try {
         const orgs = await getOrganizations();
@@ -247,8 +247,8 @@ export default function SignInPage() {
             It's fun, feels lightweight, and really quick to spin up user auth and a few tables. Almost too easy! Highly recommend.
           </blockquote>
           <div className="flex items-center gap-3">
-            <Image 
-              src="https://randomuser.me/api/portraits/men/32.jpg" 
+            <Image
+              src="https://randomuser.me/api/portraits/men/32.jpg"
               alt="User avatar"
               width={40}
               height={40}
@@ -261,5 +261,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

@@ -1,87 +1,185 @@
-import React from 'react';
-import SectionContainer from '../ui/SectionContainer';
-import FeatureCard from './FeatureCard';
+"use client";
+
+import React from "react";
+import { cn } from "@/lib/utils";
+import {
+    Database,
+    Lock,
+    Code2,
+    HardDrive,
+    Zap,
+    Box,
+    Table2,
+    CheckCircle2
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { BorderBeam } from "@/components/lightswind/border-beam";
+import InteractiveGradient from "@/components/lightswind/interactive-gradient-card";
+
+const features = [
+    {
+        title: "Postgres Database",
+        description: "Every project is a full Postgres database, the world's most trusted relational database.",
+        icon: <Database className="w-6 h-6" />,
+        className: "md:col-span-2 md:row-span-1 lg:col-span-2",
+        color: "#2C5F2D", // Forest
+        glow: "rgba(44, 95, 45, 0.2)",
+        details: [
+            "100% portable",
+            "Built-in Auth with RLS",
+            "Easy to extend"
+        ],
+        image: (
+            <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-center justify-center opacity-10 pointer-events-none">
+                <Database size={180} strokeWidth={0.5} className="text-forest" />
+            </div>
+        )
+    },
+    {
+        title: "Authentication",
+        description: "Add user sign ups and logins, securing your data with Row Level Security.",
+        icon: <Lock className="w-6 h-6" />,
+        color: "#8BA888", // Sage
+        glow: "rgba(139, 168, 136, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Edge Functions",
+        description: "Easily write custom code without deploying or scaling servers.",
+        icon: <Code2 className="w-6 h-6" />,
+        color: "#4A6B5B", // Moss
+        glow: "rgba(74, 107, 91, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Storage",
+        description: "Store, organize, and serve large files, from videos to images.",
+        icon: <HardDrive className="w-6 h-6" />,
+        color: "#6B7F4C", // Olive
+        glow: "rgba(107, 127, 76, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Realtime",
+        description: "Build multiplayer experiences with real-time data synchronization.",
+        icon: <Zap className="w-6 h-6" />,
+        color: "#C5E0D4", // Mint
+        glow: "rgba(197, 224, 212, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Vector",
+        description: "Integrate your favorite ML-models to store, index and search vector embeddings.",
+        icon: <Box className="w-6 h-6" />,
+        color: "#D1F0E3", // Seafoam
+        glow: "rgba(209, 240, 227, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Data APIs",
+        description: "Instant ready-to-use Restful APIs.",
+        icon: <Table2 className="w-6 h-6" />,
+        color: "#2E7D32", // Success Green
+        glow: "rgba(46, 125, 50, 0.2)",
+        className: "md:col-span-1",
+    }
+];
 
 export default function Features() {
-  const features = [
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: 'Mobile Money Integration',
-      description: 'Accept payments through M-Pesa, MTN Mobile Money, Airtel Money and more. Get paid instantly across Africa.',
-    },
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-      title: 'Business Analytics',
-      description: 'Track sales, monitor inventory, and understand your customers with powerful analytics built for African businesses.',
-    },
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-        </svg>
-      ),
-      title: 'Multi-Currency Support',
-      description: 'Handle transactions in multiple African currencies with real-time exchange rates and automatic conversions.',
-    },
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      ),
-      title: 'Bank-Grade Security',
-      description: 'Your data is protected with enterprise-level encryption and security measures that meet international standards.',
-    },
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      ),
-      title: 'Inventory Management',
-      description: 'Keep track of your stock levels, get low stock alerts, and manage your products across multiple locations.',
-    },
-    {
-      icon: (
-        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
-      title: 'Team Collaboration',
-      description: 'Add team members, set permissions, and work together seamlessly to grow your business faster.',
-    },
-  ];
+    return (
+        <section className="py-24 bg-brand-background">
+            <div className="container mx-auto px-6">
+                <div className="text-center mb-16">
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-4xl md:text-5xl font-black text-white mb-4"
+                    >
+                        EVERYTHING YOU NEED TO <span className="text-sage">SCALE</span>
+                    </motion.h2>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-lg text-white/60 max-w-2xl mx-auto font-medium"
+                    >
+                        Afribase provides all the enterprise-grade tools required to build,
+                        launch, and grow your digital business in Africa.
+                    </motion.p>
+                </div>
 
-  return (
-    <SectionContainer id="features" className="bg-gray-50 dark:bg-gray-900">
-      <div className="text-center mb-16 animate-fade-in-up">
-        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          Everything You Need to Succeed
-        </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Built specifically for African businesses with features that actually matter for your success
-        </p>
-      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[280px]">
+                    {features.map((feature, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.05 }}
+                            className={cn(
+                                "group relative overflow-hidden rounded-3xl border border-white/5 bg-white/5 shadow-sm hover:shadow-2xl hover:shadow-black/50 transition-all duration-500",
+                                feature.className
+                            )}
+                        >
+                            <InteractiveGradient
+                                color={feature.glow}
+                                glowColor={feature.glow}
+                                className="w-full h-full p-8 flex flex-col items-start text-left bg-transparent border-none"
+                                hoverOnly={true}
+                                intensity={100}
+                                backgroundColor="transparent"
+                            >
+                                <div className="relative z-10 h-full flex flex-col">
+                                    <div
+                                        className="mb-6 p-3 rounded-2xl transition-all duration-300"
+                                        style={{
+                                            backgroundColor: `${feature.color}20`,
+                                            color: feature.color
+                                        }}
+                                    >
+                                        {feature.icon}
+                                    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {features.map((feature, index) => (
-          <div key={index} className={`animate-fade-in-up delay-${Math.min(index + 1, 8)}00`}>
-            <FeatureCard
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-            />
-          </div>
-        ))}
-      </div>
-    </SectionContainer>
-  );
+                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-sage transition-colors duration-300">
+                                        {feature.title}
+                                    </h3>
+
+                                    <p className="text-white/60 font-medium text-sm leading-relaxed mb-6">
+                                        {feature.description}
+                                    </p>
+
+                                    {feature.details && (
+                                        <div className="mt-auto space-y-2">
+                                            {feature.details.map((detail, idx) => (
+                                                <div key={idx} className="flex items-center space-x-2 text-xs font-bold text-white/80">
+                                                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: feature.color }} />
+                                                    <span>{detail}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Moving Beam of Light */}
+                                <BorderBeam
+                                    size={250}
+                                    duration={8}
+                                    delay={index * 1.5}
+                                    colorFrom={feature.color}
+                                    colorTo="#FFFFFF"
+                                    borderThickness={2}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                    glowIntensity={2}
+                                />
+
+                                {feature.image}
+                            </InteractiveGradient>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
 }
