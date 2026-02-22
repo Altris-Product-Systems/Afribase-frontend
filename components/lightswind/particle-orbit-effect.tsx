@@ -47,7 +47,7 @@ const ParticleOrbitEffect: React.FC<ParticleOrbitEffectProps> = ({
   particleSize = 2
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({
     x: 0,
@@ -91,14 +91,14 @@ const ParticleOrbitEffect: React.FC<ParticleOrbitEffectProps> = ({
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    
+
     canvas.width = width;
     canvas.height = height;
-    
+
     // Initialize mouse position to center
     mouseRef.current.x = width / 2;
     mouseRef.current.y = height / 2;
-    
+
     // Create initial particles
     particlesRef.current = createParticles(mouseRef.current.x, mouseRef.current.y);
   }, [createParticles]);
@@ -176,10 +176,10 @@ const ParticleOrbitEffect: React.FC<ParticleOrbitEffectProps> = ({
         // Update particle position
         particle.offset.x += particle.speed * intensity;
         particle.offset.y += particle.speed * intensity;
-        
+
         particle.shift.x += (mouseRef.current.x - particle.shift.x) * particle.speed * intensity;
         particle.shift.y += (mouseRef.current.y - particle.shift.y) * particle.speed * intensity;
-        
+
         const orbitRadius = particle.orbit * mouseRef.current.radiusScale * intensity;
         particle.position.x = particle.shift.x + Math.cos(i + particle.offset.x) * orbitRadius;
         particle.position.y = particle.shift.y + Math.sin(i + particle.offset.y) * orbitRadius;
@@ -202,7 +202,7 @@ const ParticleOrbitEffect: React.FC<ParticleOrbitEffectProps> = ({
         }
 
         // Fade trail points
-        particle.trail.forEach((point, index) => {
+        particle.trail.forEach((point: any, index: number) => {
           point.alpha = (index + 1) / particle.trail.length * fadeOpacity * 20;
         });
 
@@ -211,7 +211,7 @@ const ParticleOrbitEffect: React.FC<ParticleOrbitEffectProps> = ({
           for (let j = 1; j < particle.trail.length; j++) {
             const prev = particle.trail[j - 1];
             const curr = particle.trail[j];
-            
+
             context.beginPath();
             context.strokeStyle = particle.fillColor;
             context.lineWidth = particle.size * 0.3 * curr.alpha;

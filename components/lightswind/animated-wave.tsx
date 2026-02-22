@@ -68,17 +68,17 @@ const getDeviceInfo = (): DeviceInfo => {
       Math.max(
         0,
         window.innerWidth ||
-          document.documentElement.clientWidth ||
-          document.body.clientWidth ||
-          0
+        document.documentElement.clientWidth ||
+        document.body.clientWidth ||
+        0
       ),
     screenHeight: () =>
       Math.max(
         0,
         window.innerHeight ||
-          document.documentElement.clientHeight ||
-          document.body.clientHeight ||
-          0
+        document.documentElement.clientHeight ||
+        document.body.clientHeight ||
+        0
       ),
     screenRatio: function () {
       return this.screenWidth() / this.screenHeight();
@@ -103,7 +103,7 @@ const getDeviceInfo = (): DeviceInfo => {
 };
 
 const addEase = (
-  pos: THREE.Vector3,
+  pos: THREE.Vector3 | THREE.Euler,
   to: { x: number; y: number; z: number },
   ease: number
 ) => {
@@ -291,7 +291,7 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
         // Create a new Three.js Group to hold the plane, allowing easier positioning/rotation
         this.group = new THREE.Object3D();
         this.group.position.copy(this.move);
-        this.group.rotation.copy(this.look);
+        this.group.rotation.set(this.look.x, this.look.y, this.look.z);
 
         // Define the plane geometry (width, height, segmentsX, segmentsY)
         this.geometry = new THREE.PlaneGeometry(

@@ -27,9 +27,11 @@
     "react": "19.2.3",
     "react-day-picker": "^9.13.2",
     "react-dom": "19.2.3",
+    "react-flip-toolkit": "^7.2.4",
     "react-hook-form": "^7.71.2",
     "react-resizable-panels": "^4.6.5",
     "recharts": "^3.7.0",
+    "simplex-noise": "^4.0.3",
     "swiper": "^12.1.2",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.1"

@@ -2,53 +2,17 @@
 import React, { useEffect, useRef } from "react";
 
 export interface CanvasConfettiCursorProps {
-  /**
-   * Array of confetti colors to use.
-   */
   colors?: string[];
-  /**
-   * Minimum confetti particle radius.
-   */
   minSize?: number;
-  /**
-   * Maximum confetti particle radius.
-   */
   maxSize?: number;
-  /**
-   * Number of particles to emit per burst.
-   */
   particleCount?: number;
-  /**
-   * How frequently to spawn bursts (ms).
-   */
   frequency?: number;
-  /**
-   * If true, fills parent (else covers screen).
-   */
   fillParent?: boolean;
-  /**
-   * Opacity of the canvas overlay.
-   */
   overlayOpacity?: number;
-  /**
-   * Confetti particle shrink speed (higher = faster shrink).
-   */
   decay?: number;
-  /**
-   * Optional: callback on each explosion.
-   */
   onExplosion?: (x: number, y: number) => void;
-  /**
-   * Enable/disable confetti effect.
-   */
   enabled?: boolean;
-  /**
-   * Optional: custom styles for canvas
-   */
   style?: React.CSSProperties;
-  /**
-   * Optional: extra className for canvas
-   */
   className?: string;
 }
 
@@ -67,13 +31,12 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
   className,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mousePos = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const mousePos = useRef({ x: 0, y: 0 });
   const particles = useRef<any[]>([]);
-  const animId = useRef<number>();
-  const intervalRef = useRef<number | undefined>();
+  const animId = useRef<number | null>(null);
+  const intervalRef = useRef<any>(null);
   const parentRef = useRef<HTMLDivElement | null>(null);
-  
-  // Handle canvas resize
+
   const resizeCanvas = () => {
     if (!canvasRef.current) return;
     if (fillParent && parentRef.current) {
@@ -97,20 +60,12 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
     }
   }, [fillParent]);
 
-  // Confetti logic (particle class, animation, emission)
   useEffect(() => {
     if (!enabled) return;
     let disposed = false;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
-    let parentOffsetX = 0;
-    let parentOffsetY = 0;
-    if (fillParent && parentRef.current) {
-      const rect = parentRef.current.getBoundingClientRect();
-      parentOffsetX = rect.left;
-      parentOffsetY = rect.top;
-    }
 
     class Particle {
       x: number;
@@ -157,22 +112,21 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
     animate();
     return () => {
       disposed = true;
-      animId.current && cancelAnimationFrame(animId.current);
+      if (animId.current) cancelAnimationFrame(animId.current);
       particles.current = [];
     };
-    // eslint-disable-next-line
   }, [decay, overlayOpacity, fillParent, enabled]);
 
   useEffect(() => {
     if (!enabled) return;
-    // OnMove (mouse/touch)
     function moveHandler(event: MouseEvent | TouchEvent) {
       let x = 0, y = 0;
       if ("touches" in event && event.touches[0]) {
         x = event.touches[0].clientX;
         y = event.touches[0].clientY;
       } else if ("clientX" in event) {
-        x = event.clientX; y = event.clientY;
+        x = (event as MouseEvent).clientX;
+        y = (event as MouseEvent).clientY;
       }
       if (fillParent && parentRef.current) {
         const rect = parentRef.current.getBoundingClientRect();
@@ -181,17 +135,15 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
       }
       mousePos.current = { x, y };
     }
-    // Listen on canvas for local, window for full
     const target = fillParent && parentRef.current ? parentRef.current : window;
-    target.addEventListener("mousemove", moveHandler);
-    target.addEventListener("touchmove", moveHandler);
+    target.addEventListener("mousemove", moveHandler as any);
+    target.addEventListener("touchmove", moveHandler as any);
     return () => {
-      target.removeEventListener("mousemove", moveHandler);
-      target.removeEventListener("touchmove", moveHandler);
+      target.removeEventListener("mousemove", moveHandler as any);
+      target.removeEventListener("touchmove", moveHandler as any);
     };
   }, [fillParent, enabled]);
 
-  // Confetti burst logic (interval spawn)
   useEffect(() => {
     if (!enabled) return;
     function createExplosion(x: number, y: number) {
@@ -201,15 +153,10 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
         const color = colors[Math.floor(Math.random() * colors.length)];
         const speedX = (Math.random() * 2 - 1) * 2;
         const speedY = (Math.random() * 2 - 1) * 2;
-        particles.current.push(new (class {
-          x = x;
-          y = y;
-          size = size;
-          color = color;
-          speedX = speedX;
-          speedY = speedY;
-          update() { this.x += this.speedX; this.y += this.speedY; this.size *= decay; }
-          draw(ctx: CanvasRenderingContext2D) {
+        particles.current.push({
+          x, y, size, color, speedX, speedY,
+          update() { this.x += this.speedX; this.y += this.speedY; this.size *= decay; },
+          draw(ctx: any) {
             ctx.globalAlpha = overlayOpacity;
             ctx.fillStyle = this.color;
             ctx.beginPath();
@@ -218,9 +165,9 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
             ctx.fill();
             ctx.globalAlpha = 1;
           }
-        })());
+        });
       }
-      if (typeof onExplosion === "function") onExplosion(x, y);
+      if (onExplosion) onExplosion(x, y);
     }
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = window.setInterval(() => {
@@ -229,10 +176,7 @@ export const CanvasConfettiCursor: React.FC<CanvasConfettiCursorProps> = ({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
-  }, [
-    colors, minSize, maxSize, particleCount, frequency, decay,
-    onExplosion, enabled, fillParent, overlayOpacity
-  ]);
+  }, [colors, minSize, maxSize, particleCount, frequency, decay, onExplosion, enabled, fillParent, overlayOpacity]);
 
   if (!enabled) return null;
   return (

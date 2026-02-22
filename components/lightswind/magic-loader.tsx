@@ -29,7 +29,7 @@ const MagicLoader: React.FC<MagicLoaderProps> = ({
   className
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
   const tickRef = useRef(0);
   const globalAngleRef = useRef(0);
@@ -64,8 +64,7 @@ const MagicLoader: React.FC<MagicLoaderProps> = ({
   const drawParticle = useCallback((ctx: CanvasRenderingContext2D, particle: Particle, index: number, tick: number) => {
     const hue = hueRange[0] + ((tick + (particle.life * 120)) % (hueRange[1] - hueRange[0]));
     ctx.fillStyle = ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${particle.life})`;
-    
-    // Draw line to previous particle
+
     ctx.beginPath();
     if (particlesRef.current[index - 1]) {
       ctx.moveTo(particle.x, particle.y);
@@ -73,12 +72,10 @@ const MagicLoader: React.FC<MagicLoaderProps> = ({
     }
     ctx.stroke();
 
-    // Draw main particle circle
     ctx.beginPath();
     ctx.arc(particle.x, particle.y, Math.max(0.001, particle.life * particle.radius), 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw sparkle effects
     const sparkleSize = Math.random() * 1.25;
     const sparkleX = particle.x + ((Math.random() - 0.5) * 35) * particle.life;
     const sparkleY = particle.y + ((Math.random() - 0.5) * 35) * particle.life;
@@ -97,25 +94,20 @@ const MagicLoader: React.FC<MagicLoaderProps> = ({
     const centerY = rect.height / 2;
     const minSize = Math.min(rect.width, rect.height) * 0.5;
 
-    // Add new particles
     for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push(createParticle(centerX, centerY, tickRef.current, minSize));
     }
 
-    // Update particles
     particlesRef.current.forEach((particle, index) => {
       stepParticle(particle, index);
     });
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw particles
     particlesRef.current.forEach((particle, index) => {
       drawParticle(ctx, particle, index, tickRef.current);
     });
 
-    // Update global rotation
     globalRotationRef.current += Math.PI / 6 * speed;
     globalAngleRef.current += Math.PI / 6 * speed;
     tickRef.current++;
@@ -130,17 +122,15 @@ const MagicLoader: React.FC<MagicLoaderProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
     const dpr = window.devicePixelRatio || 1;
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     canvas.style.width = `${size}px`;
     canvas.style.height = `${size}px`;
-    
+
     ctx.scale(dpr, dpr);
     ctx.globalCompositeOperation = 'lighter';
 
-    // Reset animation state
     particlesRef.current = [];
     tickRef.current = 0;
     globalAngleRef.current = 0;

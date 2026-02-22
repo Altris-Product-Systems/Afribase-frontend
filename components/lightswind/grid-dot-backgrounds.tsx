@@ -55,7 +55,7 @@ export const GridBackground = ({
   return (
     <div
       className={cn(
-        "relative flex h-[50rem] w-full items-center justify-center bg-transparent",
+        "relative flex w-full items-center justify-center bg-transparent",
         className
       )}
       {...props}
@@ -63,14 +63,14 @@ export const GridBackground = ({
       <div
         className="absolute inset-0"
         style={{
-          backgroundSize: gridSize + "px " + gridSize + "px", // String concatenation
+          backgroundSize: gridSize + "px " + gridSize + "px",
           backgroundImage:
             "linear-gradient(to right, " +
             currentGridColor +
             " 1px, transparent 1px), " +
             "linear-gradient(to bottom, " +
             currentGridColor +
-            " 1px, transparent 1px)", // String concatenation
+            " 1px, transparent 1px)",
         }}
       />
 
@@ -81,16 +81,16 @@ export const GridBackground = ({
             maskImage:
               "radial-gradient(ellipse at center, transparent " +
               fadeIntensity +
-              "%, black)", // String concatenation
+              "%, black)",
             WebkitMaskImage:
               "radial-gradient(ellipse at center, transparent " +
               fadeIntensity +
-              "%, black)", // String concatenation
+              "%, black)",
           }}
         />
       )}
 
-      <div className="relative z-20">{children}</div>
+      <div className="relative z-20 w-full h-full">{children}</div>
     </div>
   );
 };
@@ -155,7 +155,7 @@ export const DotBackground = ({
       <div
         className="absolute inset-0"
         style={{
-          backgroundSize: spacing + "px " + spacing + "px", // String concatenation
+          backgroundSize: spacing + "px " + spacing + "px",
           backgroundImage:
             "radial-gradient(" +
             currentDotColor +
@@ -163,7 +163,7 @@ export const DotBackground = ({
             dotSize +
             "px, transparent " +
             dotSize +
-            "px)", // String concatenation
+            "px)",
         }}
       />
 
@@ -174,11 +174,11 @@ export const DotBackground = ({
             maskImage:
               "radial-gradient(ellipse at center, transparent " +
               fadeIntensity +
-              "%, black)", // String concatenation
+              "%, black)",
             WebkitMaskImage:
               "radial-gradient(ellipse at center, transparent " +
               fadeIntensity +
-              "%, black)", // String concatenation
+              "%, black)",
           }}
         />
       )}

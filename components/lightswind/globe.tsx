@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import createGlobe from "cobe";
+import { MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // Utility function to convert a hex color string to a normalized RGB array
@@ -29,8 +30,8 @@ const hexToRgbNormalized = (hex: string): [number, number, number] => {
 
 interface GlobeProps {
   className?: string;
-  theta?: number;
-  phi?: number;
+  theta?: number | MotionValue<number>;
+  phi?: number | MotionValue<number>;
   dark?: number;
   scale?: number;
   diffuse?: number;
@@ -61,8 +62,33 @@ const Globe: React.FC<GlobeProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const globeRef = useRef<any>(null);
 
-  const phiRef = useRef(phi);
-  const thetaRef = useRef(theta);
+  const initialPhi = typeof phi === 'number' ? phi : phi.get();
+  const initialTheta = typeof theta === 'number' ? theta : theta.get();
+
+  const phiRef = useRef(initialPhi);
+  const thetaRef = useRef(initialTheta);
+
+  // Sync refs with props without triggering re-init
+  useEffect(() => {
+    if (typeof phi === 'number') {
+      phiRef.current = phi;
+    } else {
+      return phi.on("change", (v) => {
+        phiRef.current = v;
+      });
+    }
+  }, [phi]);
+
+  useEffect(() => {
+    if (typeof theta === 'number') {
+      thetaRef.current = theta;
+    } else {
+      return theta.on("change", (v) => {
+        thetaRef.current = v;
+      });
+    }
+  }, [theta]);
+
   const isDragging = useRef(false);
   const lastMouseX = useRef(0);
   const lastMouseY = useRef(0);
@@ -93,7 +119,7 @@ const Globe: React.FC<GlobeProps> = ({
       }
 
       const rect = canvas.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const size = Math.min(rect.width, rect.height, 800);
       const devicePixelRatio = window.devicePixelRatio || 1;
       const internalWidth = size * devicePixelRatio;
       const internalHeight = size * devicePixelRatio;
@@ -191,8 +217,6 @@ const Globe: React.FC<GlobeProps> = ({
       }
     };
   }, [
-    theta,
-    phi,
     dark,
     scale,
     diffuse,
