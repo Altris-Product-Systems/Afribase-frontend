@@ -36,7 +36,7 @@ export default function AuthPage() {
   };
 
   const handleSelectProject = (projectId: string) => {
-    router.push(`/dashboard/project/${projectId}?tab=overview`);
+    router.push(`/dashboard/project/${projectId}?tab=auth`);
   };
 
   if (isLoading) return null;

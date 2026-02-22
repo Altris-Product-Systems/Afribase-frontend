@@ -36,8 +36,7 @@ export default function UsersPage() {
   };
 
   const handleSelectProject = (projectId: string) => {
-    // Correct link based on current architecture
-    router.push(`/dashboard/project/${projectId}?tab=overview`);
+    router.push(`/dashboard/project/${projectId}?tab=users`);
   };
 
   if (isLoading) return null;

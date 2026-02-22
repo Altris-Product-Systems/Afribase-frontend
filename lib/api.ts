@@ -344,17 +344,11 @@ export async function getProjects(organizationId?: string): Promise<Project[]> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    // Build URL with organization-scoped projects endpoint
-    if (!organizationId) {
-      // If no org ID, fetch projects for all organizations
-      const orgs = await getOrganizations();
-      const allProjects = await Promise.all(
-        orgs.map(org => getProjects(org.id))
-      );
-      return allProjects.flat();
-    }
-
-    const url = `${API_BASE_URL}/api/organizations/${organizationId}/projects`;
+    // Build URL: if organizationId is provided, use organization-scoped endpoint,
+    // otherwise use the global projects endpoint for the current user.
+    const url = organizationId
+      ? `${API_BASE_URL}/api/organizations/${organizationId}/projects`
+      : `${API_BASE_URL}/api/projects`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -582,7 +576,17 @@ export async function getProjectTables(projectId: string): Promise<TableInfo[]> 
       throw new APIError(response.status, data.error || data.message || 'Failed to fetch tables');
     }
 
-    return Array.isArray(data) ? data : (data.tables ?? []);
+    const rawTables = Array.isArray(data) ? data : (data.tables ?? []);
+    return rawTables.map((t: any) => {
+      if (typeof t === 'string') {
+        const parts = t.split('.');
+        if (parts.length === 2) {
+          return { schema: parts[0], name: parts[1] };
+        }
+        return { name: t };
+      }
+      return t;
+    });
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
@@ -649,7 +653,13 @@ export async function getAuthConfig(projectId: string): Promise<AuthConfigRespon
       },
     });
 
-    const data = await response.json();
+    const textResponse = await response.text();
+    let data;
+    try {
+      data = JSON.parse(textResponse);
+    } catch {
+      throw new APIError(response.status, `Non-JSON response (status ${response.status}): ${textResponse.slice(0, 50)}...`);
+    }
 
     if (!response.ok) {
       throw new APIError(response.status, data.error || data.message || 'Failed to fetch auth config');
@@ -741,7 +751,13 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
       },
     });
 
-    const data = await response.json();
+    const textResponse = await response.text();
+    let data;
+    try {
+      data = JSON.parse(textResponse);
+    } catch {
+      throw new APIError(response.status, `Non-JSON response (status ${response.status}): ${textResponse.slice(0, 50)}...`);
+    }
 
     if (!response.ok) {
       throw new APIError(response.status, data.error || data.message || 'Failed to fetch project users');

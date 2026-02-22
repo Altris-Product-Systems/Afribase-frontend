@@ -84,6 +84,28 @@ export default function DashboardLayout({
   };
 
   const handleNavigate = (id: string) => {
+    // Detect if we are in a project context
+    const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
+    const projectId = projectMatch ? projectMatch[1] : null;
+
+    if (projectId) {
+      // If in project context, certain IDs should stay within the project detail tabs
+      const projectTabs: Record<string, string> = {
+        tables: 'tables',
+        sql: 'sql',
+        api: 'api-keys',
+        auth: 'auth',
+        users: 'users',
+        policies: 'policies',
+        settings: 'settings',
+      };
+
+      if (projectTabs[id]) {
+        router.push(`/dashboard/project/${projectId}?tab=${projectTabs[id]}${selectedOrg ? `&orgId=${selectedOrg.id}` : ''}`);
+        return;
+      }
+    }
+
     const routes: Record<string, string> = {
       dashboard: '/dashboard',
       projects: '/dashboard/projects',

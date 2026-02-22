@@ -36,7 +36,7 @@ export default function PoliciesPage() {
   };
 
   const handleSelectProject = (projectId: string) => {
-    router.push(`/dashboard/project/${projectId}?tab=overview`);
+    router.push(`/dashboard/project/${projectId}?tab=policies`);
   };
 
   if (isLoading) return null;
