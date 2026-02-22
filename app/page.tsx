@@ -8,12 +8,14 @@ import About from '@/components/landing/About';
 import Testimonials from '@/components/landing/Testimonials';
 import CTA from '@/components/landing/CTA';
 import Footer from '@/components/landing/Footer';
+import AfricaOrb from '@/components/AfricaOrb';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <AfricaOrb />
       <Header />
-      <main>
+      <main className="relative z-10">
         <Hero />
         <LogoCloud />
         <Stats />
