@@ -24,9 +24,9 @@ export default function Hero() {
                 fadeIntensity={50}
                 className="w-full h-full bg-black"
             >
-                <div className="container mx-auto h-full flex flex-col lg:flex-row items-center justify-between px-6 relative z-20 gap-12">
-                    {/* Left Side: Left-aligned Text */}
-                    <div className="flex-1 flex flex-col items-start text-left max-w-2xl">
+                <div className="container mx-auto h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-6 relative z-20 gap-12 pt-44 lg:pt-0">
+                    {/* Left Side: Centered on mobile, Left-aligned on Desktop */}
+                    <div className="flex-1 flex flex-col items-center text-center lg:items-start lg:text-left max-w-2xl">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -41,7 +41,7 @@ export default function Hero() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.2 }}
-                            className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8"
+                            className="text-4xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] md:leading-[0.9] tracking-tighter mb-8"
                         >
                             THE NEW STANDARD
                             <br />
@@ -52,7 +52,7 @@ export default function Hero() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
-                            className="text-lg md:text-xl text-white/70 max-w-xl mb-12 font-medium leading-relaxed"
+                            className="text-base md:text-xl text-white/70 max-w-xl mb-12 font-medium leading-relaxed"
                         >
                             Empowering the next generation of African entrepreneurs with
                             enterprise-grade tools for payments, inventory, and growth.
@@ -62,28 +62,28 @@ export default function Hero() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.6 }}
-                            className="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto"
+                            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
                         >
                             <Link href="/auth/sign-up" className="w-full sm:w-auto">
-                                <Button variant="default" size="lg" className="h-16 px-10 rounded-full bg-forest text-white font-bold text-lg hover:shadow-xl hover:shadow-forest/40 transition-all active:scale-95 w-full">
+                                <Button variant="default" size="lg" className="h-14 md:h-16 px-10 rounded-full bg-forest text-white font-bold text-lg hover:shadow-xl hover:shadow-forest/40 transition-all active:scale-95 w-full">
                                     Start Building
                                 </Button>
                             </Link>
                             <Link href="/auth/sign-in" className="w-full sm:w-auto">
-                                <Button variant="outline" size="lg" className="h-16 px-10 rounded-full border-2 border-white/10 text-white font-bold text-lg hover:bg-white/5 transition-all active:scale-95 w-full">
+                                <Button variant="outline" size="lg" className="h-14 md:h-16 px-10 rounded-full border-2 border-white/10 text-white font-bold text-lg hover:bg-white/5 transition-all active:scale-95 w-full">
                                     Sign In
                                 </Button>
                             </Link>
                         </motion.div>
                     </div>
 
-                    {/* Right Side: Globe */}
+                    {/* Right Side: Globe - Hidden on Mobile */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         style={{ opacity }}
                         transition={{ duration: 1, delay: 0.8 }}
-                        className="flex-1 w-full max-w-[500px] lg:max-w-none aspect-square flex items-center justify-center relative"
+                        className="hidden lg:flex flex-1 w-full max-w-[500px] lg:max-w-none aspect-square flex items-center justify-center relative"
                     >
                         {/* Subtle glow behind the globe */}
                         <div className="absolute inset-0 bg-forest/5 rounded-full blur-[100px]" />

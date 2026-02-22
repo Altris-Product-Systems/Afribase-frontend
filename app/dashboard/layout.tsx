@@ -105,7 +105,6 @@ export default function DashboardLayout({
         auth: 'auth',
         users: 'users',
         policies: 'policies',
-        settings: 'settings',
       };
 
       if (projectTabs[id]) {
@@ -167,14 +166,14 @@ export default function DashboardLayout({
               </svg>
             </button>
             <h1 className="text-sm font-bold text-white/90 uppercase tracking-widest">
-              {selectedOrg?.name || 'Afriibase'}
+              {selectedOrg?.name || 'Afribase'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg">
+            {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
               <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Platform Healthy</span>
-            </div>
+            </div> */}
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
               {user?.user_metadata?.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />

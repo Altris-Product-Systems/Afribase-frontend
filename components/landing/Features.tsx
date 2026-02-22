@@ -87,14 +87,14 @@ const features = [
 
 export default function Features() {
     return (
-        <section className="py-24 bg--brand-background">
+        <section className="py-12 md:py-24 bg--brand-background">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-black text-white mb-4"
+                        className="text-3xl md:text-5xl font-black text-white mb-4"
                     >
                         EVERYTHING YOU NEED TO <span className="text-sage">SCALE</span>
                     </motion.h2>
@@ -103,14 +103,14 @@ export default function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-lg text-white/60 max-w-2xl mx-auto font-medium"
+                        className="text-base md:text-lg text-white/60 max-w-2xl mx-auto font-medium"
                     >
                         Afriibase provides all the enterprise-grade tools required to build,
                         launch, and grow your digital business in Africa.
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[280px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min md:auto-rows-[280px]">
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
@@ -126,7 +126,7 @@ export default function Features() {
                             <InteractiveGradient
                                 color={feature.glow}
                                 glowColor={feature.glow}
-                                className="w-full h-full p-8 flex flex-col items-start text-left bg-transparent border-none"
+                                className="w-full h-full p-6 md:p-8 flex flex-col items-start text-left bg-transparent border-none"
                                 hoverOnly={true}
                                 intensity={100}
                                 backgroundColor="transparent"

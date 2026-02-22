@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: "The all-in-one platform for African businesses. Manage payments, track inventory, and grow your business with tools built for the African market.",
 };
 
+import { Toaster } from 'react-hot-toast';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,21 @@ export default function RootLayout({
         <AuthProvider>
           <GlobalLoaderProvider>
             {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: '#18181b',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  borderRadius: '12px'
+                },
+              }}
+            />
           </GlobalLoaderProvider>
         </AuthProvider>
       </body>

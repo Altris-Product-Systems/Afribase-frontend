@@ -50,6 +50,7 @@ import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
 import toast, { Toaster } from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
+import DataTable from '@/components/DataTable';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function formatBytes(bytes?: number): string {
@@ -104,6 +105,7 @@ export default function ProjectDetailPage() {
   const [tablesLoading, setTablesLoading] = useState(false);
   const [tablesError, setTablesError] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableInfo | null>(null);
+  const [tableViewState, setTableViewState] = useState<'schema' | 'data'>('schema');
 
   // SQL tab
   const [sqlQuery, setSqlQuery] = useState('SELECT * FROM public.users LIMIT 10;');
@@ -633,6 +635,20 @@ export default function ProjectDetailPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        <div className="flex bg-zinc-950 p-1 rounded-lg border border-white/5 mr-4">
+                          <button
+                            onClick={() => setTableViewState('schema')}
+                            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${tableViewState === 'schema' ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                          >
+                            Schema
+                          </button>
+                          <button
+                            onClick={() => setTableViewState('data')}
+                            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${tableViewState === 'data' ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                          >
+                            Data
+                          </button>
+                        </div>
                         <button
                           onClick={() => {
                             setSqlQuery(`SELECT * FROM ${selectedTable.schema || 'public'}.${selectedTable.name} LIMIT 50;`);
@@ -657,7 +673,13 @@ export default function ProjectDetailPage() {
                       </div>
                     </div>
 
-                    {selectedTable.columns && selectedTable.columns.length > 0 ? (
+                    {tableViewState === 'data' ? (
+                      <DataTable
+                        projectId={projectId}
+                        schema={selectedTable.schema || 'public'}
+                        tableName={selectedTable.name}
+                      />
+                    ) : selectedTable.columns && selectedTable.columns.length > 0 ? (
                       <div className="overflow-x-auto">
                         <table className="w-full text-left">
                           <thead>

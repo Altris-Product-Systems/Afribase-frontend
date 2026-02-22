@@ -38,6 +38,11 @@ function CallbackContent() {
                 }
             };
 
+            // Clear the hash from the URL so tokens don't sit in the address bar
+            if (window.location.hash) {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+
             checkAndRedirect();
         } else {
             // No token found, redirect to sign-in

@@ -237,10 +237,89 @@ export interface Organization {
   updatedAt?: string;
 }
 
+export interface MemberResponse {
+  user: User;
+  role: 'owner' | 'admin' | 'member';
+}
+
+export interface InviteMemberRequest {
+  email: string;
+  role: 'admin' | 'member';
+}
+
 export interface CreateOrganizationRequest {
   name: string;
   slug?: string;
   description?: string;
+}
+
+export async function getOrganizationMembers(orgId: string): Promise<MemberResponse[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new APIError(response.status, data.error || 'Failed to fetch members');
+    }
+    return data;
+  } catch (error) {
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'Unexpected error fetching members');
+  }
+}
+
+export async function inviteOrganizationMember(orgId: string, request: InviteMemberRequest): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new APIError(response.status, data.error || 'Failed to invite member');
+    }
+  } catch (error) {
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'Unexpected error inviting member');
+  }
+}
+
+export async function removeOrganizationMember(orgId: string, userId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new APIError(response.status, data.error || 'Failed to remove member');
+    }
+  } catch (error) {
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'Unexpected error removing member');
+  }
 }
 
 export async function createOrganization(data: CreateOrganizationRequest): Promise<Organization> {
@@ -290,7 +369,8 @@ export async function getOrganizations(): Promise<Organization[]> {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new APIError(response.status, data.message || data.detail || 'Failed to fetch organizations');
+      const errorMessage = data.message || data.detail || data.error || `Error ${response.status}`;
+      throw new APIError(response.status, `[${response.status}] ${errorMessage}`);
     }
 
     // Ensure we return an array

@@ -59,7 +59,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] flex text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#0c0c0e] flex flex-col lg:flex-row text-white relative overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px]" />
@@ -189,15 +189,15 @@ export default function SignUpPage() {
 
           {/* Sign In Link */}
           <p className="mt-12 text-center text-[10px] font-black uppercase tracking-widest text-zinc-600">
-            Active session exists?{' '}
+            already have account?{' '}
             <Link href="/auth/sign-in" className="text-white hover:text-emerald-400 transition-colors ml-1 underline underline-offset-4">
-              Return to Console
+              signin
             </Link>
           </p>
         </div>
       </div>
 
-      {/* Right Side - Africa Map Animation */}
+      {/* Right Side - Africa Map Animation - Hidden on mobile */}
       <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center bg-[#060608] overflow-hidden">
         <AfricaMapAnimation />
       </div>

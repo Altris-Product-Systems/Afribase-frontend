@@ -1,11 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Settings, User, Globe, Shield, CreditCard, ChevronRight } from 'lucide-react';
+import { Settings, User, Globe, Shield, CreditCard, ChevronRight, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const SettingItem = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
-    <button className="w-full text-left p-6 glass-card rounded-2xl border border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all group flex items-start gap-5">
+  const router = useRouter();
+  const SettingItem = ({ icon: Icon, title, description, onClick }: { icon: any, title: string, description: string, onClick?: () => void }) => (
+    <button
+      onClick={onClick}
+      className="w-full text-left p-6 glass-card rounded-2xl border border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all group flex items-start gap-5"
+    >
       <div className="w-12 h-12 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 group-hover:text-emerald-500 group-hover:scale-110 transition-all">
         <Icon size={22} strokeWidth={1.5} />
       </div>
@@ -29,24 +34,33 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10">
-        <SettingItem 
-          icon={User} 
-          title="General Settings" 
+        <SettingItem
+          icon={User}
+          title="General Settings"
           description="Update your organization name, slug, and project defaults."
         />
-        <SettingItem 
-          icon={Globe} 
-          title="Domain & Network" 
+        <SettingItem
+          icon={Globe}
+          title="Domain & Network"
           description="Configure custom domains, SSL certificates, and IP whitelisting."
         />
-        <SettingItem 
-          icon={Shield} 
-          title="Security & Access" 
+        <SettingItem
+          icon={Shield}
+          title="Security & Access"
           description="Manage API keys, environment secrets, and advanced RLS settings."
         />
-        <SettingItem 
-          icon={CreditCard} 
-          title="Billing & Plan" 
+        <SettingItem
+          icon={Users}
+          title="Team Members"
+          description="Invite your collaborators and manage their roles and permissions."
+          onClick={() => {
+            const orgId = new URLSearchParams(window.location.search).get('orgId');
+            router.push(`/dashboard/settings/members${orgId ? `?orgId=${orgId}` : ''}`);
+          }}
+        />
+        <SettingItem
+          icon={CreditCard}
+          title="Billing & Plan"
           description="Overview of your current plan, usage limits, and invoices."
         />
       </div>
