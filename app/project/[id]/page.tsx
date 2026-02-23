@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getProjects, getProjectKeys, getOrganizations, isAuthenticated, Project, ProjectKeys, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
@@ -9,6 +9,7 @@ import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
 import ApiDocs from '@/components/ApiDocs';
+import ProjectSettings from '@/components/ProjectSettings';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -189,60 +190,143 @@ export default function ProjectDetailsPage() {
               </div>
 
               {/* Project Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Status */}
-                <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">STATUS</span>
-                    <svg className="w-8 h-8 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                <div className="glass-card rounded-[32px] p-8 border border-white/5 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Activity size={64} />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 ${statusColor} rounded-full`}></div>
-                    <span className="text-lg font-semibold text-black dark:text-white capitalize">
-                      {project.status || 'Healthy'}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Live Status</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full animate-pulse ${statusColor}`} />
+                      <span className="text-2xl font-black text-white capitalize tracking-tight">
+                        {project.status || 'Healthy'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Database Metrics */}
+                <div className="glass-card rounded-[32px] p-8 border border-white/5 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Database size={64} />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">DB Size</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-white tracking-tight">12.4</span>
+                      <span className="text-xs font-bold text-zinc-500">MB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* API Requests */}
+                <div className="glass-card rounded-[32px] p-8 border border-white/5 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Zap size={64} />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Requests</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-white tracking-tight">842</span>
+                      <span className="text-xs font-bold text-zinc-500">/ 24h</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auth Users */}
+                <div className="glass-card rounded-[32px] p-8 border border-white/5 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Users size={64} />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Total Users</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-white tracking-tight">24</span>
+                      <span className="text-xs font-bold text-zinc-500">Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Health Visualization */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 glass-card rounded-[32px] p-8 border border-white/5 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-black text-white tracking-tight">Service Health</h3>
+                      <p className="text-zinc-500 text-xs font-medium">Real-time performance metrics for {project.name}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="px-3 py-1 bg-emerald-500/10 rounded-full flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-[10px] font-black text-emerald-500 uppercase">System Optimal</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* CPU Usage */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">CPU Usage</span>
+                        <span className="text-xs font-bold text-white">12%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 w-[12%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
+                      </div>
+                    </div>
+
+                    {/* Memory Usage */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Memory</span>
+                        <span className="text-xs font-bold text-white">142MB / 512MB</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 w-[28%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
+                      </div>
+                    </div>
+
+                    {/* Network I/O */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Network I/O</span>
+                        <span className="text-xs font-bold text-white">2.4 MB/s</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 w-[45%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="glass-card rounded-[32px] p-8 border border-white/5 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-black text-white tracking-tight">Active Plan</h3>
+                    <p className="text-zinc-500 text-xs font-medium">Your current subscription tier</p>
+                  </div>
+
+                  <div className="py-8">
+                    <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-white/40 tracking-tighter uppercase">
+                      {project.plan || 'Free'}
                     </span>
                   </div>
-                </div>
 
-                {/* Last Migration */}
-                <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">LAST MIGRATION</span>
-                    <svg className="w-8 h-8 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                    </svg>
+                  <div className="space-y-4">
+                    <button className="w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-zinc-200 transition-all">
+                      Upgrade Plan
+                    </button>
                   </div>
-                  <p className="text-lg font-semibold text-black dark:text-white">
-                    No migrations
-                  </p>
-                </div>
-
-                {/* Last Backup */}
-                <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">LAST BACKUP</span>
-                    <svg className="w-8 h-8 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                    </svg>
-                  </div>
-                  <p className="text-lg font-semibold text-black dark:text-white">
-                    No backups
-                  </p>
-                </div>
-
-                {/* Recent Branch */}
-                <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">RECENT BRANCH</span>
-                    <svg className="w-8 h-8 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                    </svg>
-                  </div>
-                  <p className="text-lg font-semibold text-black dark:text-white">
-                    No branches
-                  </p>
                 </div>
               </div>
 
@@ -371,7 +455,13 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && (
+          {activeTab === 'settings' && (
+            <div className="max-w-6xl mx-auto">
+              <ProjectSettings project={project} onUpdate={loadProjectData} />
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && activeTab !== 'settings' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

@@ -27,6 +27,7 @@ export default function DataTable({ projectId, schema, tableName }: DataTablePro
     const [isInsertModalOpen, setIsInsertModalOpen] = useState(false);
     const [isInserting, setIsInserting] = useState(false);
     const [newRowData, setNewRowData] = useState<Record<string, string>>({});
+    const [columnSearch, setColumnSearch] = useState('');
 
     const fullTableName = `"${schema}"."${tableName}"`;
 
@@ -227,21 +228,37 @@ export default function DataTable({ projectId, schema, tableName }: DataTablePro
                     </div>
                 }
             >
-                <form onSubmit={handleInsert} className="space-y-5 py-2 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
-                    {columns.map(col => (
-                        <div key={col} className="space-y-2">
-                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">
-                                {col}
-                            </label>
-                            <input
-                                type="text"
-                                value={newRowData[col] || ''}
-                                onChange={(e) => setNewRowData({ ...newRowData, [col]: e.target.value })}
-                                placeholder={`Enter ${col}...`}
-                                className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
-                            />
+                <div className="mb-4">
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-zinc-600">
+                            <Search size={14} />
                         </div>
-                    ))}
+                        <input
+                            type="text"
+                            placeholder="Filter columns..."
+                            value={columnSearch}
+                            onChange={(e) => setColumnSearch(e.target.value)}
+                            className="w-full bg-zinc-950 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-[10px] font-black uppercase tracking-widest text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/30 transition-all"
+                        />
+                    </div>
+                </div>
+                <form onSubmit={handleInsert} className="space-y-5 py-2 overflow-y-auto max-h-[50vh] pr-2 custom-scrollbar">
+                    {columns
+                        .filter(col => col.toLowerCase().includes(columnSearch.toLowerCase()))
+                        .map(col => (
+                            <div key={col} className="space-y-2">
+                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">
+                                    {col}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newRowData[col] || ''}
+                                    onChange={(e) => setNewRowData({ ...newRowData, [col]: e.target.value })}
+                                    placeholder={`Enter ${col}...`}
+                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                />
+                            </div>
+                        ))}
                     {columns.length === 0 && (
                         <p className="text-zinc-500 text-xs italic">No columns detected to show in form.</p>
                     )}

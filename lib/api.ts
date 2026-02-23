@@ -625,6 +625,66 @@ export async function deleteProject(projectId: string): Promise<void> {
   }
 }
 
+export async function pauseProject(projectId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pause`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new APIError(response.status, data.error || 'Failed to pause project');
+    }
+  } catch (error) {
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred.');
+  }
+}
+
+export async function reactivateProject(projectId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/reactivate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new APIError(response.status, data.error || 'Failed to reactivate project');
+    }
+  } catch (error) {
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred.');
+  }
+}
+
+export async function deleteOrganization(orgId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new APIError(response.status, data.error || data.message || 'Failed to delete organization');
+    }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+    }
+    if (error instanceof APIError) throw error;
+    throw new APIError(500, 'An unexpected error occurred.');
+  }
+}
+
 // ─── Run SQL Query ─────────────────────────────────────────────────────────
 export interface QueryResult {
   columns?: string[];

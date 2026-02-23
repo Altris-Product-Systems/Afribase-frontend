@@ -42,6 +42,9 @@ import {
   BarChart3,
   ShieldCheck,
   Settings,
+  Search,
+  Filter,
+  XCircle,
 } from 'lucide-react';
 
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
@@ -106,6 +109,8 @@ export default function ProjectDetailPage() {
   const [tablesError, setTablesError] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableInfo | null>(null);
   const [tableViewState, setTableViewState] = useState<'schema' | 'data'>('schema');
+  const [tableSearch, setTableSearch] = useState('');
+  const [columnSearch, setColumnSearch] = useState('');
 
   // SQL tab
   const [sqlQuery, setSqlQuery] = useState('SELECT * FROM public.users LIMIT 10;');
@@ -588,36 +593,66 @@ export default function ProjectDetailPage() {
           {!tablesLoading && tables.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Table List */}
-              <div className="space-y-2">
-                {tables.map((tbl, i) => (
-                  <button
-                    key={tbl.name || `table-${i}`}
-                    onClick={() => {
-                      if (selectedTable?.name === tbl.name) {
-                        setSelectedTable(null);
-                      } else {
-                        setSelectedTable(tbl);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedTable?.name === tbl.name
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                      : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Table size={14} />
-                      <span className="text-xs font-black uppercase tracking-widest">{tbl.name}</span>
+              <div className="space-y-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Search size={14} className="text-zinc-600" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search tables..."
+                    value={tableSearch}
+                    onChange={(e) => setTableSearch(e.target.value)}
+                    className="w-full bg-zinc-900/50 border border-white/5 rounded-xl py-2.5 pl-9 pr-4 text-xs font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/30 transition-all uppercase tracking-widest"
+                  />
+                  {tableSearch && (
+                    <button
+                      onClick={() => setTableSearch('')}
+                      className="absolute inset-y-0 right-3 flex items-center text-zinc-600 hover:text-white transition-colors"
+                    >
+                      <XCircle size={14} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {tables
+                    .filter(t => t.name.toLowerCase().includes(tableSearch.toLowerCase()))
+                    .map((tbl, i) => (
+                      <button
+                        key={tbl.name || `table-${i}`}
+                        onClick={() => {
+                          if (selectedTable?.name === tbl.name) {
+                            setSelectedTable(null);
+                          } else {
+                            setSelectedTable(tbl);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedTable?.name === tbl.name
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                          : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/10 hover:text-white'
+                          }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Table size={14} />
+                          <span className="text-xs font-black uppercase tracking-widest">{tbl.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-right">
+                          {tbl.rowCount != null && (
+                            <span className="text-[10px] font-bold text-zinc-500">
+                              {tbl.rowCount.toLocaleString()} rows
+                            </span>
+                          )}
+                          <ChevronRight size={12} />
+                        </div>
+                      </button>
+                    ))}
+                  {tables.filter(t => t.name.toLowerCase().includes(tableSearch.toLowerCase())).length === 0 && (
+                    <div className="py-10 text-center border border-dashed border-white/5 rounded-xl">
+                      <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">No matching tables</p>
                     </div>
-                    <div className="flex items-center gap-3 text-right">
-                      {tbl.rowCount != null && (
-                        <span className="text-[10px] font-bold text-zinc-500">
-                          {tbl.rowCount.toLocaleString()} rows
-                        </span>
-                      )}
-                      <ChevronRight size={12} />
-                    </div>
-                  </button>
-                ))}
+                  )}
+                </div>
               </div>
 
               {/* Table Detail */}
@@ -683,11 +718,27 @@ export default function ProjectDetailPage() {
                       <div className="overflow-x-auto">
                         <table className="w-full text-left">
                           <thead>
+                            <tr className="border-b border-white/10">
+                              <th colSpan={4} className="pb-4">
+                                <div className="relative">
+                                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                    <Filter size={14} className="text-zinc-600" />
+                                  </div>
+                                  <input
+                                    type="text"
+                                    placeholder="Filter columns..."
+                                    value={columnSearch}
+                                    onChange={(e) => setColumnSearch(e.target.value)}
+                                    className="w-full bg-white/[0.02] border border-white/5 rounded-xl py-2 pl-9 pr-4 text-xs font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/30 transition-all uppercase tracking-widest"
+                                  />
+                                </div>
+                              </th>
+                            </tr>
                             <tr className="border-b border-white/5">
                               {['Column', 'Type', 'Nullable', 'Default'].map((h) => (
                                 <th
                                   key={h}
-                                  className="pb-3 text-[10px] font-black text-zinc-500 uppercase tracking-widest pr-6"
+                                  className="py-3 text-[10px] font-black text-zinc-500 uppercase tracking-widest pr-6"
                                 >
                                   {h}
                                 </th>
@@ -695,23 +746,32 @@ export default function ProjectDetailPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {selectedTable.columns.map((col) => (
-                              <tr key={col.name} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
-                                <td className="py-3 text-xs font-bold text-white pr-6">{col.name}</td>
-                                <td className="py-3 text-[10px] font-mono text-cyan-400 pr-6">{col.type}</td>
-                                <td className="py-3 text-[10px] pr-6">
-                                  <span
-                                    className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${col.nullable
-                                      ? 'bg-zinc-800 text-zinc-500'
-                                      : 'bg-emerald-500/10 text-emerald-400'
-                                      }`}
-                                  >
-                                    {col.nullable ? 'YES' : 'NO'}
-                                  </span>
+                            {selectedTable.columns
+                              .filter(col => col.name.toLowerCase().includes(columnSearch.toLowerCase()) || col.type.toLowerCase().includes(columnSearch.toLowerCase()))
+                              .map((col) => (
+                                <tr key={col.name} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
+                                  <td className="py-3 text-xs font-bold text-white pr-6">{col.name}</td>
+                                  <td className="py-3 text-[10px] font-mono text-cyan-400 pr-6">{col.type}</td>
+                                  <td className="py-3 text-[10px] pr-6">
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${col.nullable
+                                        ? 'bg-zinc-800 text-zinc-500'
+                                        : 'bg-emerald-500/10 text-emerald-400'
+                                        }`}
+                                    >
+                                      {col.nullable ? 'YES' : 'NO'}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 text-[10px] font-mono text-zinc-500">{col.default || '—'}</td>
+                                </tr>
+                              ))}
+                            {selectedTable.columns.filter(col => col.name.toLowerCase().includes(columnSearch.toLowerCase()) || col.type.toLowerCase().includes(columnSearch.toLowerCase())).length === 0 && (
+                              <tr>
+                                <td colSpan={4} className="py-10 text-center text-zinc-600 text-xs italic uppercase tracking-widest">
+                                  No matching columns
                                 </td>
-                                <td className="py-3 text-[10px] font-mono text-zinc-500">{col.default || '—'}</td>
                               </tr>
-                            ))}
+                            )}
                           </tbody>
                         </table>
                       </div>

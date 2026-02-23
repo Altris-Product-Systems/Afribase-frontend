@@ -1,11 +1,59 @@
 'use client';
 
-import React from 'react';
-import { Settings, User, Globe, Shield, CreditCard, ChevronRight, Users } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { Settings, User, Globe, Shield, CreditCard, ChevronRight, Users, Trash2, RefreshCw } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { deleteOrganization, getOrganizations, Organization } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+
+  useEffect(() => {
+    if (orgId) {
+      loadOrg();
+    }
+  }, [orgId]);
+
+  const loadOrg = async () => {
+    try {
+      const orgs = await getOrganizations();
+      const currentOrg = orgs.find(o => o.id === orgId);
+      if (currentOrg) {
+        setOrg(currentOrg);
+      }
+    } catch (err) {
+      console.error('Failed to load organization:', err);
+    }
+  };
+
+  const handleDeleteOrg = async () => {
+    if (!org) return;
+    if (deleteConfirm !== org.slug) {
+      toast.error('Please type the workspace slug to confirm');
+      return;
+    }
+
+    if (!confirm('This will permanently delete the workspace and all its projects. Are you absolutely sure?')) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteOrganization(org.id);
+      toast.success('Workspace deleted successfully');
+      router.push('/dashboard');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete workspace');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const SettingItem = ({ icon: Icon, title, description, onClick }: { icon: any, title: string, description: string, onClick?: () => void }) => (
     <button
       onClick={onClick}
@@ -26,7 +74,7 @@ export default function SettingsPage() {
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
       <div className="space-y-2">
         <h1 className="text-4xl font-black tracking-tighter text-white">
-          Settings
+          Settings {org && <span className="text-zinc-600 font-medium">/ {org.name}</span>}
         </h1>
         <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">
           Manage your organization, billing, and global platform preferences.
@@ -54,7 +102,6 @@ export default function SettingsPage() {
           title="Team Members"
           description="Invite your collaborators and manage their roles and permissions."
           onClick={() => {
-            const orgId = new URLSearchParams(window.location.search).get('orgId');
             router.push(`/dashboard/settings/members${orgId ? `?orgId=${orgId}` : ''}`);
           }}
         />
@@ -65,15 +112,47 @@ export default function SettingsPage() {
         />
       </div>
 
-      <div className="pt-10">
-        <div className="p-8 border border-rose-500/20 bg-rose-500/5 rounded-3xl space-y-4">
-          <h4 className="text-lg font-bold text-rose-500">Danger Zone</h4>
-          <p className="text-xs text-zinc-500 max-w-md font-medium">Irreversibly delete this organization and all its projects. This action cannot be undone.</p>
-          <button className="px-6 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white text-xs font-black rounded-lg transition-all border border-rose-500/20 uppercase tracking-widest">
-            Delete Organization
-          </button>
+      {org && (
+        <div className="pt-10">
+          <div className="p-8 border border-rose-500/20 bg-rose-500/[0.02] rounded-3xl space-y-6">
+            <div className="flex items-start gap-6">
+              <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                <Trash2 size={24} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-lg font-bold text-rose-500">Danger Zone</h4>
+                <p className="text-xs text-zinc-500 max-w-md font-medium leading-relaxed">
+                  Irreversibly delete this workspace and all its projects.
+                  This action <span className="text-rose-500">cannot be undone</span>.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-zinc-950/50 rounded-2xl p-6 border border-rose-500/10 space-y-4">
+              <label className="text-[10px] font-black text-rose-500/70 uppercase tracking-widest block">
+                Type <span className="text-white mx-1">{org.slug}</span> to confirm
+              </label>
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder="Enter workspace slug..."
+                  className="flex-1 bg-zinc-900 border border-rose-500/20 rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:border-rose-500/50 transition-all font-mono"
+                />
+                <button
+                  onClick={handleDeleteOrg}
+                  disabled={isDeleting || deleteConfirm !== org.slug}
+                  className="px-8 py-3 bg-rose-500 hover:bg-rose-600 disabled:opacity-30 disabled:hover:bg-rose-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-rose-500/10 flex items-center gap-2"
+                >
+                  {isDeleting ? <RefreshCw className="animate-spin" size={14} /> : <Trash2 size={14} />}
+                  Delete Workspace
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
