@@ -10,6 +10,7 @@ import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
 import ApiDocs from '@/components/ApiDocs';
 import ProjectSettings from '@/components/ProjectSettings';
+import ProjectUsage from '@/components/ProjectUsage';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -461,7 +462,13 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && activeTab !== 'settings' && (
+          {activeTab === 'usage' && (
+            <div className="max-w-6xl mx-auto">
+              <ProjectUsage project={project} />
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && activeTab !== 'settings' && activeTab !== 'usage' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

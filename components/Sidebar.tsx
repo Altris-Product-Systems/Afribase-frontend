@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   HardDrive,
   Activity,
-  Code
+  Code,
+  BarChart3
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -240,6 +241,7 @@ export default function Sidebar({
           <div className="space-y-4 pt-2">
             {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Platform</div>}
             <NavigationItem id="logs" label="Logs" icon={Activity} />
+            <NavigationItem id="usage" label="Usage" icon={BarChart3} />
           </div>
         </nav>
 

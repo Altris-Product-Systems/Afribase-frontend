@@ -806,16 +806,15 @@ export async function deleteProjectTable(projectId: string, schema: string, tabl
 
 // ─── Get Project Usage ─────────────────────────────────────────────────────
 export interface ProjectUsage {
-  databaseSize?: number;
-  databaseSizeLimit?: number;
-  egressBytes?: number;
-  egressBytesLimit?: number;
-  realtimeConnections?: number;
-  realtimeConnectionsLimit?: number;
-  monthlyActiveUsers?: number;
-  monthlyActiveUsersLimit?: number;
-  storageSize?: number;
-  storageSizeLimit?: number;
+  db_size: string;
+  db_size_limit: string;
+  row_count: number;
+  bandwidth: string;
+  bandwidth_limit: string;
+  storage: string;
+  storage_limit: string;
+  auth_users: number;
+  auth_users_limit: number;
   [key: string]: unknown;
 }
 
