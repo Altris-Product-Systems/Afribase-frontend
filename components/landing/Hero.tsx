@@ -31,31 +31,31 @@ export default function Hero() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8 }}
-                            className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-forest/20 border border-forest/30 text-sage text-xs font-bold uppercase tracking-widest mb-8"
+                            className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-forest/20 border border-forest/30 text-sage text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-8"
                         >
                             <span className="w-1.5 h-1.5 bg-sage rounded-full" />
-                            <span>Built for the African market</span>
+                            <span>Build from the Source</span>
                         </motion.div>
 
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.2 }}
-                            className="text-4xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] md:leading-[0.9] tracking-tighter mb-8"
+                            className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] md:leading-[1] tracking-tighter mb-8"
                         >
-                            THE NEW STANDARD
+                            Build Backends
                             <br />
-                            <span className="text-sage">OF BUSINESS</span>
+                            <span className="text-sage">10x Faster</span>
                         </motion.h1>
 
                         <motion.p
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
-                            className="text-base md:text-xl text-white/70 max-w-xl mb-12 font-medium leading-relaxed"
+                            className="text-base md:text-lg lg:text-xl text-white/70 max-w-xl mb-12 font-medium leading-[1.6]"
                         >
-                            Empowering the next generation of African entrepreneurs with
-                            enterprise-grade tools for payments, inventory, and growth.
+                            The intelligent platform that generates your entire backend from plain English. 
+                            Hosted in Africa, built for scale.
                         </motion.p>
 
                         <motion.div

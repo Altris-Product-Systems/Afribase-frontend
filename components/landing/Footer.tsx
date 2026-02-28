@@ -12,12 +12,11 @@ export default function Footer() {
                                 <span className="text-black font-black text-xl">A</span>
                             </div>
                             <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-                                Afriibase
+                                Afribase
                             </span>
                         </div>
                         <p className="text-zinc-500 text-sm max-w-sm leading-relaxed font-medium">
-                            The high-performance platform for modern applications.
-                            Build, scale, and manage your infrastructure with absolute confidence.
+                            Build from the Source. The intelligent backend platform for African innovation.
                         </p>
                     </div>
 
@@ -43,7 +42,7 @@ export default function Footer() {
                 </div>
 
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black text-zinc-600 uppercase tracking-widest">
-                    <p>© 2026 Afriibase. All rights reserved.</p>
+                    <p>© 2026 Afribase. All rights reserved.</p>
                     <div className="flex gap-8">
                         <span className="hover:text-white transition-colors cursor-pointer">Terms</span>
                         <span className="hover:text-white transition-colors cursor-pointer">Privacy</span>
@@ -55,7 +54,7 @@ export default function Footer() {
             {/* Watermark */}
             <div className="absolute bottom-0 left-0 w-full pointer-events-none select-none overflow-hidden h-[300px] flex items-end">
                 <h2 className="text-[25vw] font-black leading-none text-white/[0.02] -mb-[5vw] ml-[-2vw] tracking-tighter uppercase italic">
-                    Afriibase
+                    Afribase
                 </h2>
             </div>
         </footer>

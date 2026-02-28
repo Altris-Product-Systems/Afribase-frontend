@@ -43,7 +43,7 @@ export default function Languages() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-2xl md:text-5xl lg:text-6xl font-black text-white mb-6 uppercase tracking-tighter"
+                        className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-6 uppercase tracking-tighter"
                     >
                         NATIVE SUPPORT FOR <span className="text-sage">EVERY STACK</span>
                     </motion.h2>
@@ -54,7 +54,7 @@ export default function Languages() {
                         transition={{ delay: 0.1 }}
                         className="text-sm md:text-lg text-white/50 max-w-2xl mx-auto font-medium"
                     >
-                        Afriibase works with any language and framework. Our client SDKs and
+                        Afribase works with any language and framework. Our client SDKs and
                         auto-generated APIs allow you to build with the tools you already love.
                     </motion.p>
                 </div>
