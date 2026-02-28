@@ -54,23 +54,43 @@ export default function Hero() {
                             transition={{ duration: 0.8, delay: 0.4 }}
                             className="text-base md:text-lg lg:text-xl text-white/70 max-w-xl mb-12 font-medium leading-[1.6]"
                         >
-                            The intelligent platform that generates your entire backend from plain English. 
+                            The intelligent platform that generates your entire backend from plain English.
                             Hosted in Africa, built for scale.
                         </motion.p>
 
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.6 }}
-                            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
+                            transition={{ duration: 0.8, delay: 0.6 }}
+                            className="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto"
                         >
-                            <Link href="/auth/sign-up" className="w-full sm:w-auto">
-                                <Button variant="default" size="lg" className="h-14 md:h-16 px-10 rounded-full bg-forest text-white font-bold text-lg hover:shadow-xl hover:shadow-forest/40 transition-all active:scale-95 w-full">
-                                    Start Building
+                            <Link href="/auth/sign-up" className="w-full sm:w-auto group">
+                                <Button
+                                    variant="default"
+                                    size="lg"
+                                    className="h-16 px-10 rounded-full bg-forest text-white font-black text-lg relative overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 w-full border border-forest/50"
+                                >
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        Start Building
+                                        <motion.span
+                                            animate={{ x: [0, 5, 0] }}
+                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                        >
+                                            →
+                                        </motion.span>
+                                    </span>
+                                    {/* Premium Glow Effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-sage/0 via-sage/30 to-sage/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                                    <div className="absolute -inset-1 bg-forest/40 blur-xl opacity-0 group-hover:opacity-100 transition-opacity -z-10 rounded-full" />
                                 </Button>
                             </Link>
+
                             <Link href="/auth/sign-in" className="w-full sm:w-auto">
-                                <Button variant="outline" size="lg" className="h-14 md:h-16 px-10 rounded-full border-2 border-white/10 text-white font-bold text-lg hover:bg-white/5 transition-all active:scale-95 w-full">
+                                <Button
+                                    variant="ghost"
+                                    size="lg"
+                                    className="h-16 px-10 rounded-full bg-white/5 border border-white/10 text-white font-black text-lg backdrop-blur-md hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 w-full uppercase tracking-widest"
+                                >
                                     Sign In
                                 </Button>
                             </Link>
