@@ -20,7 +20,18 @@ import {
   HardDrive,
   Activity,
   Code,
-  BarChart3
+  BarChart3,
+  Archive,
+  GitBranch,
+  Webhook,
+  Lock,
+  Globe,
+  Shield,
+  Radio,
+  Rss,
+  Cpu,
+  Table,
+  Server,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -215,9 +226,14 @@ export default function Sidebar({
               <SectionHeader id="database" label="Database" icon={Database} />
               {(!isCollapsed && expandedSections.includes('database')) && (
                 <div className="space-y-0.5">
-                  <NavigationItem id="tables" label="Table Editor" icon={ChevronRight} isSubItem />
+                  <NavigationItem id="tables" label="Table Editor" icon={Table} isSubItem />
                   <NavigationItem id="sql" label="SQL Editor" icon={Terminal} isSubItem />
                   <NavigationItem id="api" label="API Docs" icon={Code} isSubItem />
+                  <NavigationItem id="migrations" label="Migrations" icon={ChevronRight} isSubItem />
+                  <NavigationItem id="backups" label="Backups" icon={Archive} isSubItem />
+                  <NavigationItem id="branches" label="Branches" icon={GitBranch} isSubItem />
+                  <NavigationItem id="webhooks" label="Webhooks" icon={Webhook} isSubItem />
+                  <NavigationItem id="pooler" label="Connection Pooler" icon={Server} isSubItem />
                 </div>
               )}
             </div>
@@ -229,19 +245,37 @@ export default function Sidebar({
                   <NavigationItem id="auth" label="Configuration" icon={Settings} isSubItem />
                   <NavigationItem id="users" label="Users" icon={Users} isSubItem />
                   <NavigationItem id="policies" label="Policies" icon={ShieldCheck} isSubItem />
+                  <NavigationItem id="sso" label="SSO / SAML" icon={ShieldCheck} isSubItem />
                 </div>
               )}
             </div>
 
             <NavigationItem id="storage" label="Storage" icon={HardDrive} />
             <NavigationItem id="edge-functions" label="Edge Functions" icon={Zap} />
+            <NavigationItem id="realtime" label="Realtime" icon={Radio} />
+          </div>
+
+          {/* Platform Section */}
+          <div className="space-y-4 pt-2">
+            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Platform</div>}
+            <NavigationItem id="cron" label="Cron Jobs" icon={Activity} />
+            <NavigationItem id="logs" label="Logs" icon={Terminal} />
+            <NavigationItem id="log-drains" label="Log Drains" icon={Rss} />
+            <NavigationItem id="usage" label="Usage" icon={BarChart3} />
           </div>
 
           {/* Infrastructure Section */}
           <div className="space-y-4 pt-2">
-            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Platform</div>}
-            <NavigationItem id="logs" label="Logs" icon={Activity} />
-            <NavigationItem id="usage" label="Usage" icon={BarChart3} />
+            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Infrastructure</div>}
+            <NavigationItem id="domains" label="Custom Domains" icon={Globe} />
+            <NavigationItem id="network" label="Network Restrictions" icon={Shield} />
+            <NavigationItem id="vault" label="Vault / Secrets" icon={Lock} />
+          </div>
+
+          {/* Advanced Section */}
+          <div className="space-y-4 pt-2">
+            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Advanced</div>}
+            <NavigationItem id="advanced" label="AI / GraphQL / Types" icon={Cpu} />
           </div>
         </nav>
 

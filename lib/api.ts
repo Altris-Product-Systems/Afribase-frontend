@@ -979,3 +979,818 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
     throw new APIError(500, 'An unexpected error occurred. Please try again.');
   }
 }
+
+// ─── Storage Configuration & Management ─────────────────────────────────────
+
+export interface StorageBucket {
+  id: string;
+  name: string;
+  public: boolean;
+  fileSizeLimit?: number;
+  allowedMimeTypes?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StorageObject {
+  name: string;
+  bucket_id: string;
+  owner?: string;
+  id?: string;
+  updated_at?: string;
+  created_at?: string;
+  last_accessed_at?: string;
+  metadata?: Record<string, any>;
+}
+
+export async function getStorageBuckets(projectId: string): Promise<StorageBucket[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch buckets');
+  return data;
+}
+
+export async function createStorageBucket(projectId: string, name: string, isPublic: boolean): Promise<StorageBucket> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, public: isPublic, id: name })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create bucket');
+  return data;
+}
+
+export async function deleteStorageBucket(projectId: string, bucketId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete bucket');
+  }
+}
+
+export async function emptyStorageBucket(projectId: string, bucketId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/empty`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to empty bucket');
+  }
+}
+
+export async function getStorageObjects(projectId: string, bucketId: string, prefix: string = '', limit: number = 100, offset: number = 0): Promise<{ objects: StorageObject[], total: number }> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const url = new URL(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/objects/list`);
+  url.searchParams.append('prefix', prefix);
+  url.searchParams.append('limit', limit.toString());
+  url.searchParams.append('offset', offset.toString());
+
+  // Using POST per supabase API spec for listing
+  const response = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ prefix, limit, offset })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch objects');
+
+  // Normalize responses where sometimes it directly returns an array and sometimes {objects, total}
+  if (Array.isArray(data)) {
+    return { objects: data, total: data.length };
+  }
+  return data;
+}
+
+export async function deleteStorageObject(projectId: string, bucketId: string, objectPath: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  // objectPath might contain slashes so we make sure it's fully appended to the path as wildcard param handles it
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/object/${objectPath}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete object');
+  }
+}
+
+// ─── Edge Functions Configuration & Management ──────────────────────────────
+
+export interface EdgeFunction {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Deployment {
+  id: string;
+  version: number;
+  status: string;
+  createdAt: string;
+}
+
+export async function getEdgeFunctions(projectId: string): Promise<EdgeFunction[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch edge functions');
+  return data;
+}
+
+export async function createEdgeFunction(projectId: string, name: string): Promise<EdgeFunction> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create edge function');
+  return data;
+}
+
+export async function deleteEdgeFunction(projectId: string, functionId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete edge function');
+  }
+}
+
+export async function getFunctionDeployments(projectId: string, functionId: string): Promise<Deployment[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}/deployments`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch deployments');
+  return data;
+}
+
+// ─── Platform APIs ────────────────────────────────────────
+
+// Database Migrations
+export async function getDatabaseMigrations(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch migrations');
+  return data || [];
+}
+
+export async function createDatabaseMigration(projectId: string, name: string, sql: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
+    method: "POST",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, sql })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create migration');
+  return data;
+}
+
+// Project Logs — LogQueryRequest: { service, level, search, since, until, limit }
+export async function queryProjectLogs(projectId: string, service: string, limit: number = 50): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/logs/query`, {
+    method: "POST",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ service, limit })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch logs');
+  return Array.isArray(data) ? data : [];
+}
+
+// Cron Jobs
+export async function getCronJobs(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch cron jobs');
+  return data || [];
+}
+
+export async function createCronJob(projectId: string, name: string, schedule: string, command: string, database = 'postgres'): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
+    method: "POST",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, schedule, command, database })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create cron job');
+  return data;
+}
+
+export async function deleteCronJob(projectId: string, jobId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs/${jobId}`, {
+    method: "DELETE",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete cron job');
+  }
+}
+
+// ─── SQL Editor ──────────────────────────────────────────────────────────────
+export async function executeSql(projectId: string, query: string): Promise<{ results: any[]; execution_time: string }> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/sql`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'SQL execution failed');
+  return data;
+}
+
+// ─── Schema / Tables ─────────────────────────────────────────────────────────
+export async function getSchemaTables(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/schema/tables`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch tables');
+  return Array.isArray(data) ? data : data.tables || [];
+}
+
+export async function getSchemaVisualization(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/schema/visualize`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch schema');
+  return data;
+}
+
+// ─── Database Backups ─────────────────────────────────────────────────────────
+export async function listBackups(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch backups');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createBackup(projectId: string, type = 'manual'): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create backup');
+  return data;
+}
+
+export async function deleteBackup(projectId: string, backupId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete backup');
+  }
+}
+
+export async function restoreBackup(projectId: string, backupId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}/restore`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to restore backup');
+  return data;
+}
+
+// ─── Database Branches ────────────────────────────────────────────────────────
+export async function listBranches(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list branches');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createBranch(projectId: string, name: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create branch');
+  return data;
+}
+
+export async function deleteBranch(projectId: string, branchId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches/${branchId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete branch');
+  }
+}
+
+// ─── Database Webhooks ────────────────────────────────────────────────────────
+export async function listWebhooks(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch webhooks');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createWebhook(projectId: string, payload: { name: string; table: string; schema?: string; events: string[]; url: string; method?: string }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ schema: 'public', method: 'POST', ...payload }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create webhook');
+  return data;
+}
+
+export async function deleteWebhook(projectId: string, webhookId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks/${webhookId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete webhook');
+  }
+}
+
+// ─── Read Replicas ────────────────────────────────────────────────────────────
+export async function listReplicas(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list replicas');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createReplica(projectId: string, name: string, region: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, region }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create replica');
+  return data;
+}
+
+export async function deleteReplica(projectId: string, replicaId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas/${replicaId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete replica');
+  }
+}
+
+// ─── Vault / Secrets ──────────────────────────────────────────────────────────
+export async function listVaultSecrets(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch secrets');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createVaultSecret(projectId: string, name: string, value: string, description?: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, value, description }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create secret');
+  return data;
+}
+
+export async function deleteVaultSecret(projectId: string, secretId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets/${secretId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete secret');
+  }
+}
+
+// ─── SSO / SAML ───────────────────────────────────────────────────────────────
+export async function listSSOProviders(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list SSO providers');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createSSOProvider(projectId: string, payload: { type: string; metadataUrl?: string; metadataXml?: string; domains?: string[] }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create SSO provider');
+  return data;
+}
+
+export async function deleteSSOProvider(projectId: string, providerId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso/${providerId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete SSO provider');
+  }
+}
+
+// ─── Custom Domains ───────────────────────────────────────────────────────────
+export async function listCustomDomains(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list domains');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function addCustomDomain(projectId: string, domain: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ domain }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to add domain');
+  return data;
+}
+
+export async function verifyCustomDomain(projectId: string, domainId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}/verify`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to verify domain');
+  return data;
+}
+
+export async function removeCustomDomain(projectId: string, domainId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to remove domain');
+  }
+}
+
+// ─── Network Restrictions ─────────────────────────────────────────────────────
+export async function getNetworkRestrictions(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch network restrictions');
+  return data;
+}
+
+export async function updateNetworkRestrictions(projectId: string, payload: { enabled: boolean; allowList?: any; denyList?: any }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update network restrictions');
+  return data;
+}
+
+// ─── Connection Pooler ────────────────────────────────────────────────────────
+export async function getPoolConfig(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch pool config');
+  return data;
+}
+
+export async function updatePoolConfig(projectId: string, payload: { enabled?: boolean; poolMode?: string; defaultPoolSize?: number; maxClientConnections?: number }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update pool config');
+  return data;
+}
+
+export async function getPoolStats(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/stats`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch pool stats');
+  return data;
+}
+
+// ─── Realtime Config ──────────────────────────────────────────────────────────
+export async function getRealtimeConfig(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch realtime config');
+  return data;
+}
+
+export async function updateRealtimeConfig(projectId: string, payload: { replayEnabled?: boolean; retentionMinutes?: number; maxEventsPerSec?: number }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update realtime config');
+  return data;
+}
+
+// ─── Log Drains ───────────────────────────────────────────────────────────────
+export async function listLogDrains(projectId: string): Promise<any[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list log drains');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createLogDrain(projectId: string, payload: { name: string; type: string; config: Record<string, any>; sources: string[] }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create log drain');
+  return data;
+}
+
+export async function deleteLogDrain(projectId: string, drainId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains/${drainId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete log drain');
+  }
+}
+
+// ─── AI / pgvector ────────────────────────────────────────────────────────────
+export async function getAIConfig(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch AI config');
+  return data;
+}
+
+export async function updateAIConfig(projectId: string, payload: { pgvectorEnabled?: boolean; defaultModel?: string; openaiKey?: string }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update AI config');
+  return data;
+}
+
+// ─── GraphQL Config ───────────────────────────────────────────────────────────
+export async function getGraphQLConfig(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch GraphQL config');
+  return data;
+}
+
+export async function updateGraphQLConfig(projectId: string, payload: { enabled?: boolean; maxDepth?: number; defaultLimit?: number }): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update GraphQL config');
+  return data;
+}
+
+// ─── Type Generator ───────────────────────────────────────────────────────────
+export async function generateTypeScript(projectId: string): Promise<string> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/generators/typescript`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to generate types');
+  }
+  return response.text();
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Activity, Database, Zap, Users } from 'lucide-react';
 import { getProjects, getProjectKeys, getOrganizations, isAuthenticated, Project, ProjectKeys, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AuthSettings from '@/components/AuthSettings';
@@ -11,6 +12,24 @@ import AuthPolicies from '@/components/AuthPolicies';
 import ApiDocs from '@/components/ApiDocs';
 import ProjectSettings from '@/components/ProjectSettings';
 import ProjectUsage from '@/components/ProjectUsage';
+import StorageManager from '@/components/StorageManager';
+import FunctionsManager from '@/components/FunctionsManager';
+import CronManager from '@/components/CronManager';
+import LogsManager from '@/components/LogsManager';
+import MigrationsManager from '@/components/MigrationsManager';
+import SqlEditor from '@/components/SqlEditor';
+import TableEditor from '@/components/TableEditor';
+import BackupsManager from '@/components/BackupsManager';
+import BranchesManager from '@/components/BranchesManager';
+import WebhooksManager from '@/components/WebhooksManager';
+import VaultManager from '@/components/VaultManager';
+import SSOManager from '@/components/SSOManager';
+import DomainsManager from '@/components/DomainsManager';
+import NetworkRestrictions from '@/components/NetworkRestrictions';
+import PoolerConfig from '@/components/PoolerConfig';
+import RealtimeConfig from '@/components/RealtimeConfig';
+import LogDrainsManager from '@/components/LogDrainsManager';
+import AdvancedConfig from '@/components/AdvancedConfig';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -177,10 +196,10 @@ export default function ProjectDetailsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded text-sm text-black dark:text-white">
-                    {project.postgrestUrl || `https://${project.slug}.afriibase.co`}
+                    {`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}`}
                   </code>
                   <button
-                    onClick={() => copyToClipboard(project.postgrestUrl || `https://${project.slug}.afriibase.co`)}
+                    onClick={() => copyToClipboard(`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}`)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded transition-colors"
                   >
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,17 +421,37 @@ export default function ProjectDetailsPage() {
                         </div>
                       </div>
 
-                      {/* PostgREST URL */}
+                      {/* REST URL */}
                       <div>
                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-                          PostgREST URL
+                          Rest API URL
                         </label>
                         <div className="flex items-center gap-2">
                           <code className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded text-sm text-black dark:text-white truncate">
-                            {keys.postgrest_url}
+                            {`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}`}
                           </code>
                           <button
-                            onClick={() => copyToClipboard(keys.postgrest_url)}
+                            onClick={() => copyToClipboard(`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}`)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded transition-colors"
+                          >
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Auth URL */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                          Auth API URL
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded text-sm text-black dark:text-white truncate">
+                            {`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/auth/v1/${project.slug}`}
+                          </code>
+                          <button
+                            onClick={() => copyToClipboard(`http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/auth/v1/${project.slug}`)}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded transition-colors"
                           >
                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -468,7 +507,115 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'auth' && activeTab !== 'users' && activeTab !== 'policies' && activeTab !== 'api' && activeTab !== 'settings' && activeTab !== 'usage' && (
+          {activeTab === 'storage' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <StorageManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'edge-functions' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <FunctionsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'cron' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <CronManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'logs' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <LogsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'migrations' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <MigrationsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'tables' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <TableEditor projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'sql' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <SqlEditor projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'backups' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <BackupsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'branches' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <BranchesManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'webhooks' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <WebhooksManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'vault' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <VaultManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'sso' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <SSOManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'domains' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <DomainsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'network' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <NetworkRestrictions projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'pooler' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <PoolerConfig projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'realtime' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <RealtimeConfig projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'log-drains' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <LogDrainsManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'advanced' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <AdvancedConfig projectId={project.id} />
+            </div>
+          )}
+
+          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

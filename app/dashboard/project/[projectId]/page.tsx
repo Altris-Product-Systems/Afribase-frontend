@@ -65,8 +65,25 @@ function formatBytes(bytes?: number): string {
 }
 
 function usagePct(used?: number, limit?: number): number {
-  if (!used || !limit) return 0;
+  if (!used || !limit || limit === 0) return 0;
   return Math.min(100, Math.round((used / limit) * 100));
+}
+
+function parseSizeToBytes(sizeStr?: string | number): number {
+  if (sizeStr == null) return 0;
+  if (typeof sizeStr === 'number') return sizeStr;
+  const match = sizeStr.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]*)$/);
+  if (!match) return 0;
+  const value = parseFloat(match[1]);
+  const unit = match[2].toUpperCase();
+  const units: Record<string, number> = {
+    'B': 1,
+    'KB': 1024,
+    'MB': 1024 * 1024,
+    'GB': 1024 * 1024 * 1024,
+    'TB': 1024 * 1024 * 1024 * 1024,
+  };
+  return value * (units[unit] || 1);
 }
 
 const TABS = ['overview', 'tables', 'sql', 'auth', 'users', 'policies', 'api-keys', 'usage', 'settings'] as const;
@@ -196,9 +213,25 @@ export default function ProjectDetailPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const handleCopy = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(type);
-    setTimeout(() => setCopiedKey(null), 2000);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(type);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } else {
+      // Fallback for older browsers or insecure contexts
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopiedKey(type);
+        setTimeout(() => setCopiedKey(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+    }
   };
 
   const handleRunQuery = async () => {
@@ -453,7 +486,7 @@ export default function ProjectDetailPage() {
                       <button
                         onClick={() =>
                           handleCopy(
-                            `import { createClient } from '@afriibase/afriibase-js'\nconst afriibase = createClient('${keys?.postgrest_url || project.postgrestUrl || ''}', '${keys?.anon_key || project.anonKey || ''}')`,
+                            `import { createClient } from '@afriibase/afriibase-js'\nconst afriibase = createClient('http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}', '${keys?.anon_key || project.anonKey || ''}')`,
                             'init'
                           )
                         }
@@ -477,7 +510,7 @@ export default function ProjectDetailPage() {
                         <span className="text-cyan-400">createClient</span>(
                       </p>
                       <p className="pl-4 text-emerald-500 truncate">
-                        '{keys?.postgrest_url || project.postgrestUrl || 'https://your-project.afriibase.co'}'
+                        {`'http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}'`}
                       </p>
                       <p className="pl-4 text-yellow-500">
                         '{keys?.anon_key ? keys.anon_key.slice(0, 24) + '…' : 'your-anon-key'}'
@@ -1089,8 +1122,8 @@ export default function ProjectDetailPage() {
                 {[
                   {
                     label: 'Database Storage',
-                    used: usage?.databaseSize,
-                    limit: usage?.databaseSizeLimit,
+                    used: usage?.db_size,
+                    limit: usage?.db_size_limit,
                     fallbackUsed: '— MB',
                     fallbackLimit: '500 MB',
                     color: 'bg-emerald-500',
@@ -1098,9 +1131,20 @@ export default function ProjectDetailPage() {
                     icon: HardDrive,
                   },
                   {
-                    label: 'Egress Traffic',
-                    used: usage?.egressBytes,
-                    limit: usage?.egressBytesLimit,
+                    label: 'Row Count',
+                    used: usage?.row_count,
+                    limit: 1000000,
+                    fallbackUsed: '—',
+                    fallbackLimit: '1M',
+                    color: 'bg-cyan-500',
+                    shadow: '',
+                    icon: Table,
+                    raw: true,
+                  },
+                  {
+                    label: 'Bandwidth (Egress)',
+                    used: usage?.bandwidth,
+                    limit: usage?.bandwidth_limit,
                     fallbackUsed: '— GB',
                     fallbackLimit: '5 GB',
                     color: 'bg-blue-500',
@@ -1108,20 +1152,19 @@ export default function ProjectDetailPage() {
                     icon: Activity,
                   },
                   {
-                    label: 'Realtime Connections',
-                    used: usage?.realtimeConnections,
-                    limit: usage?.realtimeConnectionsLimit,
-                    fallbackUsed: '—',
-                    fallbackLimit: '200',
+                    label: 'File Storage',
+                    used: usage?.storage,
+                    limit: usage?.storage_limit,
+                    fallbackUsed: '— GB',
+                    fallbackLimit: '1 GB',
                     color: 'bg-purple-500',
                     shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.3)]',
-                    icon: Zap,
-                    raw: true,
+                    icon: HardDrive,
                   },
                   {
                     label: 'Monthly Active Users',
-                    used: usage?.monthlyActiveUsers,
-                    limit: usage?.monthlyActiveUsersLimit,
+                    used: usage?.auth_users,
+                    limit: usage?.auth_users_limit,
                     fallbackUsed: '—',
                     fallbackLimit: '50,000',
                     color: 'bg-amber-500',
@@ -1130,17 +1173,12 @@ export default function ProjectDetailPage() {
                     raw: true,
                   },
                 ].map(({ label, used, limit, fallbackUsed, fallbackLimit, color, shadow, icon: Icon, raw }) => {
-                  const pct = usagePct(used, limit);
-                  const usedStr = used == null
-                    ? fallbackUsed
-                    : raw
-                      ? used.toLocaleString()
-                      : formatBytes(used);
-                  const limitStr = limit == null
-                    ? fallbackLimit
-                    : raw
-                      ? limit.toLocaleString()
-                      : formatBytes(limit);
+                  const usedVal = parseSizeToBytes(used as any);
+                  const limitVal = parseSizeToBytes(limit as any);
+                  const pct = usagePct(usedVal, limitVal);
+
+                  const usedStr = used != null ? used.toLocaleString() : fallbackUsed;
+                  const limitStr = limit != null ? limit.toLocaleString() : fallbackLimit;
                   return (
                     <div key={label} className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
                       <div className="flex items-center justify-between">

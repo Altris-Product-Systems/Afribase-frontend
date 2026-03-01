@@ -317,9 +317,9 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                     </button>
                                 </div>
                                 <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed">
-                                    {`// Initialize
+                                    {config?.sdkSnippet?.javascript || `// Initialize
 const client = createClient(
-  '${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}',
+  'http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/[YOUR_PROJECT_SLUG]',
   'ANON_KEY'
 );
 
