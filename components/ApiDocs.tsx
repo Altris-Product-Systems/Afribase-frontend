@@ -29,7 +29,7 @@ export default function ApiDocs({ projectId, projectSlug, anonKey = 'eyJhbGciOiJ
         {
             title: 'Fetch Data',
             language: 'javascript',
-            code: `const { data, error } = await afriibase
+            code: `const { data, error } = await afribase
   .from('your_table')
   .select('*')
   .eq('id', 1);`
@@ -37,7 +37,7 @@ export default function ApiDocs({ projectId, projectSlug, anonKey = 'eyJhbGciOiJ
         {
             title: 'Insert Row',
             language: 'javascript',
-            code: `const { error } = await afriibase
+            code: `const { error } = await afribase
   .from('your_table')
   .insert({ name: 'New Item' });`
         },

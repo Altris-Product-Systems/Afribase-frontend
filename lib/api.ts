@@ -149,7 +149,7 @@ export async function getUser(): Promise<User> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/user`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/user`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -221,10 +221,24 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> 
 }
 
 // Import auth functions from auth.ts
-import { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated } from './auth';
+import { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated, handleUnauthorized } from './auth';
 
 // Re-export auth functions from auth.ts
 export { getAuthToken, setAuthToken, removeAuthToken, isAuthenticated };
+
+/**
+ * Drop-in replacement for fetch() that automatically handles 401 responses
+ * by clearing the auth token and redirecting to the sign-in page.
+ * Use this for all authenticated API requests.
+ */
+async function apiFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  const response = await fetch(input, init);
+  if (response.status === 401) {
+    // Clone the response so callers can still read it if needed
+    handleUnauthorized();
+  }
+  return response;
+}
 
 // Organization interfaces and functions
 export interface Organization {
@@ -258,7 +272,7 @@ export async function getOrganizationMembers(orgId: string): Promise<MemberRespo
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -281,7 +295,7 @@ export async function inviteOrganizationMember(orgId: string, request: InviteMem
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -305,7 +319,7 @@ export async function removeOrganizationMember(orgId: string, userId: string): P
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -327,7 +341,7 @@ export async function createOrganization(data: CreateOrganizationRequest): Promi
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -359,7 +373,7 @@ export async function getOrganizations(): Promise<Organization[]> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -428,7 +442,7 @@ export async function createProject(projectData: CreateProjectRequest): Promise<
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations/${projectData.organizationId}/projects`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -508,7 +522,7 @@ export async function getProjectKeys(projectId: string): Promise<ProjectKeys> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/keys`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/keys`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -538,7 +552,7 @@ export async function getProject(projectId: string): Promise<Project> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -574,7 +588,7 @@ export async function updateProject(projectId: string, data: UpdateProjectReques
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -605,7 +619,7 @@ export async function deleteProject(projectId: string): Promise<void> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -630,7 +644,7 @@ export async function pauseProject(projectId: string): Promise<void> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pause`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/pause`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -649,7 +663,7 @@ export async function reactivateProject(projectId: string): Promise<void> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/reactivate`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/reactivate`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -668,7 +682,7 @@ export async function deleteOrganization(orgId: string): Promise<void> {
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -699,7 +713,7 @@ export async function runProjectQuery(projectId: string, query: string): Promise
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/query`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/query`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -746,7 +760,7 @@ export async function getProjectTables(projectId: string): Promise<TableInfo[]> 
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tables`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/tables`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -784,7 +798,7 @@ export async function deleteProjectTable(projectId: string, schema: string, tabl
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tables/${schema}/${table}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/tables/${schema}/${table}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -823,7 +837,7 @@ export async function getProjectUsage(projectId: string): Promise<ProjectUsage> 
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/usage`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/usage`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -853,7 +867,7 @@ export async function getAuthConfig(projectId: string): Promise<AuthConfigRespon
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -887,7 +901,7 @@ export async function updateAuthConfig(projectId: string, data: UpdateAuthConfig
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/config`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -921,7 +935,7 @@ export async function updateAuthProvider(
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/providers/${provider}`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/providers/${provider}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -951,7 +965,7 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
   if (!token) throw new APIError(401, 'Not authenticated');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1007,7 +1021,7 @@ export async function getStorageBuckets(projectId: string): Promise<StorageBucke
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
 
@@ -1020,7 +1034,7 @@ export async function createStorageBucket(projectId: string, name: string, isPub
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1038,7 +1052,7 @@ export async function deleteStorageBucket(projectId: string, bucketId: string): 
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -1053,7 +1067,7 @@ export async function emptyStorageBucket(projectId: string, bucketId: string): P
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/empty`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/empty`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -1098,7 +1112,7 @@ export async function deleteStorageObject(projectId: string, bucketId: string, o
   if (!token) throw new APIError(401, 'Not authenticated');
 
   // objectPath might contain slashes so we make sure it's fully appended to the path as wildcard param handles it
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/object/${objectPath}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/storage/buckets/${bucketId}/object/${objectPath}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -1132,7 +1146,7 @@ export async function getEdgeFunctions(projectId: string): Promise<EdgeFunction[
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
 
@@ -1145,7 +1159,7 @@ export async function createEdgeFunction(projectId: string, name: string): Promi
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/functions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1163,7 +1177,7 @@ export async function deleteEdgeFunction(projectId: string, functionId: string):
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -1178,7 +1192,7 @@ export async function getFunctionDeployments(projectId: string, functionId: stri
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
 
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}/deployments`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/functions/${functionId}/deployments`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
 
@@ -1193,7 +1207,7 @@ export async function getFunctionDeployments(projectId: string, functionId: stri
 export async function getDatabaseMigrations(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const data = await response.json();
@@ -1204,7 +1218,7 @@ export async function getDatabaseMigrations(projectId: string): Promise<any[]> {
 export async function createDatabaseMigration(projectId: string, name: string, sql: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/migrations`, {
     method: "POST",
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1221,7 +1235,7 @@ export async function createDatabaseMigration(projectId: string, name: string, s
 export async function queryProjectLogs(projectId: string, service: string, limit: number = 50): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/logs/query`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/logs/query`, {
     method: "POST",
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1238,7 +1252,7 @@ export async function queryProjectLogs(projectId: string, service: string, limit
 export async function getCronJobs(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const data = await response.json();
@@ -1249,7 +1263,7 @@ export async function getCronJobs(projectId: string): Promise<any[]> {
 export async function createCronJob(projectId: string, name: string, schedule: string, command: string, database = 'postgres'): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs`, {
     method: "POST",
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1265,7 +1279,7 @@ export async function createCronJob(projectId: string, name: string, schedule: s
 export async function deleteCronJob(projectId: string, jobId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs/${jobId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/cron/jobs/${jobId}`, {
     method: "DELETE",
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -1282,7 +1296,7 @@ export async function deleteCronJob(projectId: string, jobId: string): Promise<v
 export async function executeSql(projectId: string, query: string): Promise<{ results: any[]; execution_time: string }> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/sql`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/sql`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
@@ -1296,7 +1310,7 @@ export async function executeSql(projectId: string, query: string): Promise<{ re
 export async function getSchemaTables(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/schema/tables`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/schema/tables`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1307,7 +1321,7 @@ export async function getSchemaTables(projectId: string): Promise<any[]> {
 export async function getSchemaVisualization(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/schema/visualize`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/schema/visualize`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1319,7 +1333,7 @@ export async function getSchemaVisualization(projectId: string): Promise<any> {
 export async function listBackups(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1330,7 +1344,7 @@ export async function listBackups(projectId: string): Promise<any[]> {
 export async function createBackup(projectId: string, type = 'manual'): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ type }),
@@ -1343,7 +1357,7 @@ export async function createBackup(projectId: string, type = 'manual'): Promise<
 export async function deleteBackup(projectId: string, backupId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1356,7 +1370,7 @@ export async function deleteBackup(projectId: string, backupId: string): Promise
 export async function restoreBackup(projectId: string, backupId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}/restore`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/backups/${backupId}/restore`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
@@ -1370,7 +1384,7 @@ export async function restoreBackup(projectId: string, backupId: string): Promis
 export async function listBranches(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1381,7 +1395,7 @@ export async function listBranches(projectId: string): Promise<any[]> {
 export async function createBranch(projectId: string, name: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
@@ -1394,7 +1408,7 @@ export async function createBranch(projectId: string, name: string): Promise<any
 export async function deleteBranch(projectId: string, branchId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches/${branchId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/branches/${branchId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1408,7 +1422,7 @@ export async function deleteBranch(projectId: string, branchId: string): Promise
 export async function listWebhooks(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1419,7 +1433,7 @@ export async function listWebhooks(projectId: string): Promise<any[]> {
 export async function createWebhook(projectId: string, payload: { name: string; table: string; schema?: string; events: string[]; url: string; method?: string }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ schema: 'public', method: 'POST', ...payload }),
@@ -1432,7 +1446,7 @@ export async function createWebhook(projectId: string, payload: { name: string; 
 export async function deleteWebhook(projectId: string, webhookId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks/${webhookId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/webhooks/${webhookId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1446,7 +1460,7 @@ export async function deleteWebhook(projectId: string, webhookId: string): Promi
 export async function listReplicas(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1457,7 +1471,7 @@ export async function listReplicas(projectId: string): Promise<any[]> {
 export async function createReplica(projectId: string, name: string, region: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, region }),
@@ -1470,7 +1484,7 @@ export async function createReplica(projectId: string, name: string, region: str
 export async function deleteReplica(projectId: string, replicaId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas/${replicaId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/replicas/${replicaId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1484,7 +1498,7 @@ export async function deleteReplica(projectId: string, replicaId: string): Promi
 export async function listVaultSecrets(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1495,7 +1509,7 @@ export async function listVaultSecrets(projectId: string): Promise<any[]> {
 export async function createVaultSecret(projectId: string, name: string, value: string, description?: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, value, description }),
@@ -1508,7 +1522,7 @@ export async function createVaultSecret(projectId: string, name: string, value: 
 export async function deleteVaultSecret(projectId: string, secretId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets/${secretId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/security/vault/secrets/${secretId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1522,7 +1536,7 @@ export async function deleteVaultSecret(projectId: string, secretId: string): Pr
 export async function listSSOProviders(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1533,7 +1547,7 @@ export async function listSSOProviders(projectId: string): Promise<any[]> {
 export async function createSSOProvider(projectId: string, payload: { type: string; metadataUrl?: string; metadataXml?: string; domains?: string[] }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1546,7 +1560,7 @@ export async function createSSOProvider(projectId: string, payload: { type: stri
 export async function deleteSSOProvider(projectId: string, providerId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso/${providerId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/sso/${providerId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1560,7 +1574,7 @@ export async function deleteSSOProvider(projectId: string, providerId: string): 
 export async function listCustomDomains(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1571,7 +1585,7 @@ export async function listCustomDomains(projectId: string): Promise<any[]> {
 export async function addCustomDomain(projectId: string, domain: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/domains`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ domain }),
@@ -1584,7 +1598,7 @@ export async function addCustomDomain(projectId: string, domain: string): Promis
 export async function verifyCustomDomain(projectId: string, domainId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}/verify`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}/verify`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
@@ -1597,7 +1611,7 @@ export async function verifyCustomDomain(projectId: string, domainId: string): P
 export async function removeCustomDomain(projectId: string, domainId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/domains/${domainId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1611,7 +1625,7 @@ export async function removeCustomDomain(projectId: string, domainId: string): P
 export async function getNetworkRestrictions(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1622,7 +1636,7 @@ export async function getNetworkRestrictions(projectId: string): Promise<any> {
 export async function updateNetworkRestrictions(projectId: string, payload: { enabled: boolean; allowList?: any; denyList?: any }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/network/restrictions`, {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1636,7 +1650,7 @@ export async function updateNetworkRestrictions(projectId: string, payload: { en
 export async function getPoolConfig(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1647,7 +1661,7 @@ export async function getPoolConfig(projectId: string): Promise<any> {
 export async function updatePoolConfig(projectId: string, payload: { enabled?: boolean; poolMode?: string; defaultPoolSize?: number; maxClientConnections?: number }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/config`, {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1660,7 +1674,7 @@ export async function updatePoolConfig(projectId: string, payload: { enabled?: b
 export async function getPoolStats(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/stats`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/pooler/stats`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1672,7 +1686,7 @@ export async function getPoolStats(projectId: string): Promise<any> {
 export async function getRealtimeConfig(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1683,7 +1697,7 @@ export async function getRealtimeConfig(projectId: string): Promise<any> {
 export async function updateRealtimeConfig(projectId: string, payload: { replayEnabled?: boolean; retentionMinutes?: number; maxEventsPerSec?: number }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/realtime/config`, {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1697,7 +1711,7 @@ export async function updateRealtimeConfig(projectId: string, payload: { replayE
 export async function listLogDrains(projectId: string): Promise<any[]> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1708,7 +1722,7 @@ export async function listLogDrains(projectId: string): Promise<any[]> {
 export async function createLogDrain(projectId: string, payload: { name: string; type: string; config: Record<string, any>; sources: string[] }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1721,7 +1735,7 @@ export async function createLogDrain(projectId: string, payload: { name: string;
 export async function deleteLogDrain(projectId: string, drainId: string): Promise<void> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains/${drainId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/log-drains/${drainId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -1735,7 +1749,7 @@ export async function deleteLogDrain(projectId: string, drainId: string): Promis
 export async function getAIConfig(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1746,7 +1760,7 @@ export async function getAIConfig(projectId: string): Promise<any> {
 export async function updateAIConfig(projectId: string, payload: { pgvectorEnabled?: boolean; defaultModel?: string; openaiKey?: string }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/ai/config`, {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1760,7 +1774,7 @@ export async function updateAIConfig(projectId: string, payload: { pgvectorEnabl
 export async function getGraphQLConfig(projectId: string): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   const data = await response.json();
@@ -1771,7 +1785,7 @@ export async function getGraphQLConfig(projectId: string): Promise<any> {
 export async function updateGraphQLConfig(projectId: string, payload: { enabled?: boolean; maxDepth?: number; defaultLimit?: number }): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/graphql`, {
     method: 'PUT',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1785,7 +1799,7 @@ export async function updateGraphQLConfig(projectId: string, payload: { enabled?
 export async function generateTypeScript(projectId: string): Promise<string> {
   const token = getAuthToken();
   if (!token) throw new APIError(401, 'Not authenticated');
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/generators/typescript`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/generators/typescript`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) {

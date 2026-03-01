@@ -28,7 +28,7 @@ NEXT_PUBLIC_API_BASE_URL=http://192.168.1.113:8000
 
 **For production:**
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.afriibase.com
+NEXT_PUBLIC_API_BASE_URL=https://api.afribase.com
 ```
 
 ### 3. Troubleshooting "name resolution failed" Error

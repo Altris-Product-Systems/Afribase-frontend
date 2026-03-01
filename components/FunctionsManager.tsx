@@ -206,7 +206,7 @@ export default function FunctionsManager({ projectId }: FunctionsManagerProps) {
                                 ) : deployments.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center text-zinc-500 p-8 text-center space-y-4">
                                         <p className="text-sm">No deployments found.</p>
-                                        <p className="text-xs text-zinc-400">Deploy via CLI: <code className="text-white">afriibase functions deploy {selectedFunc.name}</code></p>
+                                        <p className="text-xs text-zinc-400">Deploy via CLI: <code className="text-white">afribase functions deploy {selectedFunc.name}</code></p>
                                     </div>
                                 ) : (
                                     <table className="w-full text-sm text-left">

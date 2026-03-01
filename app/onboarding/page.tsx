@@ -115,7 +115,7 @@ export default function OnboardingPage() {
             <span className="text-black font-black text-xl italic">A</span>
           </div>
           <span className="text-2xl font-black text-white tracking-tighter uppercase italic">
-            Afriibase
+            Afribase
           </span>
         </Link>
 

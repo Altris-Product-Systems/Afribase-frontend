@@ -105,7 +105,7 @@ export default function Features() {
                         transition={{ delay: 0.1 }}
                         className="text-base md:text-lg text-white/60 max-w-2xl mx-auto font-medium"
                     >
-                        Afriibase provides all the enterprise-grade tools required to build,
+                        Afribase provides all the enterprise-grade tools required to build,
                         launch, and grow your digital business in Africa.
                     </motion.p>
                 </div>

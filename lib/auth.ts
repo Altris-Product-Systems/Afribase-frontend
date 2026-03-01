@@ -40,6 +40,23 @@ export function isAuthenticated(): boolean {
   return !!getAuthToken();
 }
 
+/**
+ * Called by API functions when the server responds with 401 Unauthorized.
+ * Clears the stored token and redirects to the sign-in page so the user
+ * can re-authenticate. Safe to call from any non-React context (e.g. api.ts).
+ */
+export function handleUnauthorized(): void {
+  if (typeof window === 'undefined') return;
+
+  // Only act if we actually had a token (avoid redirect loops on login page)
+  const hadToken = !!Cookies.get(TOKEN_NAME);
+  removeAuthToken();
+
+  if (hadToken && !window.location.pathname.startsWith('/auth')) {
+    window.location.href = '/auth/sign-in?reason=session_expired';
+  }
+}
+
 // Activity tracking
 export function updateLastActivity(): void {
   if (typeof window === 'undefined') return;

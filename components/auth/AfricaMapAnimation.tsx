@@ -120,7 +120,7 @@ export default function AfricaMapAnimation() {
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         <h3 className="text-sm font-black text-emerald-500 uppercase tracking-widest leading-tight">
-                            Afriibase Unified Console
+                            Afribase Unified Console
                         </h3>
                     </div>
                     <p className="text-white font-medium text-lg mb-1 leading-snug">

@@ -5,7 +5,7 @@ const steps = [
     {
         number: '01',
         title: 'Architect & Sync',
-        description: 'Develop locally and synchronize your codebase with the Afriibase core infrastructure.',
+        description: 'Develop locally and synchronize your codebase with the Afribase core infrastructure.',
     },
     {
         number: '02',

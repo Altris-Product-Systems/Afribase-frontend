@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
               <span className="text-black font-black text-lg italic">A</span>
             </div>
             <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-              Afriibase
+              Afribase
             </span>
           </Link>
 
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
               <input
                 type="email"
                 id="email"
-                placeholder="developer@afriibase.io"
+                placeholder="developer@afribase.io"
                 className="w-full px-4 py-3.5 border border-white/5 rounded-xl bg-white/[0.02] text-sm text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all focus:scale-[1.01]"
               />
             </div>

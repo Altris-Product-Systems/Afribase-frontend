@@ -54,7 +54,7 @@ export default function Languages() {
                         transition={{ delay: 0.1 }}
                         className="text-sm md:text-lg text-white/50 max-w-2xl mx-auto font-medium"
                     >
-                        Afriibase works with any language and framework. Our client SDKs and
+                        Afribase works with any language and framework. Our client SDKs and
                         auto-generated APIs allow you to build with the tools you already love.
                     </motion.p>
                 </div>

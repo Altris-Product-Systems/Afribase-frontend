@@ -215,7 +215,7 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
                 </div>
                 <div className="flex-1 space-y-1 text-center md:text-left">
                     <h4 className="text-white font-bold">Implement Sign In in minutes</h4>
-                    <p className="text-zinc-500 text-sm font-medium">Use the Afriibase SDK to add Google, GitHub and magic links to your React, Vue or Flutter apps.</p>
+                    <p className="text-zinc-500 text-sm font-medium">Use the Afribase SDK to add Google, GitHub and magic links to your React, Vue or Flutter apps.</p>
                 </div>
                 <button className="px-6 py-3 bg-zinc-950 border border-white/10 text-white text-[10px] font-black rounded-xl hover:border-emerald-500/50 transition-all flex items-center gap-2 uppercase tracking-widest cursor-pointer group">
                     SDK Documentation <ExternalLink size={14} className="group-hover:translate-x-1 transition-transform" />

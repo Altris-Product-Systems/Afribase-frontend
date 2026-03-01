@@ -305,7 +305,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                             </div>
                         </div>
                         <div className="p-6">
-                            <p className="text-xs text-zinc-500 leading-relaxed mb-6 font-medium">Use the Afriibase JS SDK to implement authentication in seconds.</p>
+                            <p className="text-xs text-zinc-500 leading-relaxed mb-6 font-medium">Use the Afribase JS SDK to implement authentication in seconds.</p>
 
                             <div className="relative group">
                                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -158,7 +158,7 @@ export default function Sidebar({
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 duration-200 flex-shrink-0">
               <span className="text-black font-black text-lg">A</span>
             </div>
-            {!isCollapsed && <span className="text-lg font-bold tracking-tighter text-white">Afriibase</span>}
+            {!isCollapsed && <span className="text-lg font-bold tracking-tighter text-white">Afribase</span>}
           </Link>
 
           <button onClick={onToggleCollapse} className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-zinc-900 border border-white/10 rounded-md items-center justify-center text-zinc-400 hover:text-white hover:border-emerald-500/50 transition-all z-[60] shadow-xl">
