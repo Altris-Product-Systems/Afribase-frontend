@@ -60,32 +60,32 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
                 </button>
             </div>
 
-            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-600 dark:text-amber-400">
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-400">
                 🔒 Secrets are encrypted at rest. Once stored, values cannot be retrieved in plaintext — only the name and metadata are returned.
             </div>
 
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">{error}</div>}
 
             {showForm && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-950">
+                <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-950">
                     <h3 className="font-semibold text-sm mb-4">Add Secret</h3>
                     <form onSubmit={handleCreate} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Name</label>
                                 <input value={name} onChange={e => setName(e.target.value)} placeholder="OPENAI_API_KEY"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-purple-500" />
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-purple-500 text-zinc-100" />
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Description (optional)</label>
                                 <input value={description} onChange={e => setDescription(e.target.value)} placeholder="OpenAI API key for embeddings"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-purple-500" />
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-purple-500 text-zinc-100" />
                             </div>
                         </div>
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Secret Value</label>
                             <textarea value={value} onChange={e => setValue(e.target.value)} rows={3} placeholder="sk-..."
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-purple-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-purple-500 text-zinc-100" />
                         </div>
                         <div className="flex justify-end gap-3">
                             <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-zinc-500">Cancel</button>
@@ -98,8 +98,8 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
                 </div>
             )}
 
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-between items-center">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><Lock size={16} />Secrets Store</h3>
                     <span className="text-xs text-zinc-500">{secrets.length} secrets</span>
                 </div>
@@ -112,25 +112,25 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
                         <p className="text-xs text-zinc-400 mt-1">Store API keys, tokens, and credentials securely.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div className="divide-y divide-zinc-800">
                         {secrets.map(s => (
-                            <div key={s.id} className="px-6 py-4 flex items-center gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                            <div key={s.id} className="px-6 py-4 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors">
                                 <Lock size={16} className="text-purple-500 shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100">{s.name}</p>
+                                        <p className="font-mono text-sm font-semibold text-zinc-100">{s.name}</p>
                                     </div>
                                     {s.description && <p className="text-xs text-zinc-500 mt-0.5">{s.description}</p>}
                                     {s.createdAt && <p className="text-[10px] text-zinc-400 mt-0.5">Added {new Date(s.createdAt).toLocaleString()}</p>}
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                    <div className="flex items-center gap-1 font-mono text-sm bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded text-zinc-500">
+                                    <div className="flex items-center gap-1 font-mono text-sm bg-zinc-800 px-3 py-1.5 rounded text-zinc-500">
                                         {revealedIds.has(s.id) ? (s.decrypted || '••••••••') : '••••••••••••••••'}
                                     </div>
-                                    <button onClick={() => toggleReveal(s.id)} className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                                    <button onClick={() => toggleReveal(s.id)} className="p-1.5 text-zinc-400 hover:text-zinc-200 transition-colors">
                                         {revealedIds.has(s.id) ? <EyeOff size={14} /> : <Eye size={14} />}
                                     </button>
-                                    <button onClick={() => copySecret(s.id, s.decrypted || s.name)} className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                                    <button onClick={() => copySecret(s.id, s.decrypted || s.name)} className="p-1.5 text-zinc-400 hover:text-zinc-200 transition-colors">
                                         {copiedId === s.id ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                                     </button>
                                     <button onClick={() => handleDelete(s.id)} className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>

@@ -65,7 +65,7 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
             {/* Add domain */}
             <form onSubmit={handleAdd} className="flex gap-3">
                 <input value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="api.yourdomain.com"
-                    className="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded-lg focus:outline-none focus:border-cyan-500" />
+                    className="flex-1 bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded-lg focus:outline-none focus:border-cyan-500 text-zinc-100" />
                 <button type="submit" disabled={adding || !newDomain}
                     className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 disabled:opacity-50">
                     {adding ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
@@ -73,8 +73,8 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                 </button>
             </form>
 
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-between items-center">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><Globe size={16} />Domains</h3>
                     <span className="text-xs text-zinc-500">{domains.length} configured</span>
                 </div>
@@ -87,13 +87,13 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                         <p className="text-xs text-zinc-400 mt-1">Add a custom domain and point a CNAME to your project.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div className="divide-y divide-zinc-800">
                         {domains.map(d => (
-                            <div key={d.id} className="px-6 py-4 flex items-center gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                            <div key={d.id} className="px-6 py-4 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors">
                                 <StatusIcon status={d.status} />
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{d.domain}</p>
+                                        <p className="font-medium text-sm text-zinc-100">{d.domain}</p>
                                         <a href={`https://${d.domain}`} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-cyan-500 transition-colors">
                                             <ExternalLink size={12} />
                                         </a>
@@ -106,12 +106,12 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                                     {d.error && <p className="text-xs text-red-500 mt-0.5">{d.error}</p>}
                                 </div>
                                 <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${d.status === 'verified' || d.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
-                                        d.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500'
+                                    d.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500'
                                     }`}>{d.status || 'pending'}</span>
                                 <div className="flex items-center gap-1">
                                     {d.status !== 'verified' && d.status !== 'active' && (
                                         <button onClick={() => handleVerify(d.id)} disabled={verifyingId === d.id}
-                                            className="px-3 py-1.5 text-xs font-semibold text-cyan-600 border border-cyan-600/30 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors disabled:opacity-50">
+                                            className="px-3 py-1.5 text-xs font-semibold text-cyan-400 border border-cyan-600/30 rounded-lg hover:bg-cyan-900/20 transition-colors disabled:opacity-50">
                                             {verifyingId === d.id ? <Loader2 size={12} className="animate-spin" /> : 'Verify'}
                                         </button>
                                     )}
@@ -123,9 +123,9 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                 )}
             </div>
 
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-600 dark:text-zinc-400">
-                <p className="font-semibold text-zinc-700 dark:text-zinc-300 mb-1">DNS Setup Instructions</p>
-                <p>Add a <code className="text-xs bg-zinc-200 dark:bg-zinc-800 px-1 py-0.5 rounded">CNAME</code> record from your domain to the project endpoint shown above, then click <strong>Verify</strong>.</p>
+            <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-400">
+                <p className="font-semibold text-zinc-300 mb-1">DNS Setup Instructions</p>
+                <p>Add a <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">CNAME</code> record from your domain to the project endpoint shown above, then click <strong>Verify</strong>.</p>
             </div>
         </div>
     );

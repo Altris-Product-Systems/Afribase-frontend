@@ -58,19 +58,19 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
             </div>
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">{error}</div>}
             {showForm && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-950">
+                <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-950">
                     <h3 className="font-semibold text-sm mb-4">Create Log Drain</h3>
                     <form onSubmit={handleCreate} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Name</label>
                                 <input value={name} onChange={e => setName(e.target.value)} placeholder="My Datadog Drain"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500" />
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500 text-zinc-100" />
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Type</label>
                                 <select value={type} onChange={e => setType(e.target.value)}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500">
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500 text-zinc-100">
                                     {DRAIN_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                                 </select>
                             </div>
@@ -78,14 +78,14 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Endpoint URL</label>
                             <input type="url" value={endpoint} onChange={e => setEndpoint(e.target.value)} placeholder="https://your-collector.example.com/logs"
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-teal-500 text-zinc-100" />
                         </div>
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-2">Log Sources</label>
                             <div className="flex flex-wrap gap-2">
                                 {SOURCES.map(s => (
                                     <button type="button" key={s} onClick={() => toggleSource(s)}
-                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors ${sources.includes(s) ? 'bg-teal-500 text-white border-teal-500' : 'border-zinc-200 dark:border-zinc-700 text-zinc-500'}`}>
+                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors ${sources.includes(s) ? 'bg-teal-500 text-white border-teal-500' : 'border-zinc-700 text-zinc-500'}`}>
                                         {s}
                                     </button>
                                 ))}
@@ -101,8 +101,8 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
                     </form>
                 </div>
             )}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-between items-center">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><Rss size={16} />Active Drains</h3>
                     <span className="text-xs text-zinc-500">{drains.length} active</span>
                 </div>
@@ -116,7 +116,7 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
                     </div>
                 ) : (
                     <table className="w-full text-sm">
-                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50">
+                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
                             <tr>
                                 <th className="px-6 py-3 font-medium text-left">Name</th>
                                 <th className="px-6 py-3 font-medium text-left">Type</th>
@@ -124,12 +124,12 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-zinc-800">
                             {drains.map(d => (
-                                <tr key={d.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                <tr key={d.id} className="hover:bg-zinc-900/50 transition-colors">
                                     <td className="px-6 py-4 font-medium">{d.name}</td>
-                                    <td className="px-6 py-4"><code className="text-xs bg-teal-500/10 text-teal-600 dark:text-teal-400 px-2 py-1 rounded">{d.type}</code></td>
-                                    <td className="px-6 py-4"><div className="flex flex-wrap gap-1">{(d.sources || []).map((s: string) => <span key={s} className="text-[10px] font-bold border border-zinc-300 dark:border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>)}</div></td>
+                                    <td className="px-6 py-4"><code className="text-xs bg-teal-500/10 text-teal-400 px-2 py-1 rounded">{d.type}</code></td>
+                                    <td className="px-6 py-4"><div className="flex flex-wrap gap-1">{(d.sources || []).map((s: string) => <span key={s} className="text-[10px] font-bold border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>)}</div></td>
                                     <td className="px-6 py-4 text-right"><button onClick={() => handleDelete(d.id)} className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button></td>
                                 </tr>
                             ))}

@@ -68,8 +68,8 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
 
             {/* AI Config */}
             {ai && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                    <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-violet-500/5 to-transparent">
+                <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                    <div className="p-4 border-b border-zinc-800 bg-gradient-to-r from-violet-500/5 to-transparent">
                         <h3 className="font-bold text-base flex items-center gap-2">
                             <span className="text-lg">🤖</span> AI / pgvector
                         </h3>
@@ -83,13 +83,13 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={ai.pgvectorEnabled ?? false} onChange={e => setAi((a: any) => ({ ...a, pgvectorEnabled: e.target.checked }))} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-zinc-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
+                                <div className="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
                             </label>
                         </div>
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Default Embedding Model</label>
                             <select value={ai.defaultModel || 'text-embedding-3-small'} onChange={e => setAi((a: any) => ({ ...a, defaultModel: e.target.value }))}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-violet-500">
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-violet-500 text-zinc-100">
                                 <option value="text-embedding-3-small">text-embedding-3-small (1536d)</option>
                                 <option value="text-embedding-3-large">text-embedding-3-large (3072d)</option>
                                 <option value="text-embedding-ada-002">text-embedding-ada-002 (Legacy)</option>
@@ -98,7 +98,7 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">OpenAI API Key (stored in Vault)</label>
                             <input type="password" value={ai.openaiKey || ''} onChange={e => setAi((a: any) => ({ ...a, openaiKey: e.target.value }))} placeholder="sk-..."
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-violet-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-violet-500 text-zinc-100" />
                         </div>
                         <div className="flex justify-end">
                             <button onClick={saveAI} disabled={savingAi} className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 disabled:opacity-50">
@@ -111,8 +111,8 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
 
             {/* GraphQL Config */}
             {gql && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                    <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-pink-500/5 to-transparent">
+                <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                    <div className="p-4 border-b border-zinc-800 bg-gradient-to-r from-pink-500/5 to-transparent">
                         <h3 className="font-bold text-base flex items-center gap-2">
                             <span className="text-lg">⚡</span> GraphQL (pg_graphql)
                         </h3>
@@ -126,25 +126,25 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" checked={gql.enabled ?? false} onChange={e => setGql((g: any) => ({ ...g, enabled: e.target.checked }))} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-zinc-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                                <div className="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
                             </label>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Max Query Depth</label>
                                 <input type="number" min={1} max={20} value={gql.maxDepth ?? 5} onChange={e => setGql((g: any) => ({ ...g, maxDepth: e.target.value }))}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-pink-500" />
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-pink-500 text-zinc-100" />
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Default Limit</label>
                                 <input type="number" min={1} max={1000} value={gql.defaultLimit ?? 100} onChange={e => setGql((g: any) => ({ ...g, defaultLimit: e.target.value }))}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-pink-500" />
+                                    className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-pink-500 text-zinc-100" />
                             </div>
                         </div>
                         {gql.endpoint && (
                             <div>
                                 <label className="text-xs font-medium text-zinc-500 block mb-1">Endpoint</label>
-                                <code className="block w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-xs font-mono rounded text-zinc-600 dark:text-zinc-400">{gql.endpoint}</code>
+                                <code className="block w-full bg-zinc-900 border border-zinc-800 p-2.5 text-xs font-mono rounded text-zinc-400">{gql.endpoint}</code>
                             </div>
                         )}
                         <div className="flex justify-end">
@@ -157,8 +157,8 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
             )}
 
             {/* TypeScript Types */}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-cyan-500/5 to-transparent">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-gradient-to-r from-cyan-500/5 to-transparent">
                     <h3 className="font-bold text-base flex items-center gap-2">
                         <span className="text-lg">🔷</span> TypeScript Type Generator
                     </h3>
@@ -172,10 +172,10 @@ export default function AdvancedConfig({ projectId }: AdvancedConfigProps) {
                         </button>
                         {types && (
                             <>
-                                <button onClick={copyTypes} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                <button onClick={copyTypes} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-zinc-700 rounded-lg hover:bg-zinc-800 transition-colors">
                                     {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />} Copy
                                 </button>
-                                <button onClick={downloadTypes} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                                <button onClick={downloadTypes} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-zinc-700 rounded-lg hover:bg-zinc-800 transition-colors">
                                     <Download size={12} /> Download .ts
                                 </button>
                             </>

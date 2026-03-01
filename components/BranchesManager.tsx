@@ -55,13 +55,13 @@ export default function BranchesManager({ projectId }: BranchesManagerProps) {
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">{error}</div>}
             <form onSubmit={handleCreate} className="flex gap-3">
                 <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="feature/new-schema"
-                    className="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded-lg focus:outline-none focus:border-violet-500" />
+                    className="flex-1 bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded-lg focus:outline-none focus:border-violet-500 text-zinc-100" />
                 <button type="submit" disabled={creating || !newName.trim()} className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 disabled:opacity-50">
                     {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Create Branch
                 </button>
             </form>
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-between items-center">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><GitBranch size={16} />Branches</h3>
                     <span className="text-xs text-zinc-500">{branches.length} branches</span>
                 </div>
@@ -75,7 +75,7 @@ export default function BranchesManager({ projectId }: BranchesManagerProps) {
                     </div>
                 ) : (
                     <table className="w-full text-sm">
-                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50">
+                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
                             <tr>
                                 <th className="px-6 py-3 font-medium text-left">Name</th>
                                 <th className="px-6 py-3 font-medium text-left">Status</th>
@@ -84,9 +84,9 @@ export default function BranchesManager({ projectId }: BranchesManagerProps) {
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-zinc-800">
                             {branches.map(b => (
-                                <tr key={b.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                <tr key={b.id} className="hover:bg-zinc-900/50 transition-colors">
                                     <td className="px-6 py-4 font-mono text-sm font-semibold flex items-center gap-2"><GitBranch size={14} className="text-violet-500" />{b.name}</td>
                                     <td className="px-6 py-4"><span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${STATUS_COLORS[b.status] || STATUS_COLORS.creating}`}>{b.status}</span></td>
                                     <td className="px-6 py-4 text-xs text-zinc-500 font-mono max-w-xs truncate">{b.postgrestUrl || '—'}</td>

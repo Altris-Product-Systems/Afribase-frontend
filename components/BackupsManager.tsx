@@ -58,7 +58,7 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
                     <p className="text-sm text-zinc-500 mt-1">Create and restore point-in-time database backups.</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={load} disabled={loading} className="p-2 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                    <button onClick={load} disabled={loading} className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors">
                         <RefreshCw size={14} className={`text-zinc-500 ${loading ? 'animate-spin' : ''}`} />
                     </button>
                     <button onClick={handleCreate} disabled={creating} className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg flex items-center gap-2 disabled:opacity-50">
@@ -77,15 +77,15 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
                     { label: 'Completed', value: backups.filter(b => b.status === 'completed').length, color: 'text-emerald-500' },
                     { label: 'Latest', value: backups[0] ? new Date(backups[0].createdAt).toLocaleDateString() : '—', color: 'text-blue-500' },
                 ].map(stat => (
-                    <div key={stat.label} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-950">
+                    <div key={stat.label} className="border border-zinc-800 rounded-xl p-4 bg-zinc-950">
                         <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">{stat.label}</p>
                         <p className={`text-2xl font-black mt-1 ${stat.color}`}>{stat.value}</p>
                     </div>
                 ))}
             </div>
 
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><Archive size={16} />Backup History</h3>
                 </div>
                 {loading ? (
@@ -98,7 +98,7 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
                     </div>
                 ) : (
                     <table className="w-full text-sm">
-                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50">
+                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
                             <tr>
                                 <th className="px-6 py-3 font-medium text-left">Type</th>
                                 <th className="px-6 py-3 font-medium text-left">Status</th>
@@ -107,10 +107,10 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-zinc-800">
                             {backups.map(b => (
-                                <tr key={b.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                                    <td className="px-6 py-4"><code className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded capitalize">{b.type || 'manual'}</code></td>
+                                <tr key={b.id} className="hover:bg-zinc-900/50 transition-colors">
+                                    <td className="px-6 py-4"><code className="text-xs bg-zinc-800 px-2 py-1 rounded capitalize">{b.type || 'manual'}</code></td>
                                     <td className="px-6 py-4">
                                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${STATUS_COLORS[b.status] || STATUS_COLORS.pending}`}>
                                             {b.status}

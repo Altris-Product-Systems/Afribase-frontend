@@ -98,7 +98,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
 
             {/* Create Form */}
             {showForm && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 p-6">
+                <div className="border border-zinc-800 rounded-xl bg-zinc-950 p-6">
                     <h3 className="font-semibold text-sm mb-4 flex items-center gap-2">
                         <Plus size={14} />
                         Create New Cron Job
@@ -111,7 +111,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                 placeholder="e.g. cleanup-old-sessions"
                                 value={newName}
                                 onChange={e => setNewName(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                         </div>
                         <div>
@@ -121,7 +121,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                 placeholder="postgres"
                                 value={newDatabase}
                                 onChange={e => setNewDatabase(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                         </div>
                         <div>
@@ -130,7 +130,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                 type="text"
                                 value={newSchedule}
                                 onChange={e => setNewSchedule(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                             <div className="flex flex-wrap gap-1 mt-2">
                                 {CRON_PRESETS.map(p => (
@@ -138,7 +138,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                         key={p.value}
                                         type="button"
                                         onClick={() => setNewSchedule(p.value)}
-                                        className="text-[10px] px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+                                        className="text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded hover:bg-emerald-900/30 hover:text-emerald-400 transition-colors"
                                     >
                                         {p.label}
                                     </button>
@@ -152,14 +152,14 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                 value={newCommand}
                                 onChange={e => setNewCommand(e.target.value)}
                                 rows={3}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                         </div>
                         <div className="md:col-span-2 flex items-center justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={() => setShowForm(false)}
-                                className="px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                                className="px-4 py-2 text-sm text-zinc-400 hover:text-zinc-100"
                             >
                                 Cancel
                             </button>
@@ -177,8 +177,8 @@ export default function CronManager({ projectId }: CronManagerProps) {
             )}
 
             {/* Jobs Table */}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
                         <Activity size={16} />
                         Scheduled Jobs
@@ -200,7 +200,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                     </div>
                 ) : (
                     <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50">
+                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
                             <tr>
                                 <th className="px-6 py-3 font-medium">Name</th>
                                 <th className="px-6 py-3 font-medium">Schedule</th>
@@ -210,15 +210,15 @@ export default function CronManager({ projectId }: CronManagerProps) {
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-zinc-800">
                             {jobs.map(job => (
-                                <tr key={job.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">{job.name}</td>
+                                <tr key={job.id} className="hover:bg-zinc-900/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-zinc-100">{job.name}</td>
                                     <td className="px-6 py-4">
-                                        <code className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded font-mono">{job.schedule}</code>
+                                        <code className="text-xs bg-zinc-800 px-2 py-1 rounded font-mono">{job.schedule}</code>
                                     </td>
                                     <td className="px-6 py-4 max-w-xs">
-                                        <code className="text-xs text-zinc-500 dark:text-zinc-400 truncate block font-mono">{job.command}</code>
+                                        <code className="text-xs text-zinc-400 truncate block font-mono">{job.command}</code>
                                     </td>
                                     <td className="px-6 py-4 text-zinc-500 text-xs">{job.database || 'postgres'}</td>
                                     <td className="px-6 py-4">

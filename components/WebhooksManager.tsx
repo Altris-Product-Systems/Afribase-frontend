@@ -54,7 +54,7 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                     <p className="text-sm text-zinc-500 mt-1">Fire HTTP requests when database events occur.</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={load} className="p-2 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                    <button onClick={load} className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors">
                         <RefreshCw size={14} className={`text-zinc-500 ${loading ? 'animate-spin' : ''}`} />
                     </button>
                     <button onClick={() => setShowForm(v => !v)} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg flex items-center gap-2">
@@ -64,30 +64,30 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
             </div>
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">{error}</div>}
             {showForm && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-white dark:bg-zinc-950">
+                <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-950">
                     <h3 className="font-semibold text-sm mb-4">Create Webhook</h3>
                     <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Webhook Name</label>
                             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. notify-slack-on-insert"
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500 text-zinc-100" />
                         </div>
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Table</label>
                             <input value={table} onChange={e => setTable(e.target.value)} placeholder="users"
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500 text-zinc-100" />
                         </div>
                         <div className="md:col-span-2">
                             <label className="text-xs font-medium text-zinc-500 block mb-1">Endpoint URL</label>
                             <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://your-service.com/webhook"
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500" />
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500 text-zinc-100" />
                         </div>
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-2">Events</label>
                             <div className="flex gap-2">
                                 {EVENTS.map(e => (
                                     <button type="button" key={e} onClick={() => toggleEvent(e)}
-                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors ${events.includes(e) ? 'bg-orange-500 text-white border-orange-500' : 'border-zinc-200 dark:border-zinc-700 text-zinc-500'}`}>
+                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors ${events.includes(e) ? 'bg-orange-500 text-white border-orange-500' : 'border-zinc-700 text-zinc-500'}`}>
                                         {e}
                                     </button>
                                 ))}
@@ -96,7 +96,7 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                         <div>
                             <label className="text-xs font-medium text-zinc-500 block mb-1">HTTP Method</label>
                             <select value={method} onChange={e => setMethod(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500">
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-orange-500 text-zinc-100">
                                 {['POST', 'PUT', 'PATCH'].map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                         </div>
@@ -110,8 +110,8 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                     </form>
                 </div>
             )}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-between items-center">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                     <h3 className="font-semibold text-sm flex items-center gap-2"><Webhook size={16} />Active Webhooks</h3>
                     <span className="text-xs text-zinc-500">{hooks.length} configured</span>
                 </div>
@@ -125,7 +125,7 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                     </div>
                 ) : (
                     <table className="w-full text-sm">
-                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50">
+                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50">
                             <tr>
                                 <th className="px-6 py-3 font-medium text-left">Name</th>
                                 <th className="px-6 py-3 font-medium text-left">Table</th>
@@ -134,9 +134,9 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-zinc-800">
                             {hooks.map(h => (
-                                <tr key={h.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                <tr key={h.id} className="hover:bg-zinc-900/50 transition-colors">
                                     <td className="px-6 py-4 font-medium">{h.name}</td>
                                     <td className="px-6 py-4 text-xs font-mono text-zinc-500">{h.schema}.{h.table}</td>
                                     <td className="px-6 py-4">

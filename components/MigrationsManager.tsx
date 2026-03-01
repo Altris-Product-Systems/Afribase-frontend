@@ -87,7 +87,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                     <button
                         onClick={loadMigrations}
                         disabled={loading}
-                        className="p-2 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                        className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors"
                     >
                         <RefreshCw size={14} className={loading ? 'animate-spin text-zinc-500' : 'text-zinc-500'} />
                     </button>
@@ -109,7 +109,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
 
             {/* Create Form */}
             {showForm && (
-                <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 p-6">
+                <div className="border border-zinc-800 rounded-xl bg-zinc-950 p-6">
                     <h3 className="font-semibold text-sm mb-4">Create New Migration</h3>
                     <form onSubmit={handleCreateMigration} className="space-y-4">
                         <div>
@@ -119,7 +119,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                                 placeholder="e.g. create_users_table"
                                 value={newName}
                                 onChange={e => setNewName(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                         </div>
                         <div>
@@ -131,7 +131,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                                             key={t.label}
                                             type="button"
                                             onClick={() => setNewSQL(t.sql)}
-                                            className="text-[10px] px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+                                            className="text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded hover:bg-emerald-900/30 hover:text-emerald-400 transition-colors"
                                         >
                                             {t.label}
                                         </button>
@@ -143,14 +143,14 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                                 value={newSQL}
                                 onChange={e => setNewSQL(e.target.value)}
                                 rows={6}
-                                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-2.5 text-sm font-mono rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                             />
                         </div>
                         <div className="flex items-center justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={() => setShowForm(false)}
-                                className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                                className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-100"
                             >
                                 Cancel
                             </button>
@@ -168,8 +168,8 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
             )}
 
             {/* Migrations Table */}
-            <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden">
-                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+            <div className="border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
                         <GitMerge size={16} />
                         Migration History
@@ -190,16 +190,16 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                         <p className="text-xs text-zinc-400 mt-1">Click "New Migration" to apply your first SQL schema change.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div className="divide-y divide-zinc-800">
                         {migrations.map(mig => (
                             <div key={mig.id}>
                                 <div
-                                    className="flex items-center justify-between px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 cursor-pointer transition-colors"
+                                    className="flex items-center justify-between px-6 py-4 hover:bg-zinc-900/50 cursor-pointer transition-colors"
                                     onClick={() => setExpandedId(expandedId === mig.id ? null : mig.id)}
                                 >
                                     <div className="flex items-center gap-4 min-w-0">
                                         <code className="text-xs text-zinc-400 font-mono shrink-0">{mig.version || '—'}</code>
-                                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{mig.name}</span>
+                                        <span className="text-sm font-medium text-zinc-100 truncate">{mig.name}</span>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0 ml-4">
                                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${STATUS_COLORS[mig.status] || STATUS_COLORS.pending}`}>
@@ -218,7 +218,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                                                 Error: {mig.error}
                                             </div>
                                         )}
-                                        <pre className="text-xs font-mono bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded p-4 overflow-x-auto text-zinc-700 dark:text-zinc-300">
+                                        <pre className="text-xs font-mono bg-zinc-900 border border-zinc-800 rounded p-4 overflow-x-auto text-zinc-300">
                                             {mig.sql || '-- No SQL recorded'}
                                         </pre>
                                     </div>

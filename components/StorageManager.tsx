@@ -130,30 +130,30 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* Buckets List Panel */}
-                <div className="col-span-1 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 overflow-hidden flex flex-col min-h-[500px]">
-                    <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+                <div className="col-span-1 border border-zinc-800 rounded-xl bg-zinc-950 overflow-hidden flex flex-col min-h-[500px]">
+                    <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                         <h3 className="font-semibold text-sm flex items-center gap-2">
                             <HardDrive size={16} />
                             Buckets
                         </h3>
                         <button
                             onClick={() => setNewBucketName('new-bucket')}
-                            className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                            className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-100 transition-colors"
                         >
                             <Plus size={16} />
                         </button>
                     </div>
 
-                    <form onSubmit={handleCreateBucket} className="p-3 bg-zinc-50 dark:bg-zinc-900/30 border-b border-zinc-200 dark:border-zinc-800 space-y-2">
+                    <form onSubmit={handleCreateBucket} className="p-3 bg-zinc-900/30 border-b border-zinc-800 space-y-2">
                         <input
                             type="text"
                             placeholder="New bucket name..."
                             value={newBucketName}
                             onChange={(e) => setNewBucketName(e.target.value)}
-                            className="w-full bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 p-2 text-sm rounded focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-zinc-900 border border-zinc-800 p-2 text-sm rounded focus:outline-none focus:border-emerald-500 text-zinc-100"
                         />
                         <div className="flex items-center justify-between">
-                            <label className="text-xs flex items-center gap-2 cursor-pointer text-zinc-600 dark:text-zinc-400">
+                            <label className="text-xs flex items-center gap-2 cursor-pointer text-zinc-400">
                                 <input
                                     type="checkbox"
                                     checked={newBucketPublic}
@@ -164,7 +164,7 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                             <button
                                 type="submit"
                                 disabled={creating || !newBucketName.trim()}
-                                className="px-3 py-1 bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold rounded disabled:opacity-50"
+                                className="px-3 py-1 bg-zinc-800 text-zinc-100 text-xs font-semibold rounded disabled:opacity-50"
                             >
                                 {creating ? "Creating..." : "Create"}
                             </button>
@@ -177,12 +177,12 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                                 No buckets found
                             </div>
                         ) : (
-                            <ul className="divide-y divide-zinc-200 dark:divide-zinc-800 h-full">
+                            <ul className="divide-y divide-zinc-800 h-full">
                                 {buckets.map((bucket) => {
                                     const isSelected = selectedBucket?.id === bucket.id;
                                     const itemClass = isSelected
-                                        ? "w-full text-left px-4 py-3 bg-zinc-100 dark:bg-zinc-900/80 border-l-2 border-emerald-500 flex justify-between items-center cursor-pointer transition-colors"
-                                        : "w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 flex justify-between items-center cursor-pointer transition-colors";
+                                        ? "w-full text-left px-4 py-3 bg-zinc-900/80 border-l-2 border-emerald-500 flex justify-between items-center cursor-pointer transition-colors"
+                                        : "w-full text-left px-4 py-3 hover:bg-zinc-900 flex justify-between items-center cursor-pointer transition-colors";
 
                                     return (
                                         <li key={bucket.id}>
@@ -207,16 +207,16 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                 </div>
 
                 {/* Objects Explorer Panel */}
-                <div className="col-span-1 md:col-span-3 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950 flex flex-col h-[500px]">
+                <div className="col-span-1 md:col-span-3 border border-zinc-800 rounded-xl bg-zinc-950 flex flex-col h-[500px]">
                     {selectedBucket ? (
                         <>
-                            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+                            <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                                 <div className="flex items-center gap-3">
                                     <h3 className="font-semibold text-sm flex items-center gap-2">
                                         <FolderOpen size={16} className="text-emerald-500" />
                                         {selectedBucket.name}
                                     </h3>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-medium">
                                         {selectedBucket.public ? 'Public' : 'Private'}
                                     </span>
                                 </div>
@@ -224,7 +224,7 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => loadObjects(selectedBucket.id)}
-                                        className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                                        className="p-1.5 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-100 transition-colors"
                                     >
                                         <RefreshCw size={14} />
                                     </button>
@@ -236,34 +236,34 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                                 </div>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto bg-white dark:bg-black">
+                            <div className="flex-1 overflow-y-auto bg-zinc-950">
                                 {objectsLoading ? (
                                     <div className="flex items-center justify-center h-full">
                                         <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
                                     </div>
                                 ) : objects.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-zinc-500 p-8 text-center space-y-4">
-                                        <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                                        <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center">
                                             <FolderOpen size={24} className="text-zinc-400" />
                                         </div>
                                         <div>
-                                            <h4 className="font-medium text-zinc-900 dark:text-zinc-100">Bucket is empty</h4>
+                                            <h4 className="font-medium text-zinc-100">Bucket is empty</h4>
                                             <p className="text-sm mt-1">Upload files to get started.</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <table className="w-full text-sm text-left">
-                                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-900/50 sticky top-0">
+                                        <thead className="text-xs text-zinc-500 uppercase bg-zinc-900/50 sticky top-0">
                                             <tr>
                                                 <th className="px-6 py-3 font-medium">Name</th>
                                                 <th className="px-6 py-3 font-medium">Last Modified</th>
                                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                                        <tbody className="divide-y divide-zinc-800">
                                             {objects.map((obj) => (
-                                                <tr key={obj.id || obj.name} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                                                    <td className="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
+                                                <tr key={obj.id || obj.name} className="hover:bg-zinc-900/50 transition-colors">
+                                                    <td className="px-6 py-4 font-medium text-zinc-100">
                                                         {obj.name}
                                                     </td>
                                                     <td className="px-6 py-4 text-zinc-500">
