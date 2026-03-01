@@ -68,6 +68,9 @@ export interface AuthConfigResponse {
   sdkSnippet: {
     javascript: string;
     dart: string;
+    swift: string;
+    kotlin: string;
+    python: string;
   };
 }
 
@@ -83,16 +86,40 @@ export interface UpdateAuthConfigRequest {
   discord?: OAuthProviderConfig;
 }
 
+export interface ProjectIdentity {
+  identity_id: string;
+  id: string; // provider_id
+  user_id: string;
+  identity_data: any;
+  provider: string;
+  last_sign_in_at: string;
+  created_at: string;
+  updated_at: string;
+  email?: string;
+}
+
 export interface ProjectUser {
   id: string;
+  aud: string;
+  role: string;
   email: string;
   phone: string;
-  confirmedAt?: string;
-  lastSignInAt?: string;
-  appMetadata?: string;
-  userMetadata?: string;
-  createdAt: string;
-  provider: string;
+  email_confirmed_at?: string;
+  confirmed_at?: string;
+  last_sign_in_at?: string;
+  app_metadata: any;
+  user_metadata: any;
+  identities: ProjectIdentity[];
+  created_at: string;
+  updated_at: string;
+  is_anonymous: boolean;
+  banned_until?: string;
+  deleted_at?: string;
+}
+
+export interface ListProjectUsersResponse {
+  aud: string;
+  users: ProjectUser[];
 }
 
 export class APIError extends Error {
@@ -989,6 +1016,9 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
       throw new APIError(response.status, data.error || data.message || 'Failed to fetch project users');
     }
 
+    if (data && data.users && Array.isArray(data.users)) {
+      return data.users;
+    }
     return Array.isArray(data) ? data : [];
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {

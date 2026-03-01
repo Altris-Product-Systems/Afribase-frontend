@@ -18,11 +18,11 @@ export default function NewProjectPage() {
   const [orgSearch, setOrgSearch] = useState('');
 
   const regions = [
-    { id: 'lagos-01', name: 'Lagos, Nigeria', flag: '🇳🇬' },
-    { id: 'accra-01', name: 'Accra, Ghana', flag: '🇬🇭' },
-    { id: 'nairobi-01', name: 'Nairobi, Kenya', flag: '🇰🇪' },
-    { id: 'cape-town-01', name: 'Cape Town, South Africa', flag: '🇿🇦' },
-    { id: 'cairo-01', name: 'Cairo, Egypt', flag: '🇪🇬' },
+    { id: 'lagos-01', name: 'Lagos, Nigeria' },
+    { id: 'accra-01', name: 'Accra, Ghana' },
+    { id: 'nairobi-01', name: 'Nairobi, Kenya' },
+    { id: 'cape-town-01', name: 'Cape Town, South Africa' },
+    { id: 'cairo-01', name: 'Cairo, Egypt' },
   ];
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function NewProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedOrg) {
       setError('Please select an organization');
       return;
@@ -64,7 +64,7 @@ export default function NewProjectPage() {
         region: region,
         organizationId: selectedOrg.id,
       });
-      
+
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof APIError) {
@@ -254,7 +254,6 @@ export default function NewProjectPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span>{selectedRegion?.flag}</span>
                       <span className="text-black dark:text-white">{selectedRegion?.name}</span>
                     </div>
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +276,6 @@ export default function NewProjectPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span>{r.flag}</span>
                             <span className="text-black dark:text-white">{r.name}</span>
                           </div>
                           {region === r.id && (

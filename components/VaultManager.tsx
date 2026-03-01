@@ -60,9 +60,7 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
                 </button>
             </div>
 
-            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-400">
-                🔒 Secrets are encrypted at rest. Once stored, values cannot be retrieved in plaintext — only the name and metadata are returned.
-            </div>
+
 
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">{error}</div>}
 

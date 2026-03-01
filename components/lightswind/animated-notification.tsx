@@ -61,16 +61,16 @@ export interface AnimatedNotificationProps {
 }
 
 const defaultMessages = [
-  "Just completed a task! ✅",
-  "New feature deployed 🚀",
-  "Check out our latest update 📱",
-  "Server responded with 200 OK ✨",
-  "Background job finished 🔄",
-  "Data synced successfully! 💾",
-  "User logged in successfully 👋",
-  "Payment processed 💳",
-  "Email sent successfully 📧",
-  "Backup completed 🛡️"
+  "Just completed a task!",
+  "New feature deployed",
+  "Check out our latest update",
+  "Server responded with 200 OK",
+  "Background job finished",
+  "Data synced successfully!",
+  "User logged in successfully",
+  "Payment processed",
+  "Email sent successfully",
+  "Backup completed"
 ];
 
 const Avatar: React.FC<{
@@ -120,78 +120,78 @@ const Notification: React.FC<{
   onClick,
   allowDismiss
 }) => {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'minimal':
-        return "bg-background/95 border border-border/50 backdrop-blur-xl";
-      case 'glass':
-        return "bg-background/30 backdrop-blur-2xl border border-white/20 dark:border-gray-800/20 shadow-2xl";
-      case 'bordered':
-        return "bg-card/95 border-2 border-primary/30 backdrop-blur-lg shadow-xl";
-      default:
-        return "bg-background/30 backdrop-blur-2xl border border-white/20 shadow-2xl";
-    }
-  };
+    const getVariantStyles = () => {
+      switch (variant) {
+        case 'minimal':
+          return "bg-background/95 border border-border/50 backdrop-blur-xl";
+        case 'glass':
+          return "bg-background/30 backdrop-blur-2xl border border-white/20 dark:border-gray-800/20 shadow-2xl";
+        case 'bordered':
+          return "bg-card/95 border-2 border-primary/30 backdrop-blur-lg shadow-xl";
+        default:
+          return "bg-background/30 backdrop-blur-2xl border border-white/20 shadow-2xl";
+      }
+    };
 
-const getPriorityStyles = () => {
-  switch (notification.priority) { 
-    case 'high':
-      return 'border-l-4 border-l-red-500 shadow-red-500/20 dark:border-l-red-500 dark:shadow-red-500/20';
-    case 'medium':
-      return 'border-l-4 border-l-yellow-500 shadow-yellow-500/20 dark:border-l-yellow-500 dark:shadow-yellow-500/20';
-    case 'low':
-      return 'border-l-4 border-l-blue-500 shadow-blue-500/20 dark:border-l-blue-500 dark:shadow-blue-500/20';
-    default:
-      return 'border-l-4 border-l-primary/50 shadow-primary/20 dark:border-l-primary/50 dark:shadow-primary/20';
-  }
-};
+    const getPriorityStyles = () => {
+      switch (notification.priority) {
+        case 'high':
+          return 'border-l-4 border-l-red-500 shadow-red-500/20 dark:border-l-red-500 dark:shadow-red-500/20';
+        case 'medium':
+          return 'border-l-4 border-l-yellow-500 shadow-yellow-500/20 dark:border-l-yellow-500 dark:shadow-yellow-500/20';
+        case 'low':
+          return 'border-l-4 border-l-blue-500 shadow-blue-500/20 dark:border-l-blue-500 dark:shadow-blue-500/20';
+        default:
+          return 'border-l-4 border-l-primary/50 shadow-primary/20 dark:border-l-primary/50 dark:shadow-primary/20';
+      }
+    };
 
 
-  return (
-    <div
-      className={cn(
-        "group relative transition-all duration-500 ease-out transform hover:scale-[1.02] hover:-translate-y-1",
-        "rounded-xl p-4 flex items-start gap-3 w-80 max-w-80 cursor-pointer",
-        getVariantStyles(),
-        getPriorityStyles(),
-        notification.fadingOut && "animate-pulse"
-      )}
-      onClick={onClick}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none" />
+    return (
+      <div
+        className={cn(
+          "group relative transition-all duration-500 ease-out transform hover:scale-[1.02] hover:-translate-y-1",
+          "rounded-xl p-4 flex items-start gap-3 w-80 max-w-80 cursor-pointer",
+          getVariantStyles(),
+          getPriorityStyles(),
+          notification.fadingOut && "animate-pulse"
+        )}
+        onClick={onClick}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none" />
 
-      <Avatar user={notification.user} showAvatar={showAvatars} />
+        <Avatar user={notification.user} showAvatar={showAvatars} />
 
-      <div className="flex-1 min-w-0 space-y-1">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-foreground/90 truncate">
-            {notification.user.name}
-          </h3>
-          {showTimestamps && notification.timestamp && (
-            <span className="text-xs text-muted-foreground/70 font-mono">
-              {notification.timestamp}
-            </span>
-          )}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm text-foreground/90 truncate">
+              {notification.user.name}
+            </h3>
+            {showTimestamps && notification.timestamp && (
+              <span className="text-xs text-muted-foreground/70 font-mono">
+                {notification.timestamp}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
+            {notification.message}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
-          {notification.message}
-        </p>
-      </div>
 
-      {allowDismiss && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDismiss?.();
-          }}
-          className="flex-shrink-0 w-5 h-5 text-muted-foreground/50 hover:text-muted-foreground transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-};
+        {allowDismiss && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss?.();
+            }}
+            className="flex-shrink-0 w-5 h-5 text-muted-foreground/50 hover:text-muted-foreground transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    );
+  };
 
 async function fetchRandomUser(apiEndpoint?: string): Promise<NotificationUser> {
   try {

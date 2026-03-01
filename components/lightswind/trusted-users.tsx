@@ -16,7 +16,7 @@ interface TrustedUsersProps {
 export const TrustedUsers: React.FC<TrustedUsersProps> = ({
   avatars,
   rating = 5,
-  totalUsersText = 1000, // ✅ default as number
+  totalUsersText = 1000, // default as number
   caption = "Trusted by",
   className = "",
   starColorClass = "text-yellow-400",
@@ -34,9 +34,8 @@ export const TrustedUsers: React.FC<TrustedUsersProps> = ({
         {avatars.map((src, i) => (
           <div
             key={i}
-            className={`w-10 h-10 rounded-full overflow-hidden ring-1 ring-offset-2 ring-offset-black ${
-              ringColors[i] || "ring-blue-900"
-            }`}
+            className={`w-10 h-10 rounded-full overflow-hidden ring-1 ring-offset-2 ring-offset-black ${ringColors[i] || "ring-blue-900"
+              }`}
           >
             <img
               src={src}

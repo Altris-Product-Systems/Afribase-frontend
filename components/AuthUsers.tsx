@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getProjectUsers, ProjectUser } from '@/lib/api';
-import { Users, Search, Filter, MoreHorizontal, Mail, Phone, Calendar, Shield, ExternalLink, RefreshCcw } from 'lucide-react';
+import { Users, Search, Filter, MoreHorizontal, Mail, Phone, Calendar, Shield, ExternalLink, RefreshCcw, X, Copy, Check, Globe } from 'lucide-react';
 
 interface AuthUsersProps {
     projectId: string;
@@ -13,6 +13,8 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [selectedUser, setSelectedUser] = useState<ProjectUser | null>(null);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
 
     useEffect(() => {
         loadUsers();
@@ -55,6 +57,12 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
             case 'email': return <Mail size={14} className="text-zinc-400" />;
             default: return <Shield size={14} className="text-emerald-500" />;
         }
+    };
+
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     // Inline icons since lucide might not have these specific brands directly
@@ -163,7 +171,7 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
                                                 <div>
                                                     <div className="text-sm font-bold text-white flex items-center gap-2">
                                                         {user.email || 'Anonymous'}
-                                                        {!user.confirmedAt && <span className="bg-orange-500/10 text-orange-400 text-[8px] font-black uppercase px-1.5 py-0.5 rounded border border-orange-500/20">Unconfirmed</span>}
+                                                        {!user.confirmed_at && <span className="bg-orange-500/10 text-orange-400 text-[8px] font-black uppercase px-1.5 py-0.5 rounded border border-orange-500/20">Unconfirmed</span>}
                                                     </div>
                                                     <div className="text-[10px] font-mono text-zinc-600 group-hover:text-zinc-500 transition-colors flex items-center gap-1">
                                                         {user.id}
@@ -173,20 +181,30 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-zinc-900 border border-white/5 rounded-lg">
-                                                {getUserProviderIcon(user.provider)}
-                                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">{user.provider || 'email'}</span>
+                                                {(() => {
+                                                    const p = user.app_metadata?.provider || user.identities?.[0]?.provider || 'email';
+                                                    return (
+                                                        <>
+                                                            {getUserProviderIcon(p)}
+                                                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">{p}</span>
+                                                        </>
+                                                    );
+                                                })()}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-xs font-medium text-zinc-300">{formatDate(user.lastSignInAt)}</span>
+                                                <span className="text-xs font-medium text-zinc-300">{formatDate(user.last_sign_in_at || '')}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-xs font-medium text-zinc-500">{formatDate(user.createdAt)}</span>
+                                            <span className="text-xs font-medium text-zinc-500">{formatDate(user.created_at)}</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="p-2 text-zinc-600 hover:text-white transition-colors">
+                                            <button
+                                                onClick={() => setSelectedUser(user)}
+                                                className="p-2 text-zinc-600 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                                            >
                                                 <MoreHorizontal size={18} />
                                             </button>
                                         </td>
@@ -221,6 +239,157 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
                     SDK Documentation <ExternalLink size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
+            {/* Side Drawer for User Details */}
+            {selectedUser && (
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] animate-fade-in"
+                        onClick={() => setSelectedUser(null)}
+                    />
+                    <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-zinc-950 border-l border-white/10 z-[101] shadow-2xl animate-slide-in-right flex flex-col">
+                        {/* Drawer Header */}
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
+                                    <Users size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">User Details</h3>
+                                    <p className="text-zinc-500 text-xs font-medium">Full record for user {selectedUser.email}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedUser(null)}
+                                className="p-2 text-zinc-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Drawer Content */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                            {/* Basic Info Card */}
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Basic Information</h4>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-zinc-600 uppercase">User ID</span>
+                                            <button
+                                                onClick={() => copyToClipboard(selectedUser.id, 'id')}
+                                                className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+                                            >
+                                                {copiedId === 'id' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                                                <span className="text-[10px] font-mono">{selectedUser.id}</span>
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-zinc-600 uppercase">Email</span>
+                                            <span className="text-sm font-bold text-zinc-200">{selectedUser.email}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-zinc-600 uppercase">Status</span>
+                                            {selectedUser.confirmed_at ? (
+                                                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase rounded border border-emerald-500/20">Active</span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase rounded border border-amber-500/20">Pending Confirmation</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Activity Card */}
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Activity & Status</h4>
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-zinc-600 uppercase">Created At</p>
+                                            <p className="text-sm font-bold text-zinc-300">{formatDate(selectedUser.created_at)}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-zinc-600 uppercase">Updated At</p>
+                                            <p className="text-sm font-bold text-zinc-300">{formatDate(selectedUser.updated_at)}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-zinc-600 uppercase">Confirmed At</p>
+                                            <p className="text-sm font-bold text-zinc-300">{formatDate(selectedUser.confirmed_at || selectedUser.email_confirmed_at || '')}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-black text-zinc-600 uppercase">Last Sign In</p>
+                                            <p className="text-sm font-bold text-zinc-300">{formatDate(selectedUser.last_sign_in_at || '')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Providers & Identities */}
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Connected Identities</h4>
+                                <div className="space-y-3">
+                                    {selectedUser.identities?.length > 0 ? (
+                                        selectedUser.identities.map((identity) => (
+                                            <div key={identity.identity_id} className="p-4 bg-zinc-900/50 border border-white/5 rounded-2xl flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center border border-white/5">
+                                                        {getUserProviderIcon(identity.provider)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white capitalize">{identity.provider}</p>
+                                                        <p className="text-[10px] font-medium text-zinc-500">{identity.email || 'No email attached'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[10px] font-black text-zinc-600 uppercase mb-1">Last Sync</p>
+                                                    <p className="text-[10px] font-bold text-zinc-400">{formatDate(identity.last_sign_in_at)}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-8 text-center bg-zinc-900/20 border border-white/5 border-dashed rounded-2xl">
+                                            <p className="text-xs text-zinc-600">No identities found for this account.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Raw Data (JSON) */}
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Metadata (Raw JSON)</h4>
+                                <div className="p-4 bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex gap-2">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500/20" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/20" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20" />
+                                        </div>
+                                        <button
+                                            onClick={() => copyToClipboard(JSON.stringify(selectedUser, null, 2), 'json')}
+                                            className="p-1.5 text-zinc-500 hover:text-white transition-colors"
+                                        >
+                                            {copiedId === 'json' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                        </button>
+                                    </div>
+                                    <pre className="text-[10px] font-mono text-emerald-500/80 overflow-x-auto max-h-[400px] leading-relaxed custom-scrollbar">
+                                        {JSON.stringify(selectedUser, null, 2)}
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Drawer Footer */}
+                        <div className="p-6 border-t border-white/10 bg-zinc-900/50 flex gap-3">
+                            <button className="flex-1 py-3 bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+                                Ban User
+                            </button>
+                            <button className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+                                Delete User
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

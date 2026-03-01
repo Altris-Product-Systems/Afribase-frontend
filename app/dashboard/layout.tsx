@@ -91,10 +91,7 @@ export default function DashboardLayout({
 
     // If we have a tab parameter, that is our active ID
     const tab = searchParams.get('tab');
-    if (tab) {
-      if (tab === 'api-keys') return 'api';
-      return tab;
-    }
+    if (tab) return tab;
 
     return pathname.split('/').pop() || 'dashboard';
   };
@@ -110,7 +107,8 @@ export default function DashboardLayout({
         overview: 'overview',
         tables: 'tables',
         sql: 'sql',
-        api: 'api-keys',
+        api: 'api',
+        'api-keys': 'api-keys',
         auth: 'auth',
         users: 'users',
         policies: 'policies',

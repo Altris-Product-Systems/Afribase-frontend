@@ -152,7 +152,7 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
                         <div className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl border border-white/5">
                             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Region</span>
                             <span className="text-xs font-bold text-zinc-300 flex items-center gap-2">
-                                <span className="text-base text-white">🇳🇬</span> {project.region}
+                                {project.region}
                             </span>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl border border-white/5">

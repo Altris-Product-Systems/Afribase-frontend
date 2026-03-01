@@ -356,7 +356,9 @@ export default function ProjectDetailsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🇳🇬</span>
+                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                        <Globe size={18} className="text-cyan-400" />
+                      </div>
                       <div>
                         <p className="font-medium text-black dark:text-white">{project.region}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{project.databaseName || `${project.slug}-db`}</p>

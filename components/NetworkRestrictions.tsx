@@ -61,7 +61,7 @@ export default function NetworkRestrictions({ projectId }: NetworkRestrictionsPr
                 {enabled && (
                     <>
                         <div>
-                            <h4 className="font-semibold text-sm mb-3 text-emerald-400">✅ Allow List (CIDR ranges)</h4>
+                            <h4 className="font-semibold text-sm mb-3 text-emerald-400">Allow List (CIDR ranges)</h4>
                             <div className="space-y-2 mb-3">
                                 {allowList.map((ip, i) => (
                                     <div key={i} className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function NetworkRestrictions({ projectId }: NetworkRestrictionsPr
                             </div>
                         </div>
                         <div>
-                            <h4 className="font-semibold text-sm mb-3 text-red-400">🚫 Deny List</h4>
+                            <h4 className="font-semibold text-sm mb-3 text-red-400">Deny List</h4>
                             <div className="space-y-2 mb-3">
                                 {denyList.map((ip, i) => (
                                     <div key={i} className="flex items-center gap-2">

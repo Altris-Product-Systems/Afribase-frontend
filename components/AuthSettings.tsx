@@ -8,7 +8,7 @@ import {
     AuthConfigResponse,
     OAuthProviderConfig
 } from '@/lib/api';
-import { Shield, Mail, Phone, Github, Globe, Save, Check, Copy, ExternalLink, Key, Code } from 'lucide-react';
+import { Shield, Mail, Phone, Github, Globe, Save, Check, Copy, ExternalLink, Key, Code, Smartphone, Terminal } from 'lucide-react';
 import { FaGoogle, FaGithub, FaDiscord, FaFacebook, FaApple, FaTwitter } from 'react-icons/fa';
 
 interface AuthSettingsProps {
@@ -21,6 +21,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
+    const [activeSdk, setActiveSdk] = useState<string>('javascript');
 
     // Local state for editting (only for specific providers when expanded)
     const [editingProvider, setEditingProvider] = useState<string | null>(null);
@@ -299,39 +300,52 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                     {/* SDK Snippet Card */}
                     <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
                         <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02]">
-                            <div className="flex items-center gap-3">
-                                <Code className="text-emerald-500" size={18} />
-                                <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Quick Integration</span>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Code className="text-emerald-500" size={18} />
+                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Quick Integration</span>
+                                </div>
+                                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                                    {[
+                                        { id: 'javascript', label: 'JS', icon: Globe },
+                                        { id: 'dart', label: 'Dart', icon: Smartphone },
+                                        { id: 'swift', label: 'Swift', icon: Smartphone },
+                                        { id: 'kotlin', label: 'Kotlin', icon: Smartphone },
+                                        { id: 'python', label: 'Py', icon: Terminal },
+                                    ].map((sdk) => (
+                                        <button
+                                            key={sdk.id}
+                                            onClick={() => setActiveSdk(sdk.id)}
+                                            title={sdk.label}
+                                            className={`p-1.5 rounded-md transition-all ${activeSdk === sdk.id ? 'bg-zinc-800 text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                        >
+                                            <sdk.icon size={12} />
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <div className="p-6">
-                            <p className="text-xs text-zinc-500 leading-relaxed mb-6 font-medium">Use the Afribase JS SDK to implement authentication in seconds.</p>
+                            <p className="text-[10px] text-zinc-500 leading-relaxed mb-4 font-medium italic">
+                                Use the Afribase SDK for <span className="text-emerald-500 uppercase font-black">{activeSdk}</span> to get started instantly.
+                            </p>
 
                             <div className="relative group">
-                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                     <button
-                                        onClick={() => copyToClipboard(config?.sdkSnippet?.javascript || '', 'sdk')}
+                                        onClick={() => copyToClipboard((config?.sdkSnippet as any)?.[activeSdk] || '', `sdk-${activeSdk}`)}
                                         className="p-2 bg-zinc-900/80 backdrop-blur border border-white/10 rounded-lg text-zinc-400 hover:text-white"
                                     >
-                                        {copiedStates['sdk'] ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                        {copiedStates[`sdk-${activeSdk}`] ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                                     </button>
                                 </div>
-                                <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed">
-                                    {config?.sdkSnippet?.javascript || `// Initialize
-const client = createClient(
-  'http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/[YOUR_PROJECT_SLUG]',
-  'ANON_KEY'
-);
-
-// Sign in with Google
-await client.auth.signInWithOAuth({
-  provider: 'google'
-});`}
+                                <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed max-h-[400px] custom-scrollbar">
+                                    {(config?.sdkSnippet as any)?.[activeSdk] || `// No snippet available`}
                                 </pre>
                             </div>
 
                             <button className="w-full mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 hover:text-white transition-colors py-2 border border-dashed border-zinc-800 rounded-xl hover:border-zinc-700">
-                                View Full Documentation <ExternalLink size={12} />
+                                Build your next app <ExternalLink size={12} />
                             </button>
                         </div>
                     </div>
