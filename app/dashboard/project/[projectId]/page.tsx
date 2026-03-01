@@ -51,6 +51,22 @@ import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
+import SSOManager from '@/components/SSOManager';
+import StorageManager from '@/components/StorageManager';
+import FunctionsManager from '@/components/FunctionsManager';
+import RealtimeConfig from '@/components/RealtimeConfig';
+import MigrationsManager from '@/components/MigrationsManager';
+import BackupsManager from '@/components/BackupsManager';
+import BranchesManager from '@/components/BranchesManager';
+import WebhooksManager from '@/components/WebhooksManager';
+import PoolerConfig from '@/components/PoolerConfig';
+import CronManager from '@/components/CronManager';
+import LogsManager from '@/components/LogsManager';
+import LogDrainsManager from '@/components/LogDrainsManager';
+import DomainsManager from '@/components/DomainsManager';
+import NetworkRestrictions from '@/components/NetworkRestrictions';
+import VaultManager from '@/components/VaultManager';
+import AdvancedConfig from '@/components/AdvancedConfig';
 import toast, { Toaster } from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
@@ -86,7 +102,12 @@ function parseSizeToBytes(sizeStr?: string | number): number {
   return value * (units[unit] || 1);
 }
 
-const TABS = ['overview', 'tables', 'sql', 'auth', 'users', 'policies', 'api-keys', 'usage', 'settings'] as const;
+const TABS = [
+  'overview', 'tables', 'sql', 'auth', 'users', 'policies', 'sso',
+  'api-keys', 'storage', 'edge-functions', 'realtime',
+  'migrations', 'backups', 'branches', 'webhooks', 'pooler',
+  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'settings',
+] as const;
 type Tab = (typeof TABS)[number];
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
@@ -988,6 +1009,14 @@ export default function ProjectDetailPage() {
         )
       }
 
+      {
+        activeTab === 'sso' && (
+          <div className="animate-fade-in">
+            <SSOManager projectId={project.id} />
+          </div>
+        )
+      }
+
       {/* ════════════════════════════════════════════
           API KEYS TAB
       ════════════════════════════════════════════ */}
@@ -1208,6 +1237,171 @@ export default function ProjectDetailPage() {
                 })}
               </div>
             )}
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          STORAGE TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'storage' && (
+          <div className="animate-fade-in">
+            <StorageManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          EDGE FUNCTIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'edge-functions' && (
+          <div className="animate-fade-in">
+            <FunctionsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          REALTIME TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'realtime' && (
+          <div className="animate-fade-in">
+            <RealtimeConfig projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          MIGRATIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'migrations' && (
+          <div className="animate-fade-in">
+            <MigrationsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          BACKUPS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'backups' && (
+          <div className="animate-fade-in">
+            <BackupsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          BRANCHES TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'branches' && (
+          <div className="animate-fade-in">
+            <BranchesManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          WEBHOOKS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'webhooks' && (
+          <div className="animate-fade-in">
+            <WebhooksManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CONNECTION POOLER TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'pooler' && (
+          <div className="animate-fade-in">
+            <PoolerConfig projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CRON JOBS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'cron' && (
+          <div className="animate-fade-in">
+            <CronManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          LOGS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'logs' && (
+          <div className="animate-fade-in">
+            <LogsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          LOG DRAINS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'log-drains' && (
+          <div className="animate-fade-in">
+            <LogDrainsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CUSTOM DOMAINS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'domains' && (
+          <div className="animate-fade-in">
+            <DomainsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          NETWORK RESTRICTIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'network' && (
+          <div className="animate-fade-in">
+            <NetworkRestrictions projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          VAULT / SECRETS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'vault' && (
+          <div className="animate-fade-in">
+            <VaultManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          ADVANCED (AI / GRAPHQL / TYPES) TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'advanced' && (
+          <div className="animate-fade-in">
+            <AdvancedConfig projectId={project.id} />
           </div>
         )
       }
