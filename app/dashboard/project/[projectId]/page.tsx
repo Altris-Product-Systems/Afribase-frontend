@@ -411,22 +411,7 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex items-center gap-8 border-b border-white/5 overflow-x-auto scrollbar-hide">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => handleTabChange(tab)}
-            className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-          >
-            {tab.replace('-', ' ')}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Navigation is handled by the sidebar */}
 
       {/* ════════════════════════════════════════════
           OVERVIEW TAB

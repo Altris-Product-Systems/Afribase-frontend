@@ -59,7 +59,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] flex flex-col xl:flex-row text-white relative">
+    <div className="h-screen bg-[#0c0c0e] flex flex-col xl:flex-row text-white relative overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px]" />
@@ -67,7 +67,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Left Side - Form */}
-      <div className="w-full xl:w-[45%] flex items-center justify-center p-8 xl:p-16 relative z-10 border-r border-white/5 bg-[#09090b]">
+      <div className="flex-1 xl:flex-none xl:w-[45%] flex items-center justify-center p-8 xl:p-16 relative z-10 border-r border-white/5 bg-[#09090b] overflow-y-auto scrollbar-hide">
         <div className="w-full max-w-sm animate-gelatinous-in">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2 mb-10 group">

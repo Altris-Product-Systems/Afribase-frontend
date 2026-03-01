@@ -214,8 +214,9 @@ export default function Sidebar({
         <nav className={`flex-1 overflow-y-auto py-6 space-y-6 scrollbar-hide ${isCollapsed ? 'px-3' : 'px-4'}`}>
           {/* General Section */}
           <div className="space-y-1">
-            <NavigationItem id="dashboard" label="Dashboard" icon={LayoutGrid} />
+            <NavigationItem id="dashboard" label="Home" icon={LayoutGrid} />
             <NavigationItem id="projects" label="Projects" icon={Activity} />
+            <NavigationItem id="overview" label="Project Overview" icon={LayoutGrid} />
           </div>
 
           {/* Development Section */}
