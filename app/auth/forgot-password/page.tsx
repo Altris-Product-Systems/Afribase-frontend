@@ -28,39 +28,39 @@ export default function ForgotPasswordPage() {
 
           {/* Heading */}
           <div className="mb-10">
-            <h1 className="text-3xl font-black text-white mb-3 tracking-tighter italic uppercase">
-              Reset Key
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+              Reset Password
             </h1>
-            <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">
-              Initiate <span className="text-emerald-500">recovery protocol</span>
+            <p className="text-zinc-500 text-sm font-medium">
+              Enter your email to receive recovery instructions
             </p>
           </div>
 
           {/* Form */}
           <form className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-                Verified Email
+              <label htmlFor="email" className="block text-xs font-medium text-zinc-400">
+                Email Address
               </label>
               <input
                 type="email"
                 id="email"
                 placeholder="developer@afribase.io"
-                className="w-full px-4 py-3.5 border border-white/5 rounded-xl bg-white/[0.02] text-sm text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all focus:scale-[1.01]"
+                className="w-full px-4 py-3.5 border border-white/5 rounded-xl bg-white/[0.02] text-sm text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl transition-all duration-300 transform active:scale-95 uppercase tracking-widest text-xs shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] mt-4"
+              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all duration-300 transform active:scale-95 text-sm shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] mt-4"
             >
-              Dispatch Recovery Link
+              Send Reset Link
             </button>
           </form>
 
           {/* Back to Sign In */}
-          <p className="mt-12 text-center text-[10px] font-black uppercase tracking-widest text-zinc-600">
-            <Link href="/auth/sign-in" className="text-white hover:text-emerald-400 transition-colors underline underline-offset-4">
+          <p className="mt-12 text-center text-sm text-zinc-500">
+            <Link href="/auth/sign-in" className="text-white hover:text-emerald-400 transition-colors font-medium underline underline-offset-4">
               ← Return to Login
             </Link>
           </p>

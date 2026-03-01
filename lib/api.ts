@@ -191,13 +191,18 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> 
     const data = await response.json();
 
     if (!response.ok) {
-      // Handle specific error cases
+      console.error('Signup failed response:', { status: response.status, data });
+
+      // Handle specific error cases with better message extraction
+      const errorMsg = data.message || data.detail || data.error || (data.errors ? JSON.stringify(data.errors) : null);
+
       if (response.status === 400) {
-        throw new APIError(400, data.message || 'Invalid signup data. Please check your information.');
+        throw new APIError(400, errorMsg || 'Invalid signup data. Please check your information.');
       } else if (response.status === 409) {
         throw new APIError(409, 'An account with this email already exists. Please sign in instead.');
       }
-      throw new APIError(response.status, data.message || data.detail || 'Failed to create account');
+
+      throw new APIError(response.status, errorMsg || 'Failed to create account. Please try again later.');
     }
 
     // Normalize access_token to token if needed
