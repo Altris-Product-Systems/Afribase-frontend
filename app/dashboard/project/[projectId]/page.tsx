@@ -49,6 +49,7 @@ import {
 
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 import ApiDocs from '@/components/ApiDocs';
+import ClientLibraries from '@/components/ClientLibraries';
 import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
@@ -104,7 +105,7 @@ function parseSizeToBytes(sizeStr?: string | number): number {
 }
 
 const TABS = [
-  'overview', 'tables', 'sql', 'api', 'auth', 'users', 'policies', 'sso',
+  'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
   'api-keys', 'storage', 'edge-functions', 'realtime',
   'migrations', 'backups', 'branches', 'webhooks', 'pooler',
   'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'settings',
@@ -1014,6 +1015,17 @@ export default function ProjectDetailPage() {
               projectSlug={project.slug}
               anonKey={keys?.anon_key || project.anonKey || ''}
             />
+          </div>
+        )
+      }
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          CLIENT LIBRARIES (SDK GALLERY)
+      ───────────────────────────────────────────────────────────────────────────── */}
+      {
+        activeTab === 'libraries' && (
+          <div className="animate-fade-in">
+            <ClientLibraries />
           </div>
         )
       }

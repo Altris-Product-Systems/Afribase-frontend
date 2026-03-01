@@ -93,6 +93,8 @@ export default function DashboardLayout({
     const tab = searchParams.get('tab');
     if (tab) return tab;
 
+    if (pathname === '/dashboard/libraries') return 'libraries';
+
     return pathname.split('/').pop() || 'dashboard';
   };
 
@@ -108,6 +110,7 @@ export default function DashboardLayout({
         tables: 'tables',
         sql: 'sql',
         api: 'api',
+        libraries: 'libraries',
         'api-keys': 'api-keys',
         auth: 'auth',
         users: 'users',
@@ -161,6 +164,7 @@ export default function DashboardLayout({
       logs: '/dashboard/logs',
       'log-drains': '/dashboard/log-drains',
       usage: '/dashboard/usage',
+      libraries: '/dashboard/libraries',
       domains: '/dashboard/domains',
       network: '/dashboard/network',
       vault: '/dashboard/vault',

@@ -32,6 +32,7 @@ import {
   Cpu,
   Table,
   Server,
+  Library,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -230,6 +231,7 @@ export default function Sidebar({
                   <NavigationItem id="tables" label="Table Editor" icon={Table} isSubItem />
                   <NavigationItem id="sql" label="SQL Editor" icon={Terminal} isSubItem />
                   <NavigationItem id="api" label="API Docs" icon={Code} isSubItem />
+                  <NavigationItem id="libraries" label="Client Libraries" icon={Library} isSubItem />
                   <NavigationItem id="migrations" label="Migrations" icon={ChevronRight} isSubItem />
                   <NavigationItem id="backups" label="Backups" icon={Archive} isSubItem />
                   <NavigationItem id="branches" label="Branches" icon={GitBranch} isSubItem />
