@@ -6,7 +6,7 @@ import AfricaMapAnimation from '@/components/auth/AfricaMapAnimation';
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="min-h-screen bg-[#0c0c0e] flex text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#0c0c0e] flex flex-col xl:flex-row text-white relative">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px]" />
@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Left Side - Form */}
-      <div className="w-full lg:w-[45%] flex items-center justify-center p-8 lg:p-16 relative z-10 border-r border-white/5 bg-[#09090b]">
+      <div className="w-full xl:w-[45%] flex items-center justify-center p-8 xl:p-16 relative z-10 border-r border-white/5 bg-[#09090b]">
         <div className="w-full max-w-sm animate-gelatinous-in">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2 mb-10 group">
@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Right Side - Africa Map Animation */}
-      <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center bg-[#060608] overflow-hidden">
+      <div className="hidden xl:flex xl:w-[55%] relative items-center justify-center bg-[#060608] overflow-hidden">
         <AfricaMapAnimation />
       </div>
     </div>
