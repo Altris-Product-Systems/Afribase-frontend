@@ -33,6 +33,7 @@ import {
   Table,
   Server,
   Library,
+  MessageSquare,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -279,6 +280,12 @@ export default function Sidebar({
           <div className="space-y-4 pt-2">
             {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Advanced</div>}
             <NavigationItem id="advanced" label="AI / GraphQL / Types" icon={Cpu} />
+          </div>
+
+          {/* Community Section */}
+          <div className="space-y-4 pt-2">
+            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Community</div>}
+            <NavigationItem id="forum" label="Developer Forum" icon={MessageSquare} />
           </div>
         </nav>
 

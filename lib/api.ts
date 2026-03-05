@@ -458,7 +458,7 @@ export interface CreateProjectRequest {
   description?: string;
   organizationId: string;
   region: string;
-  databasePassword?: string;
+  databasePassword: string; // required by backend (min=8)
   enableDataApi?: boolean;
   enableRls?: boolean;
 }
@@ -1843,3 +1843,341 @@ export async function generateTypeScript(projectId: string): Promise<string> {
   }
   return response.text();
 }
+
+// ─── Developer Forum ───────────────────────────────────────────────────────────
+
+export interface ForumCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  color: string;
+  icon: string;
+  sortOrder: number;
+  postCount: number;
+  createdAt: string;
+}
+
+export interface ForumTag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ForumPostAuthor {
+  id: string;
+  email: string;
+  fullName: string;
+}
+
+export interface ForumPost {
+  id: string;
+  author: ForumPostAuthor;
+  category: ForumCategory;
+  title: string;
+  slug: string;
+  content: string;
+  status: 'open' | 'closed' | 'resolved' | 'pinned';
+  isPinned: boolean;
+  viewCount: number;
+  upVotes: number;
+  downVotes: number;
+  commentCount: number;
+  tags: ForumTag[];
+  lastReplyAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ForumPostListResponse {
+  posts: ForumPost[];
+  total: number;
+}
+
+export interface ForumComment {
+  id: string;
+  postId: string;
+  author: ForumPostAuthor;
+  parentId?: string;
+  content: string;
+  upVotes: number;
+  downVotes: number;
+  isAccepted: boolean;
+  replies?: ForumComment[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateForumPostRequest {
+  categoryId: string;
+  title: string;
+  content: string;
+  tags?: string[];
+}
+
+export interface UpdateForumPostRequest {
+  title?: string;
+  content?: string;
+  status?: 'open' | 'closed' | 'resolved';
+}
+
+export interface CreateForumCommentRequest {
+  content: string;
+  parentId?: string;
+}
+
+export interface ForumListPostsParams {
+  category?: string;
+  tag?: string;
+  status?: string;
+  search?: string;
+  sort?: 'latest' | 'oldest' | 'most_votes' | 'most_comments' | 'most_views';
+  limit?: number;
+  offset?: number;
+}
+
+// ── Categories ────────────────────────────────────────────────────────────────
+
+export async function listForumCategories(): Promise<ForumCategory[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/categories`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch categories');
+  return data;
+}
+
+export async function createForumCategory(req: { name: string; description?: string; color?: string; icon?: string; sortOrder?: number }): Promise<ForumCategory> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/categories`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create category');
+  return data;
+}
+
+export async function updateForumCategory(categoryId: string, req: { name?: string; description?: string; color?: string; icon?: string; sortOrder?: number }): Promise<ForumCategory> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/categories/${categoryId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update category');
+  return data;
+}
+
+export async function deleteForumCategory(categoryId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/categories/${categoryId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete category');
+  }
+}
+
+// ── Tags ──────────────────────────────────────────────────────────────────────
+
+export async function listForumTags(): Promise<ForumTag[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/tags`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch tags');
+  return data;
+}
+
+// ── Posts ─────────────────────────────────────────────────────────────────────
+
+export async function listForumPosts(params: ForumListPostsParams = {}): Promise<ForumPostListResponse> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const qs = new URLSearchParams();
+  if (params.category) qs.set('category', params.category);
+  if (params.tag) qs.set('tag', params.tag);
+  if (params.status) qs.set('status', params.status);
+  if (params.search) qs.set('search', params.search);
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.limit !== undefined) qs.set('limit', String(params.limit));
+  if (params.offset !== undefined) qs.set('offset', String(params.offset));
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts?${qs}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch posts');
+  return data;
+}
+
+export async function getForumPost(postId: string): Promise<ForumPost> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Post not found');
+  return data;
+}
+
+export async function createForumPost(req: CreateForumPostRequest): Promise<ForumPost> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create post');
+  return data;
+}
+
+export async function updateForumPost(postId: string, req: UpdateForumPostRequest): Promise<ForumPost> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update post');
+  return data;
+}
+
+export async function deleteForumPost(postId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete post');
+  }
+}
+
+export async function voteForumPost(postId: string, voteType: 'up' | 'down'): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}/vote`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ voteType }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to vote');
+  }
+}
+
+export async function pinForumPost(postId: string, pin: boolean): Promise<ForumPost> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}/pin`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ pin }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to pin post');
+  return data;
+}
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+export async function listForumComments(postId: string, limit = 50, offset = 0): Promise<{ comments: ForumComment[]; total: number }> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}/comments?limit=${limit}&offset=${offset}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch comments');
+  return data;
+}
+
+export async function createForumComment(postId: string, req: CreateForumCommentRequest): Promise<ForumComment> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}/comments`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to post comment');
+  return data;
+}
+
+export async function updateForumComment(commentId: string, content: string): Promise<ForumComment> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/comments/${commentId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update comment');
+  return data;
+}
+
+export async function deleteForumComment(commentId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/comments/${commentId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete comment');
+  }
+}
+
+export async function acceptForumComment(postId: string, commentId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/posts/${postId}/comments/${commentId}/accept`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to accept comment');
+  }
+}
+
+export async function voteForumComment(commentId: string, voteType: 'up' | 'down'): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/forum/comments/${commentId}/vote`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ voteType }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to vote on comment');
+  }
+}
+

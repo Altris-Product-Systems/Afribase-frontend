@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Activity, Database, Zap, Users } from 'lucide-react';
+import { Activity, Database, Zap, Users, Globe } from 'lucide-react';
 import { getProjects, getProjectKeys, getOrganizations, isAuthenticated, Project, ProjectKeys, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AuthSettings from '@/components/AuthSettings';
@@ -30,6 +30,7 @@ import PoolerConfig from '@/components/PoolerConfig';
 import RealtimeConfig from '@/components/RealtimeConfig';
 import LogDrainsManager from '@/components/LogDrainsManager';
 import AdvancedConfig from '@/components/AdvancedConfig';
+import ForumManager from '@/components/ForumManager';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -617,7 +618,13 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced'].includes(activeTab) && (
+          {activeTab === 'forum' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <ForumManager projectId={project.id} />
+            </div>
+          )}
+
+          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced', 'forum'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

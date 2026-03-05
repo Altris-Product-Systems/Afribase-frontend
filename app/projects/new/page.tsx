@@ -16,6 +16,16 @@ export default function NewProjectPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [orgSearch, setOrgSearch] = useState('');
+  const [databasePassword, setDatabasePassword] = useState('');
+
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 16; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setDatabasePassword(password);
+  };
 
   const regions = [
     { id: 'lagos-01', name: 'Lagos, Nigeria' },
@@ -63,6 +73,7 @@ export default function NewProjectPage() {
         description: description || undefined,
         region: region,
         organizationId: selectedOrg.id,
+        databasePassword,
       });
 
       router.push('/dashboard');
@@ -239,6 +250,32 @@ export default function NewProjectPage() {
                 rows={3}
                 className="w-full px-4 py-2.5 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition-colors resize-none"
               />
+            </div>
+
+            {/* Database Password */}
+            <div>
+              <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                Database Password
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={databasePassword}
+                  onChange={(e) => setDatabasePassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Min. 8 characters"
+                  className="flex-1 px-4 py-2.5 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition-colors font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={generatePassword}
+                  className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  Generate
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">Save this password — it cannot be recovered once set.</p>
             </div>
 
             {/* Region */}

@@ -69,6 +69,7 @@ import DomainsManager from '@/components/DomainsManager';
 import NetworkRestrictions from '@/components/NetworkRestrictions';
 import VaultManager from '@/components/VaultManager';
 import AdvancedConfig from '@/components/AdvancedConfig';
+import ForumManager from '@/components/ForumManager';
 import toast, { Toaster } from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
@@ -108,7 +109,7 @@ const TABS = [
   'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
   'api-keys', 'storage', 'edge-functions', 'realtime',
   'migrations', 'backups', 'branches', 'webhooks', 'pooler',
-  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'settings',
+  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'settings',
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -1522,6 +1523,18 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+
+      {/* ════════════════════════════════════════════
+          FORUM TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'forum' && (
+          <div className="animate-fade-in">
+            <ForumManager projectId={project.id} />
+          </div>
+        )
+      }
+
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
@@ -1594,6 +1607,9 @@ export default function ProjectDetailPage() {
 
       <Toaster
         position="bottom-right"
+        containerStyle={{
+          zIndex: 9999,
+        }}
         toastOptions={{
           style: {
             background: '#18181b',

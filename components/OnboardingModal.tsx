@@ -145,17 +145,17 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
         {/* Progress Indicator */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 1 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 1 ? 'bg-white text-black' : 'bg-[#2a2a2a] text-gray-500'
               }`}>
               {step > 1 ? '✓' : '1'}
             </div>
-            <div className={`w-16 h-1 ${step >= 2 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 2 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+            <div className={`w-16 h-1 ${step >= 2 ? 'bg-white' : 'bg-[#2a2a2a]'}`} />
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 2 ? 'bg-white text-black' : 'bg-[#2a2a2a] text-gray-500'
               }`}>
               {step > 2 ? '✓' : '2'}
             </div>
-            <div className={`w-16 h-1 ${step >= 3 ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-800'}`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 3 ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
+            <div className={`w-16 h-1 ${step >= 3 ? 'bg-white' : 'bg-[#2a2a2a]'}`} />
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${step >= 3 ? 'bg-white text-black' : 'bg-[#2a2a2a] text-gray-500'
               }`}>
               3
             </div>
@@ -164,21 +164,21 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
         {/* Step 1: Create Organization */}
         {step === 1 && (
           <div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
+            <p className="text-gray-400 mb-6 text-center">
               Organizations help you manage your team and projects
             </p>
 
             <form onSubmit={handleCreateOrganization} className="space-y-5">
               <div>
-                <label htmlFor="orgName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="orgName" className="block text-sm font-medium text-zinc-300 mb-2">
                   Organization name
                 </label>
                 <input
@@ -189,12 +189,12 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   required
                   disabled={isLoading}
                   placeholder="Acme Inc"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white placeholder-zinc-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label htmlFor="orgSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="orgSlug" className="block text-sm font-medium text-zinc-300 mb-2">
                   Organization slug
                 </label>
                 <input
@@ -206,9 +206,9 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   disabled={isLoading}
                   placeholder="acme-inc"
                   pattern="[a-z0-9\-]+"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white placeholder-zinc-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-xs text-gray-500">
                   Only lowercase letters, numbers, and hyphens
                 </p>
               </div>
@@ -237,13 +237,13 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
         {/* Step 2: Create Project */}
         {step === 2 && (
           <div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
+            <p className="text-gray-400 mb-6 text-center">
               Projects contain your databases, APIs, and storage
             </p>
 
             <form onSubmit={handleCreateProject} className="space-y-5">
               <div>
-                <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="projectName" className="block text-sm font-medium text-gray-300 mb-2">
                   Project name
                 </label>
                 <input
@@ -254,12 +254,12 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   required
                   disabled={isLoading}
                   placeholder="My Awesome App"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white placeholder-zinc-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label htmlFor="projectSlug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="projectSlug" className="block text-sm font-medium text-gray-300 mb-2">
                   Project slug
                 </label>
                 <input
@@ -271,15 +271,15 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   disabled={isLoading}
                   placeholder="my-awesome-app"
                   pattern="[a-z0-9\-]+"
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white placeholder-zinc-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-xs text-gray-500">
                   Only lowercase letters, numbers, and hyphens
                 </p>
               </div>
 
               <div>
-                <label htmlFor="region" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="region" className="block text-sm font-medium text-gray-300 mb-2">
                   Region
                 </label>
                 <select
@@ -287,7 +287,7 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="lagos-01">Lagos, Nigeria</option>
                   <option value="nairobi-01">Nairobi, Kenya</option>
@@ -297,7 +297,7 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
               </div>
 
               <div>
-                <label htmlFor="plan" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="plan" className="block text-sm font-medium text-gray-300 mb-2">
                   Plan
                 </label>
                 <select
@@ -305,7 +305,7 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   value={plan}
                   onChange={(e) => setPlan(e.target.value)}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white focus:border-green-600 dark:focus:border-green-500 focus:ring-2 focus:ring-green-600/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="free">Free - Get started</option>
                   <option value="pro">Pro - $25/month</option>
@@ -313,9 +313,40 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                 </select>
               </div>
 
+              {/* Database Password */}
+              <div>
+                <label htmlFor="databasePassword" className="block text-sm font-medium text-gray-300 mb-2">
+                  Database Password
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="databasePassword"
+                    value={databasePassword}
+                    onChange={(e) => setDatabasePassword(e.target.value)}
+                    required
+                    minLength={8}
+                    disabled={isLoading}
+                    placeholder="Min. 8 characters"
+                    className="flex-1 px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#09090b] text-white placeholder-zinc-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    disabled={isLoading}
+                    className="px-4 py-3 border border-[#2a2a2a] rounded-lg !bg-[#1a1a1a] text-gray-300 hover:bg-[#2a2a2a] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                  >
+                    Generate
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  This password cannot be recovered once set. Save it somewhere safe.
+                </p>
+              </div>
+
               {/* Security & Advanced Configuration */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-4">
-                <h3 className="text-sm font-medium text-black dark:text-white">Security Configuration</h3>
+              <div className="pt-4 border-t border-[#222222] space-y-4">
+                <h3 className="text-sm font-medium text-white">Security Configuration</h3>
 
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <div className="relative mt-0.5">
@@ -326,11 +357,11 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                       onChange={(e) => setEnableDataApi(e.target.checked)}
                       disabled={isLoading}
                     />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableDataApi ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableDataApi ? 'bg-green-600' : 'bg-[#3a3a3a]'}`}></div>
                     <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableDataApi ? 'transform translate-x-4' : ''}`}></div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-black dark:text-white">Enable Data API</p>
+                    <p className="text-sm font-medium text-white">Enable Data API</p>
                     <p className="text-xs text-gray-500 mt-1">Autogenerate a RESTful API for your public schema using PostgREST.</p>
                   </div>
                 </label>
@@ -344,11 +375,11 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                       onChange={(e) => setEnableRls(e.target.checked)}
                       disabled={isLoading}
                     />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableRls ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${enableRls ? 'bg-green-600' : 'bg-[#3a3a3a]'}`}></div>
                     <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${enableRls ? 'transform translate-x-4' : ''}`}></div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-black dark:text-white">Enable automatic RLS</p>
+                    <p className="text-sm font-medium text-white">Enable automatic RLS</p>
                     <p className="text-xs text-gray-500 mt-1">Enforce Row Level Security heavily on your databases automatically.</p>
                   </div>
                 </label>
@@ -359,13 +390,13 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
                   type="button"
                   onClick={() => setStep(1)}
                   disabled={isLoading}
-                  className="flex-1 py-3 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 border border-[#2a2a2a] text-gray-300 font-medium rounded-lg hover:bg-[#1a1a1a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || !projectName || !projectSlug}
+                  disabled={isLoading || !projectName || !projectSlug || databasePassword.length < 8}
                   className="flex-[2] py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
@@ -390,15 +421,15 @@ export default function OnboardingModal({ isOpen, onClose, onSuccess }: Onboardi
         {
           step === 3 && (
             <div className="text-center py-4">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-black dark:text-white mb-3">
+              <h2 className="text-2xl font-bold text-white mb-3">
                 You're all set!
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-400">
                 Your organization and project have been created successfully.
               </p>
             </div>

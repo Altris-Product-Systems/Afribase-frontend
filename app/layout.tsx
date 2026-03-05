@@ -32,6 +32,9 @@ export default function RootLayout({
             {children}
             <Toaster
               position="bottom-right"
+              containerStyle={{
+                zIndex: 9999,
+              }}
               toastOptions={{
                 style: {
                   background: '#18181b',

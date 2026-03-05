@@ -132,6 +132,7 @@ export default function DashboardLayout({
         network: 'network',
         vault: 'vault',
         advanced: 'advanced',
+        forum: 'forum',
         settings: 'settings',
       };
 
@@ -169,6 +170,7 @@ export default function DashboardLayout({
       network: '/dashboard/network',
       vault: '/dashboard/vault',
       advanced: '/dashboard/advanced',
+      forum: '/dashboard/forum',
       settings: '/dashboard/settings',
     };
 

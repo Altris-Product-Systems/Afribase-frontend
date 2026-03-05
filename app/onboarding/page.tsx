@@ -24,6 +24,16 @@ export default function OnboardingPage() {
   const [projectSlug, setProjectSlug] = useState('');
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
+  const [databasePassword, setDatabasePassword] = useState('');
+
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 16; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setDatabasePassword(password);
+  };
 
   useEffect(() => {
     const checkExistingOrganizations = async () => {
@@ -82,7 +92,7 @@ export default function OnboardingPage() {
     setGlobalLoading(true, 'Provisioning New Instance');
 
     try {
-      await createProject({ name: projectName, region, organizationId });
+      await createProject({ name: projectName, region, organizationId, databasePassword });
       setStep(3);
     } catch (err) {
       setError(err instanceof APIError ? err.message : 'Failed to create project');
@@ -239,6 +249,30 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
+                {/* Database Password */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Database Password</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={databasePassword}
+                      onChange={(e) => setDatabasePassword(e.target.value)}
+                      required
+                      minLength={8}
+                      placeholder="Min. 8 characters"
+                      className="flex-1 px-5 py-4 border border-white/5 rounded-xl bg-white/[0.02] text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all font-mono text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={generatePassword}
+                      className="px-4 py-2 border border-white/5 rounded-xl bg-white/[0.02] text-zinc-400 hover:text-white hover:border-emerald-500/30 transition-all text-xs font-black uppercase tracking-widest whitespace-nowrap"
+                    >
+                      Generate
+                    </button>
+                  </div>
+                  <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Save this password — it cannot be recovered.</p>
+                </div>
+
                 <div className="flex gap-4 pt-4">
                   <button
                     type="button"
@@ -249,7 +283,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting || !projectName}
+                    disabled={isSubmitting || !projectName || databasePassword.length < 8}
                     className="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl transition-all shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] uppercase tracking-widest text-xs active:scale-95 disabled:opacity-50"
                   >
                     Commit Instance
@@ -305,8 +339,8 @@ function StepIndicator({ current, success, number, label }: { current: boolean; 
   return (
     <div className="flex flex-col items-center gap-3">
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all duration-500 border-2 ${success ? 'bg-emerald-500 border-emerald-500 text-black' :
-          current ? 'bg-zinc-900 border-emerald-500 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' :
-            'bg-zinc-900 border-white/5 text-zinc-700'
+        current ? 'bg-zinc-900 border-emerald-500 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' :
+          'bg-zinc-900 border-white/5 text-zinc-700'
         }`}>
         {success ? '✓' : number}
       </div>
