@@ -16,18 +16,29 @@ import {
     Filter,
     CheckCircle2,
     Pin,
+    Loader2,
+    Send,
+    Share2,
     AlertCircle,
-    Loader2
+    AlertTriangle,
+    Flag
 } from 'lucide-react';
 import {
     listForumCategories,
     listForumPosts,
     createForumPost,
+    getForumPost,
+    voteForumPost,
+    listForumComments,
+    createForumComment,
+    voteForumComment,
     ForumCategory,
     ForumPost,
+    ForumComment,
     ForumListPostsParams,
     APIError,
-    CreateForumPostRequest
+    CreateForumPostRequest,
+    CreateForumCommentRequest
 } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { Modal } from '@/components/ui/Modal';
@@ -53,6 +64,18 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostCategoryId, setNewPostCategoryId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Detail Modal State
+    const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [comments, setComments] = useState<ForumComment[]>([]);
+    const [newCommentContent, setNewCommentContent] = useState('');
+    const [isCommenting, setIsCommenting] = useState(false);
+    const [isLoadingComments, setIsLoadingComments] = useState(false);
+
+    // User Vote Tracking (Local session)
+    const [userVotes, setUserVotes] = useState<Record<string, 'up' | 'down' | null>>({});
+    const [userCommentVotes, setUserCommentVotes] = useState<Record<string, 'up' | 'down' | null>>({});
 
     useEffect(() => {
         loadCategories();
@@ -100,6 +123,161 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         loadPosts();
+    };
+
+    const handleVote = async (postId: string, voteType: 'up' | 'down', e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+
+        const currentVote = userVotes[postId];
+
+        try {
+            await voteForumPost(postId, voteType);
+
+            // Dynamic delta calculation based on toggle/change
+            let upDelta = 0;
+            let downDelta = 0;
+            let nextVote: 'up' | 'down' | null = voteType;
+
+            if (currentVote === voteType) {
+                // Toggling off
+                if (voteType === 'up') upDelta = -1;
+                else downDelta = -1;
+                nextVote = null;
+            } else if (currentVote) {
+                // Changing vote
+                if (voteType === 'up') {
+                    upDelta = 1;
+                    downDelta = -1;
+                } else {
+                    upDelta = -1;
+                    downDelta = 1;
+                }
+            } else {
+                // New vote
+                if (voteType === 'up') upDelta = 1;
+                else downDelta = 1;
+            }
+
+            // Update tracked votes
+            setUserVotes(prev => ({ ...prev, [postId]: nextVote }));
+
+            // Optimistic update for list
+            setPosts(prev => prev.map(p => {
+                if (p.id === postId) {
+                    return {
+                        ...p,
+                        upVotes: Math.max(0, (p.upVotes || 0) + upDelta),
+                        downVotes: Math.max(0, (p.downVotes || 0) + downDelta)
+                    };
+                }
+                return p;
+            }));
+
+            // Sync with selected post if open
+            if (selectedPost?.id === postId) {
+                setSelectedPost(prev => prev ? {
+                    ...prev,
+                    upVotes: Math.max(0, (prev.upVotes || 0) + upDelta),
+                    downVotes: Math.max(0, (prev.downVotes || 0) + downDelta)
+                } : null);
+            }
+
+            if (nextVote) toast.success(`Post ${voteType}voted!`);
+            else toast.success('Vote removed');
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to vote');
+        }
+    };
+
+    const handleVoteComment = async (commentId: string, voteType: 'up' | 'down') => {
+        const currentVote = userCommentVotes[commentId];
+
+        try {
+            await voteForumComment(commentId, voteType);
+
+            let upDelta = 0;
+            let downDelta = 0;
+            let nextVote: 'up' | 'down' | null = voteType;
+
+            if (currentVote === voteType) {
+                if (voteType === 'up') upDelta = -1;
+                else downDelta = -1;
+                nextVote = null;
+            } else if (currentVote) {
+                if (voteType === 'up') { upDelta = 1; downDelta = -1; }
+                else { upDelta = -1; downDelta = 1; }
+            } else {
+                if (voteType === 'up') upDelta = 1;
+                else downDelta = 1;
+            }
+
+            setUserCommentVotes(prev => ({ ...prev, [commentId]: nextVote }));
+
+            setComments(prev => prev.map(c => {
+                if (c.id === commentId) {
+                    return {
+                        ...c,
+                        upVotes: Math.max(0, (c.upVotes || 0) + upDelta),
+                        downVotes: Math.max(0, (c.downVotes || 0) + downDelta)
+                    };
+                }
+                return c;
+            }));
+
+            if (nextVote) toast.success('Comment vote recorded');
+            else toast.success('Comment vote removed');
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to vote on comment');
+        }
+    };
+
+    const handleOpenPost = async (post: ForumPost) => {
+        setIsDetailModalOpen(true);
+        loadComments(post.id);
+
+        try {
+            // Fetch fresh data. Backend increments view count on GET /posts/:id
+            const freshPost = await getForumPost(post.id);
+            setSelectedPost(freshPost);
+
+            // Sync the updated view count back to the main list
+            setPosts(prev => prev.map(p => p.id === post.id ? { ...p, viewCount: freshPost.viewCount } : p));
+        } catch (err) {
+            console.error('Failed to fetch full post details:', err);
+            // Fallback to the post data we already have if the fetch fails
+            setSelectedPost(post);
+        }
+    };
+
+    const loadComments = async (postId: string) => {
+        setIsLoadingComments(true);
+        try {
+            const res = await listForumComments(postId);
+            setComments(res.comments);
+        } catch (err) {
+            console.error('Failed to load comments:', err);
+        } finally {
+            setIsLoadingComments(false);
+        }
+    };
+
+    const handleCreateComment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedPost || !newCommentContent.trim()) return;
+
+        setIsCommenting(true);
+        try {
+            await createForumComment(selectedPost.id, { content: newCommentContent });
+            toast.success('Comment posted!');
+            setNewCommentContent('');
+            loadComments(selectedPost.id);
+            // Update comment count in list
+            setPosts(prev => prev.map(p => p.id === selectedPost.id ? { ...p, commentCount: (p.commentCount || 0) + 1 } : p));
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to post comment');
+        } finally {
+            setIsCommenting(false);
+        }
     };
 
     const handleCreatePost = async (e: React.FormEvent) => {
@@ -278,16 +456,28 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
                             ))
                         ) : posts.length > 0 ? (
                             posts.map((post) => (
-                                <div key={post.id} className="group glass-card rounded-2xl p-6 border border-white/5 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all cursor-pointer relative overflow-hidden">
+                                <div
+                                    key={post.id}
+                                    onClick={() => handleOpenPost(post)}
+                                    className="group glass-card rounded-2xl p-6 border border-white/5 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all cursor-pointer relative overflow-hidden"
+                                >
                                     <div className="flex gap-5 relative z-10">
                                         {/* Voting */}
                                         <div className="flex flex-col items-center gap-1 shrink-0 bg-white/5 rounded-xl px-2 py-3 h-fit border border-white/5">
-                                            <button className="text-zinc-500 hover:text-emerald-400 transition-colors">
-                                                <ThumbsUp size={16} />
+                                            <button
+                                                onClick={(e) => handleVote(post.id, 'up', e)}
+                                                className={`transition-colors ${userVotes[post.id] === 'up' ? 'text-emerald-400' : 'text-zinc-500 hover:text-emerald-400'}`}
+                                            >
+                                                <ThumbsUp size={16} className={userVotes[post.id] === 'up' ? 'fill-emerald-400' : ''} />
                                             </button>
-                                            <span className="text-xs font-black text-white">{(post.upVotes || 0) - (post.downVotes || 0)}</span>
-                                            <button className="text-zinc-500 hover:text-red-400 transition-colors">
-                                                <ThumbsDown size={16} />
+                                            <span className={`text-xs font-black transition-colors ${userVotes[post.id] === 'up' ? 'text-emerald-400' : userVotes[post.id] === 'down' ? 'text-red-400' : 'text-white'}`}>
+                                                {(post.upVotes || 0) - (post.downVotes || 0)}
+                                            </span>
+                                            <button
+                                                onClick={(e) => handleVote(post.id, 'down', e)}
+                                                className={`transition-colors ${userVotes[post.id] === 'down' ? 'text-red-400' : 'text-zinc-500 hover:text-red-400'}`}
+                                            >
+                                                <ThumbsDown size={16} className={userVotes[post.id] === 'down' ? 'fill-red-400' : ''} />
                                             </button>
                                         </div>
 
@@ -441,6 +631,147 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
                         />
                     </div>
                 </form>
+            </Modal>
+
+            {/* Post Detail Modal */}
+            <Modal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                title={selectedPost?.title || 'Discussion'}
+            >
+                {selectedPost && (
+                    <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                        {/* Main Post */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-black font-black">
+                                    {selectedPost.author?.fullName?.charAt(0) || 'U'}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white mb-0.5">{selectedPost.author?.fullName || 'Anonymous'}</h4>
+                                    <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                                        <span>In {selectedPost.category?.name}</span>
+                                        <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                                        <span>{formatDistanceToNow(new Date(selectedPost.createdAt), { addSuffix: true })}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4">
+                                <p className="text-zinc-300 leading-relaxed text-sm whitespace-pre-wrap">{selectedPost.content}</p>
+
+                                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleVote(selectedPost.id, 'up')}
+                                                className={`p-2 rounded-lg transition-all border ${userVotes[selectedPost.id] === 'up'
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20'
+                                                    : 'bg-white/5 text-zinc-400 border-white/5 hover:text-emerald-400'}`}
+                                            >
+                                                <ThumbsUp size={16} className={userVotes[selectedPost.id] === 'up' ? 'fill-emerald-400' : ''} />
+                                            </button>
+                                            <span className={`text-xs font-black px-2 ${userVotes[selectedPost.id] === 'up' ? 'text-emerald-400' : userVotes[selectedPost.id] === 'down' ? 'text-red-400' : 'text-white'}`}>
+                                                {(selectedPost.upVotes || 0) - (selectedPost.downVotes || 0)}
+                                            </span>
+                                            <button
+                                                onClick={() => handleVote(selectedPost.id, 'down')}
+                                                className={`p-2 rounded-lg transition-all border ${userVotes[selectedPost.id] === 'down'
+                                                    ? 'bg-red-500/20 text-red-400 border-red-500/20'
+                                                    : 'bg-white/5 text-zinc-400 border-white/5 hover:text-red-400'}`}
+                                            >
+                                                <ThumbsDown size={16} className={userVotes[selectedPost.id] === 'down' ? 'fill-red-400' : ''} />
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-zinc-500">
+                                            <MessageCircle size={16} />
+                                            <span className="text-xs font-bold">{selectedPost.commentCount || 0} Comments</span>
+                                        </div>
+                                    </div>
+                                    <button className="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-500 hover:text-white tracking-widest transition-colors">
+                                        <Share2 size={14} /> Share
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Comments Section */}
+                        <div className="space-y-6">
+                            <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
+                                Comments {isLoadingComments && <Loader2 size={12} className="animate-spin" />}
+                            </h5>
+
+                            {/* Comment Form */}
+                            <form onSubmit={handleCreateComment} className="relative group">
+                                <textarea
+                                    value={newCommentContent}
+                                    onChange={(e) => setNewCommentContent(e.target.value)}
+                                    placeholder="Write a helpful comment..."
+                                    rows={3}
+                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none font-medium leading-relaxed pr-12"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isCommenting || !newCommentContent.trim()}
+                                    className="absolute right-3 bottom-3 p-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-20 text-black rounded-xl transition-all shadow-lg active:scale-90"
+                                >
+                                    {isCommenting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                </button>
+                            </form>
+
+                            {/* Comments List */}
+                            <div className="space-y-4">
+                                {comments.length === 0 && !isLoadingComments ? (
+                                    <div className="py-8 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-2xl">
+                                        <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">No comments yet. Start the conversation!</p>
+                                    </div>
+                                ) : (
+                                    comments.map((comment) => (
+                                        <div key={comment.id} className="flex gap-4 group">
+                                            <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-[10px] font-black text-zinc-600 shrink-0">
+                                                {comment.author?.fullName?.charAt(0) || 'U'}
+                                            </div>
+                                            <div className="flex-1 space-y-2">
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className="text-xs font-bold text-white">{comment.author?.fullName || 'Anonymous'}</span>
+                                                        <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                                                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-zinc-400 text-sm leading-relaxed">{comment.content}</p>
+                                                </div>
+                                                <div className="flex items-center gap-4 px-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <button
+                                                            onClick={() => handleVoteComment(comment.id, 'up')}
+                                                            className={`transition-colors ${userCommentVotes[comment.id] === 'up' ? 'text-emerald-400' : 'text-zinc-600 hover:text-emerald-400'}`}
+                                                        >
+                                                            <ThumbsUp size={12} className={userCommentVotes[comment.id] === 'up' ? 'fill-emerald-400' : ''} />
+                                                        </button>
+                                                        <span className={`text-[10px] font-black transition-colors ${userCommentVotes[comment.id] === 'up' ? 'text-emerald-400' : userCommentVotes[comment.id] === 'down' ? 'text-red-400' : 'text-zinc-500'}`}>
+                                                            {(comment.upVotes || 0) - (comment.downVotes || 0)}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleVoteComment(comment.id, 'down')}
+                                                            className={`transition-colors ${userCommentVotes[comment.id] === 'down' ? 'text-red-400' : 'text-zinc-600 hover:text-red-400'}`}
+                                                        >
+                                                            <ThumbsDown size={12} className={userCommentVotes[comment.id] === 'down' ? 'fill-red-400' : ''} />
+                                                        </button>
+                                                    </div>
+                                                    <button className="text-[10px] font-black uppercase text-zinc-700 hover:text-zinc-400 tracking-widest transition-colors">Reply</button>
+                                                    <button className="text-[10px] font-black uppercase text-zinc-800 hover:text-red-500/50 tracking-widest transition-colors ml-auto opacity-0 group-hover:opacity-100 uppercase flex items-center gap-1">
+                                                        <Flag size={10} /> Report
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </Modal>
         </div>
     );

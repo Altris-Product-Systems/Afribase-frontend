@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { getOrganizations, isAuthenticated, Organization, getUser, User } from '@/lib/api';
+import { getOrganizations, isAuthenticated, Organization, getUser, User, getProject, Project } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
@@ -20,6 +20,7 @@ export default function DashboardLayout({
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -34,12 +35,35 @@ export default function DashboardLayout({
   }, [searchParams, organizations]);
 
   useEffect(() => {
+    const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
+    const projectIdFromPath = projectMatch ? projectMatch[1] : null;
+
+    if (projectIdFromPath) {
+      if (!project || project.id !== projectIdFromPath) {
+        loadProjectData(projectIdFromPath);
+      }
+    } else {
+      setProject(null);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/auth/sign-in');
       return;
     }
     loadSidebarData();
   }, [router]);
+
+  const loadProjectData = async (id: string) => {
+    try {
+      const found = await getProject(id);
+      setProject(found);
+    } catch (err) {
+      console.error('Failed to load project context for sidebar:', err);
+      setProject(null);
+    }
+  };
 
   const loadSidebarData = async () => {
     try {
@@ -196,6 +220,11 @@ export default function DashboardLayout({
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         onNewOrganization={() => setShowOnboardingModal(true)}
+        projectId={project?.id}
+        projectName={project?.name}
+        projectPlan={project?.plan}
+        projectRegion={project?.region}
+        projectStatus={project?.status}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">

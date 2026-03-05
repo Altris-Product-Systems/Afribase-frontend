@@ -49,6 +49,7 @@ interface SidebarProps {
   onMobileClose?: () => void;
   onNewOrganization?: () => void;
   // Project context props
+  projectId?: string;
   projectName?: string;
   projectPlan?: string;
   projectRegion?: string;
@@ -67,6 +68,7 @@ export default function Sidebar({
   isMobileOpen = false,
   onMobileClose,
   onNewOrganization,
+  projectId,
   projectName,
   projectPlan,
   projectRegion,
@@ -209,6 +211,54 @@ export default function Sidebar({
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* Project Context Widget */}
+        {projectName && (
+          <div className={`py-5 border-b border-white/5 relative ${isCollapsed ? 'px-3' : 'px-5'}`}>
+            <div className={`space-y-3 ${isCollapsed ? 'items-center flex flex-col' : ''}`}>
+              {!isCollapsed && (
+                <div className="flex items-center justify-between">
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${projectStatus === 'active' || !projectStatus
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-zinc-800 text-zinc-500 border border-white/5'
+                    }`}>
+                    {projectStatus || 'Active'}
+                  </span>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-widest text-amber-500">
+                    <Zap size={10} className="fill-amber-500" />
+                    {projectPlan || 'Free'}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 w-full overflow-hidden">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Database size={18} className="text-emerald-400" />
+                </div>
+                {!isCollapsed && (
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-black text-white truncate uppercase italic tracking-tighter">{projectName}</h3>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate">
+                      {projectRegion || 'Lagos-01'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {!isCollapsed && (
+                <div className="space-y-2 pt-1">
+                  <div className="px-3 py-2 bg-white/[0.02] border border-white/5 rounded-lg">
+                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Project ID</p>
+                    <p className="text-[10px] font-mono text-zinc-400 truncate text-[8px]">{projectId}</p>
+                  </div>
+                  <button className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-[9px] font-black text-zinc-400 hover:text-white uppercase tracking-[0.2em] rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <Zap size={10} className="text-amber-500" /> Upgrade Plan
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

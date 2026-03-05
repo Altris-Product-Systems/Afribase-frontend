@@ -142,13 +142,19 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Login failed response:', { status: response.status, data });
+
+      // GoTrue often uses 'msg' or 'error_description' for errors
+      const errorMsg = data.msg || data.message || data.error_description || data.detail || data.error;
+
       // Handle specific error cases
-      if (response.status === 401) {
+      if (response.status === 401 || (response.status === 400 && errorMsg?.includes('invalid_grant'))) {
         throw new APIError(401, 'Invalid email or password. Please check your credentials.');
       } else if (response.status === 404) {
         throw new APIError(404, 'User not found. Please sign up first.');
       }
-      throw new APIError(response.status, data.message || data.detail || 'Failed to sign in');
+
+      throw new APIError(response.status, errorMsg || 'Failed to sign in. Please check your credentials.');
     }
 
     // Backend returns access_token, normalize it to token for consistency
@@ -219,14 +225,20 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> 
 
     if (!response.ok) {
       console.error('Signup failed response:', { status: response.status, data });
+      // DEBUG: Log the full data object to see all fields
+      console.log('DEBUG: Full signup error data:', data);
 
       // Handle specific error cases with better message extraction
-      const errorMsg = data.message || data.detail || data.error || (data.errors ? JSON.stringify(data.errors) : null);
+      // GoTrue often uses 'msg' or 'error_description'
+      const errorMsg = data.msg || data.message || data.error_description || data.detail || data.error || (data.errors ? JSON.stringify(data.errors) : null);
+      const errorCode = data.error_code || data.code;
 
       if (response.status === 400) {
         throw new APIError(400, errorMsg || 'Invalid signup data. Please check your information.');
-      } else if (response.status === 409) {
+      } else if (response.status === 409 || (response.status === 422 && (errorMsg?.includes('already registered') || errorCode === 'user_already_exists'))) {
         throw new APIError(409, 'An account with this email already exists. Please sign in instead.');
+      } else if (response.status === 422) {
+        throw new APIError(422, errorMsg || 'Validation failed. The password might be too weak or the email is invalid.');
       }
 
       throw new APIError(response.status, errorMsg || 'Failed to create account. Please try again later.');
@@ -1026,6 +1038,53 @@ export async function getProjectUsers(projectId: string): Promise<ProjectUser[]>
     }
     if (error instanceof APIError) throw error;
     throw new APIError(500, 'An unexpected error occurred. Please try again.');
+  }
+}
+
+export interface CreateProjectUserRequest {
+  email: string;
+  password: string;
+  user_metadata?: Record<string, unknown>;
+  confirm?: boolean;
+}
+
+export async function createProjectUser(projectId: string, payload: CreateProjectUserRequest): Promise<ProjectUser> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create user');
+  return data;
+}
+
+export async function banProjectUser(projectId: string, userId: string, banDuration: string): Promise<ProjectUser> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users/${userId}/ban`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ban_duration: banDuration }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to ban user');
+  return data;
+}
+
+export async function deleteProjectUser(projectId: string, userId: string, softDelete = false): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/auth/users/${userId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ should_soft_delete: softDelete }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete user');
   }
 }
 
