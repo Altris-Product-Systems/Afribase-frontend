@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Archive, Plus, Trash2, RotateCcw, Loader2, Download, RefreshCw } from 'lucide-react';
 import { listBackups, createBackup, deleteBackup, restoreBackup } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface BackupsManagerProps { projectId: string; }
 
@@ -13,6 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function BackupsManager({ projectId }: BackupsManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [backups, setBackups] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -32,13 +35,25 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
     };
 
     const handleRestore = async (id: string) => {
-        if (!confirm('Restore this backup? Current data may be overwritten.')) return;
-        try { setRestoringId(id); await restoreBackup(projectId, id); alert('Restore initiated successfully!'); }
+        const ok = await confirm({
+            title: 'Restore Backup',
+            message: 'Restore this backup? Current data may be overwritten.',
+            variant: 'danger',
+            confirmText: 'Restore Backup'
+        });
+        if (!ok) return;
+        try { setRestoringId(id); await restoreBackup(projectId, id); toast.success('Restore initiated successfully!'); }
         catch (e: any) { setError(e.message); } finally { setRestoringId(null); }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this backup permanently?')) return;
+        const ok = await confirm({
+            title: 'Delete Backup',
+            message: 'Delete this backup permanently?',
+            variant: 'danger',
+            confirmText: 'Delete Permanently'
+        });
+        if (!ok) return;
         try { await deleteBackup(projectId, id); setBackups(prev => prev.filter(b => b.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -133,6 +148,7 @@ export default function BackupsManager({ projectId }: BackupsManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

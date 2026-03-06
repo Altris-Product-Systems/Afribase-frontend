@@ -2,12 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { Webhook, Plus, Trash2, Loader2, RefreshCw, Zap } from 'lucide-react';
 import { listWebhooks, createWebhook, deleteWebhook } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface WebhooksManagerProps { projectId: string; }
 
 const EVENTS = ['INSERT', 'UPDATE', 'DELETE'];
 
 export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [hooks, setHooks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -41,7 +44,13 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this webhook?')) return;
+        const ok = await confirm({
+            title: 'Delete Webhook',
+            message: 'Delete this webhook?',
+            variant: 'danger',
+            confirmText: 'Delete Webhook'
+        });
+        if (!ok) return;
         try { await deleteWebhook(projectId, id); setHooks(prev => prev.filter(h => h.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -156,6 +165,7 @@ export default function WebhooksManager({ projectId }: WebhooksManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

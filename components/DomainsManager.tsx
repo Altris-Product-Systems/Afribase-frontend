@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { listCustomDomains, addCustomDomain, verifyCustomDomain, removeCustomDomain } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface DomainsManagerProps { projectId: string; }
 
 export default function DomainsManager({ projectId }: DomainsManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [domains, setDomains] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,13 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
     };
 
     const handleRemove = async (id: string) => {
-        if (!confirm('Remove this custom domain?')) return;
+        const ok = await confirm({
+            title: 'Remove Domain',
+            message: 'Are you sure you want to remove this custom domain?',
+            variant: 'danger',
+            confirmText: 'Remove Domain'
+        });
+        if (!ok) return;
         try {
             await removeCustomDomain(projectId, id);
             setDomains(prev => prev.filter(d => d.id !== id));
@@ -304,6 +312,7 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                     </div>
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

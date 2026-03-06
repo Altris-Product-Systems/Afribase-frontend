@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 import {
     Plus,
     Key,
@@ -32,6 +33,7 @@ import {
     APIKey,
     EmbedConfig
 } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 interface NocodeManagerProps {
     projectId: string;
@@ -40,6 +42,7 @@ interface NocodeManagerProps {
 
 export default function NocodeManager({ projectId, projectSlug }: NocodeManagerProps) {
     const [activeTab, setActiveTab] = useState<'keys' | 'embed' | 'docs'>('keys');
+    const { confirm, ConfirmDialog } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [keys, setKeys] = useState<APIKey[]>([]);
     const [embedConfig, setEmbedConfig] = useState<EmbedConfig | null>(null);
@@ -94,19 +97,27 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
             setShowKeyModal(false);
             loadData();
         } catch (err) {
-            alert('Failed to create API key');
+            toast.error('Failed to create API key');
         } finally {
             setCreating(false);
         }
     };
 
     const handleDeleteKey = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) return;
+        const ok = await confirm({
+            title: 'Delete API Key',
+            message: 'Are you sure you want to delete this API key? This action cannot be undone.',
+            variant: 'danger',
+            confirmText: 'Delete Key'
+        });
+        if (!ok) return;
+
         try {
             await deleteAPIKey(projectId, id);
+            toast.success('API key deleted');
             loadData();
         } catch (err) {
-            alert('Failed to delete key');
+            toast.error('Failed to delete key');
         }
     };
 
@@ -119,7 +130,7 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
                 setLocalBrandColor(updates.brandColor);
             }
         } catch (err) {
-            alert('Failed to update embed settings');
+            toast.error('Failed to update embed settings');
         } finally {
             setIsUpdatingEmbed(false);
         }
@@ -131,11 +142,11 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
             const resp = await getEmbedScript(projectId);
             setEmbedScript(resp.script);
             if (!resp.script) {
-                alert('Success, but no script snippet was found. Please check your config.');
+                toast.error('Success, but no script snippet was found. Please check your config.');
             }
         } catch (err: any) {
             console.error('Script fetch error:', err);
-            alert(`Failed to fetch embed script: ${err.message || 'Unknown error'}`);
+            toast.error(`Failed to fetch embed script: ${err.message || 'Unknown error'}`);
         } finally {
             setFetchingScript(false);
         }
@@ -707,6 +718,7 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
                     </div>
                 </div>
             )}
+            <ConfirmDialog />
         </div>
     );
 }

@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Plus, Trash2, Loader2, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { listVaultSecrets, createVaultSecret, deleteVaultSecret } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface VaultManagerProps { projectId: string; }
 
 export default function VaultManager({ projectId }: VaultManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [secrets, setSecrets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +39,13 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this secret? This cannot be undone.')) return;
+        const ok = await confirm({
+            title: 'Delete Secret',
+            message: 'Delete this secret? This cannot be undone.',
+            variant: 'danger',
+            confirmText: 'Delete Secret'
+        });
+        if (!ok) return;
         try { await deleteVaultSecret(projectId, id); setSecrets(prev => prev.filter(s => s.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -138,6 +147,7 @@ export default function VaultManager({ projectId }: VaultManagerProps) {
                     </div>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

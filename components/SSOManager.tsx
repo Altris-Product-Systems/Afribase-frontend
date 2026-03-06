@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Loader2, Plus, Trash2, Globe, Link, FileText, Tag } from 'lucide-react';
 import { listSSOProviders, createSSOProvider, deleteSSOProvider } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface SSOManagerProps { projectId: string; }
 
 export default function SSOManager({ projectId }: SSOManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [providers, setProviders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,7 +41,13 @@ export default function SSOManager({ projectId }: SSOManagerProps) {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this SSO provider?')) return;
+        const ok = await confirm({
+            title: 'Delete SSO Provider',
+            message: 'Delete this SSO provider?',
+            variant: 'danger',
+            confirmText: 'Delete Provider'
+        });
+        if (!ok) return;
         try { await deleteSSOProvider(projectId, id); setProviders(prev => prev.filter(p => p.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -133,6 +142,7 @@ export default function SSOManager({ projectId }: SSOManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

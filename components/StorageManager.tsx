@@ -9,12 +9,15 @@ import {
     getStorageObjects,
     deleteStorageObject
 } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface StorageManagerProps {
     projectId: string;
 }
 
 export default function StorageManager({ projectId }: StorageManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [buckets, setBuckets] = useState<StorageBucket[]>([]);
     const [selectedBucket, setSelectedBucket] = useState<StorageBucket | null>(null);
     const [objects, setObjects] = useState<StorageObject[]>([]);
@@ -86,7 +89,13 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
     };
 
     const handleDeleteBucket = async (bucketId: string) => {
-        if (!window.confirm('Are you sure you want to delete this bucket? All contents will be lost.')) return;
+        const ok = await confirm({
+            title: 'Delete Bucket',
+            message: 'Are you sure you want to delete this bucket? All contents will be lost.',
+            variant: 'danger',
+            confirmText: 'Delete Bucket'
+        });
+        if (!ok) return;
 
         try {
             setError(null);
@@ -102,13 +111,19 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
 
     const handleDeleteObject = async (objectPath: string) => {
         if (!selectedBucket) return;
-        if (!window.confirm('Are you sure you want to delete this object?')) return;
+        const ok = await confirm({
+            title: 'Delete Object',
+            message: 'Are you sure you want to delete this object?',
+            variant: 'danger',
+            confirmText: 'Delete Object'
+        });
+        if (!ok) return;
 
         try {
             await deleteStorageObject(projectId, selectedBucket.id, objectPath);
             loadObjects(selectedBucket.id);
         } catch (err: any) {
-            alert(err.message || 'Failed to delete object');
+            toast.error(err.message || 'Failed to delete object');
         }
     };
 
@@ -292,6 +307,7 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
                     )}
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

@@ -8,12 +8,15 @@ import {
     deleteEdgeFunction,
     getFunctionDeployments
 } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface FunctionsManagerProps {
     projectId: string;
 }
 
 export default function FunctionsManager({ projectId }: FunctionsManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [functions, setFunctions] = useState<EdgeFunction[]>([]);
     const [selectedFunc, setSelectedFunc] = useState<EdgeFunction | null>(null);
     const [deployments, setDeployments] = useState<Deployment[]>([]);
@@ -67,7 +70,13 @@ export default function FunctionsManager({ projectId }: FunctionsManagerProps) {
     };
 
     const handleDeleteFunction = async (functionId: string) => {
-        if (!window.confirm('Delete this edge function? This cannot be recovered.')) return;
+        const ok = await confirm({
+            title: 'Delete Edge Function',
+            message: 'Delete this edge function? This cannot be recovered.',
+            variant: 'danger',
+            confirmText: 'Delete Function'
+        });
+        if (!ok) return;
         try {
             setError(null);
             await deleteEdgeFunction(projectId, functionId);
@@ -244,6 +253,7 @@ export default function FunctionsManager({ projectId }: FunctionsManagerProps) {
                     )}
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

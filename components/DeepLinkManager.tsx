@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { getDeepLinkConfig, upsertDeepLinkConfig, deleteDeepLinkConfig, DeepLinkConfig } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface DeepLinkManagerProps {
     projectId: string;
@@ -27,6 +28,7 @@ interface DeepLinkManagerProps {
 }
 
 export default function DeepLinkManager({ projectId, projectSlug }: DeepLinkManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [config, setConfig] = useState<Partial<DeepLinkConfig>>({
@@ -95,7 +97,13 @@ export default function DeepLinkManager({ projectId, projectSlug }: DeepLinkMana
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete deep link configuration?')) return;
+        const ok = await confirm({
+            title: 'Delete Deep Link Config',
+            message: 'Are you sure you want to delete deep link configuration?',
+            variant: 'danger',
+            confirmText: 'Delete Config'
+        });
+        if (!ok) return;
         try {
             await deleteDeepLinkConfig(projectId);
             setConfig({
@@ -411,6 +419,7 @@ export default function DeepLinkManager({ projectId, projectSlug }: DeepLinkMana
                     </div>
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

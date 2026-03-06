@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { GitBranch, Plus, Trash2, Loader2, Merge } from 'lucide-react';
 import { listBranches, createBranch, deleteBranch } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface BranchesManagerProps { projectId: string; }
 
@@ -14,6 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function BranchesManager({ projectId }: BranchesManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [branches, setBranches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -39,7 +42,13 @@ export default function BranchesManager({ projectId }: BranchesManagerProps) {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this database branch?')) return;
+        const ok = await confirm({
+            title: 'Delete Branch',
+            message: 'Delete this database branch?',
+            variant: 'danger',
+            confirmText: 'Delete Branch'
+        });
+        if (!ok) return;
         try { await deleteBranch(projectId, id); setBranches(prev => prev.filter(b => b.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -100,6 +109,7 @@ export default function BranchesManager({ projectId }: BranchesManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

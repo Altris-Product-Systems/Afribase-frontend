@@ -5,6 +5,7 @@ import { runProjectQuery, QueryResult } from '@/lib/api';
 import { RefreshCw, Play, Search, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Filter, AlertTriangle, XCircle, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface DataTableProps {
     projectId: string;
@@ -13,6 +14,7 @@ interface DataTableProps {
 }
 
 export default function DataTable({ projectId, schema, tableName }: DataTableProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [data, setData] = useState<any[]>([]);
     const [columns, setColumns] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -151,7 +153,13 @@ export default function DataTable({ projectId, schema, tableName }: DataTablePro
         const pkField = row.id ? 'id' : row.ID ? 'ID' : 'uuid';
         const pkValue = row[pkField];
 
-        if (!confirm(`Are you sure you want to delete row where ${pkField}=${pkValue}?`)) return;
+        const ok = await confirm({
+            title: 'Delete Row',
+            message: `Are you sure you want to delete row where ${pkField}=${pkValue}?`,
+            variant: 'danger',
+            confirmText: 'Delete Row'
+        });
+        if (!ok) return;
 
         try {
             const deleteQuery = `DELETE FROM ${fullTableName} WHERE "${pkField}" = '${pkValue}';`;
@@ -373,6 +381,7 @@ export default function DataTable({ projectId, schema, tableName }: DataTablePro
                     </div>
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

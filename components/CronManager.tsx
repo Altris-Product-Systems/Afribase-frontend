@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Plus, Trash2, Clock, Loader2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { getCronJobs, createCronJob, deleteCronJob } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface CronManagerProps {
     projectId: string;
 }
 
 export default function CronManager({ projectId }: CronManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [jobs, setJobs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -54,7 +57,13 @@ export default function CronManager({ projectId }: CronManagerProps) {
     };
 
     const handleDeleteJob = async (jobId: string) => {
-        if (!window.confirm('Delete this scheduled job?')) return;
+        const ok = await confirm({
+            title: 'Delete Cron Job',
+            message: 'Are you sure you want to delete this scheduled job?',
+            variant: 'danger',
+            confirmText: 'Delete Job'
+        });
+        if (!ok) return;
         try {
             await deleteCronJob(projectId, jobId);
             setJobs(prev => prev.filter(j => j.id !== jobId));
@@ -243,6 +252,7 @@ export default function CronManager({ projectId }: CronManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

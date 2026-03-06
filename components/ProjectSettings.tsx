@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { pauseProject, reactivateProject, deleteProject, Project } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface ProjectSettingsProps {
     project: Project;
@@ -21,6 +22,7 @@ interface ProjectSettingsProps {
 }
 
 export default function ProjectSettings({ project, onUpdate }: ProjectSettingsProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const router = useRouter();
     const [isPausing, setIsPausing] = useState(false);
     const [isReactivating, setIsReactivating] = useState(false);
@@ -28,7 +30,13 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
     const [deleteConfirm, setDeleteConfirm] = useState('');
 
     const handlePause = async () => {
-        if (!confirm('Are you sure you want to pause this project? Services will be stopped but data is safe.')) return;
+        const ok = await confirm({
+            title: 'Pause Project',
+            message: 'Are you sure you want to pause this project? Services will be stopped but data is safe.',
+            variant: 'default',
+            confirmText: 'Pause Project'
+        });
+        if (!ok) return;
 
         setIsPausing(true);
         try {
@@ -205,6 +213,7 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
                     </div>
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

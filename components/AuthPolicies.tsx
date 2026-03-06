@@ -13,12 +13,14 @@ import {
 } from '@/lib/api';
 import { Modal } from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 interface AuthPoliciesProps {
     projectId: string;
 }
 
 export default function AuthPolicies({ projectId }: AuthPoliciesProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [tables, setTables] = useState<TableRLSStatus[]>([]);
     const [selectedTable, setSelectedTable] = useState<string | null>(null);
     const [policies, setPolicies] = useState<RLSPolicy[]>([]);
@@ -88,7 +90,13 @@ export default function AuthPolicies({ projectId }: AuthPoliciesProps) {
     };
 
     const handleDeletePolicy = async (policy: RLSPolicy) => {
-        if (!confirm(`Delete policy "${policy.name}"?`)) return;
+        const ok = await confirm({
+            title: 'Delete Policy',
+            message: `Delete policy "${policy.name}"?`,
+            variant: 'danger',
+            confirmText: 'Delete Policy'
+        });
+        if (!ok) return;
         try {
             await deletePolicy(projectId, { name: policy.name, schema: policy.schema, table: policy.table });
             toast.success('Policy deleted');
@@ -359,6 +367,7 @@ export default function AuthPolicies({ projectId }: AuthPoliciesProps) {
                     </div>
                 </form>
             </Modal>
+            <ConfirmDialog />
         </div>
     );
 }

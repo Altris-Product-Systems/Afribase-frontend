@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Rss, Plus, Trash2, Loader2 } from 'lucide-react';
 import { listLogDrains, createLogDrain, deleteLogDrain } from '@/lib/api';
+import { useConfirm } from '@/lib/hooks/useConfirm';
+import toast from 'react-hot-toast';
 
 interface LogDrainsManagerProps { projectId: string; }
 
@@ -9,6 +11,7 @@ const DRAIN_TYPES = ['http', 'datadog', 'papertrail', 's3', 'loki'];
 const SOURCES = ['api', 'auth', 'postgrest', 'storage', 'edge-functions'];
 
 export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
+    const { confirm, ConfirmDialog } = useConfirm();
     const [drains, setDrains] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -40,7 +43,13 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this log drain?')) return;
+        const ok = await confirm({
+            title: 'Delete Log Drain',
+            message: 'Are you sure you want to delete this log drain?',
+            variant: 'danger',
+            confirmText: 'Delete Drain'
+        });
+        if (!ok) return;
         try { await deleteLogDrain(projectId, id); setDrains(prev => prev.filter(d => d.id !== id)); }
         catch (e: any) { setError(e.message); }
     };
@@ -137,6 +146,7 @@ export default function LogDrainsManager({ projectId }: LogDrainsManagerProps) {
                     </table>
                 )}
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

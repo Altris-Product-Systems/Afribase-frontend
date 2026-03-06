@@ -12,8 +12,10 @@ import {
 } from '@/lib/api';
 import { Users, Mail, Shield, UserPlus, Trash2, ChevronLeft, RefreshCw, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 export default function MembersPage() {
+    const { confirm, ConfirmDialog } = useConfirm();
     const router = useRouter();
     const searchParams = useSearchParams();
     const orgId = searchParams.get('orgId');
@@ -65,7 +67,14 @@ export default function MembersPage() {
     };
 
     const handleRemove = async (userId: string) => {
-        if (!orgId || !confirm('Are you sure you want to remove this member?')) return;
+        if (!orgId) return;
+        const ok = await confirm({
+            title: 'Remove Member',
+            message: 'Are you sure you want to remove this member?',
+            variant: 'danger',
+            confirmText: 'Remove Member'
+        });
+        if (!ok) return;
 
         try {
             await removeOrganizationMember(orgId, userId);
@@ -234,6 +243,7 @@ export default function MembersPage() {
                     )}
                 </div>
             </div>
+            <ConfirmDialog />
         </div>
     );
 }

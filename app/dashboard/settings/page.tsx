@@ -5,8 +5,10 @@ import { Settings, User, Globe, Shield, CreditCard, ChevronRight, Users, Trash2,
 import { useRouter, useSearchParams } from 'next/navigation';
 import { deleteOrganization, getOrganizations, Organization } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/lib/hooks/useConfirm';
 
 export default function SettingsPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
   const orgId = searchParams.get('orgId');
@@ -40,7 +42,13 @@ export default function SettingsPage() {
       return;
     }
 
-    if (!confirm('This will permanently delete the workspace and all its projects. Are you absolutely sure?')) return;
+    const ok = await confirm({
+      title: 'Delete Workspace',
+      message: 'This will permanently delete the workspace and all its projects. Are you absolutely sure?',
+      variant: 'danger',
+      confirmText: 'Delete Permanently'
+    });
+    if (!ok) return;
 
     setIsDeleting(true);
     try {
@@ -153,6 +161,7 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+      <ConfirmDialog />
     </div>
   );
 }
