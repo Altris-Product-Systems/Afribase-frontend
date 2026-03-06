@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HardDrive, Upload, Folder, Shield } from 'lucide-react';
+import { HardDrive, Upload, Folder, Shield, Globe } from 'lucide-react';
 import EmptyState from '@/components/EmptyState';
 
 export default function StoragePage() {
@@ -30,9 +30,9 @@ export default function StoragePage() {
           description="Buckets are where you store your files. Create your first bucket to start uploading images, videos, and documents."
           icon={HardDrive}
           actionLabel="Create Bucket"
-          onAction={() => {}}
+          onAction={() => { }}
           secondaryActionLabel="Storage Docs"
-          onSecondaryAction={() => {}}
+          onSecondaryAction={() => { }}
         />
       </div>
 
