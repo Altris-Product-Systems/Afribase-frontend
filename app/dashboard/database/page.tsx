@@ -30,9 +30,9 @@ export default function DatabasePage() {
           description="Your database is ready but has no tables yet. Create a new table or use the SQL editor to get started."
           icon={Database}
           actionLabel="Create New Table"
-          onAction={() => // console.log('Create table')}
+          onAction={() => {}}
           secondaryActionLabel="Open SQL Editor"
-          onSecondaryAction={() => // console.log('SQL Editor')}
+          onSecondaryAction={() => {}}
         />
       </div>
 
