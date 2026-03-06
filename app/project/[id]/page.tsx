@@ -47,7 +47,7 @@ export default function ProjectDetailsPage() {
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [showApiKeys, setShowApiKeys] = useState(false);
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export default function ProjectDetailsPage() {
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-6">
-          {activeTab === 'dashboard' && (
+          {activeTab === 'overview' && (
             <div className="max-w-6xl mx-auto space-y-6">
               {/* Project URL */}
               <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
@@ -635,7 +635,7 @@ export default function ProjectDetailsPage() {
 
           {activeTab === 'nocode' && (
             <div className="max-w-6xl mx-auto h-full p-4">
-              <NocodeManager projectId={project.id} />
+              <NocodeManager projectId={project.id} projectSlug={project.slug} />
             </div>
           )}
 
@@ -645,7 +645,7 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced', 'forum', 'health', 'nocode', 'deeplinks'].includes(activeTab) && (
+          {!['overview', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced', 'forum', 'health', 'nocode', 'deeplinks'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

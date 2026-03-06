@@ -72,6 +72,7 @@ import AdvancedConfig from '@/components/AdvancedConfig';
 import ForumManager from '@/components/ForumManager';
 import HealthMonitor from '@/components/HealthMonitor';
 import NocodeManager from '@/components/NocodeManager';
+import DeepLinkManager from '@/components/DeepLinkManager';
 import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
@@ -111,7 +112,7 @@ const TABS = [
   'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
   'api-keys', 'storage', 'edge-functions', 'realtime',
   'migrations', 'backups', 'branches', 'webhooks', 'pooler',
-  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'health', 'nocode', 'settings',
+  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'health', 'nocode', 'deeplinks', 'settings',
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -1569,7 +1570,15 @@ export default function ProjectDetailPage() {
       {
         activeTab === 'nocode' && (
           <div className="animate-fade-in">
-            <NocodeManager projectId={project.id} />
+            <NocodeManager projectId={project.id} projectSlug={project.slug} />
+          </div>
+        )
+      }
+
+      {
+        activeTab === 'deeplinks' && (
+          <div className="animate-fade-in">
+            <DeepLinkManager projectId={project.id} projectSlug={project.slug} />
           </div>
         )
       }

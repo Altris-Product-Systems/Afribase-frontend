@@ -35,9 +35,10 @@ import {
 
 interface NocodeManagerProps {
     projectId: string;
+    projectSlug?: string;
 }
 
-export default function NocodeManager({ projectId }: NocodeManagerProps) {
+export default function NocodeManager({ projectId, projectSlug }: NocodeManagerProps) {
     const [activeTab, setActiveTab] = useState<'keys' | 'embed' | 'docs'>('keys');
     const [loading, setLoading] = useState(true);
     const [keys, setKeys] = useState<APIKey[]>([]);
@@ -56,6 +57,7 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
     const [isUpdatingEmbed, setIsUpdatingEmbed] = useState(false);
     const [fetchingScript, setFetchingScript] = useState(false);
     const [embedScript, setEmbedScript] = useState<string>('');
+    const [localBrandColor, setLocalBrandColor] = useState('#10b981');
 
     useEffect(() => {
         loadData();
@@ -70,6 +72,9 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
             ]);
             setKeys(keysData);
             setEmbedConfig(configData);
+            if (configData) {
+                setLocalBrandColor(configData.brandColor);
+            }
         } catch (err) {
             console.error('Failed to load nocode data:', err);
         } finally {
@@ -110,6 +115,9 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
         try {
             const updated = await updateEmbedConfig(projectId, updates);
             setEmbedConfig(updated);
+            if (updates.brandColor) {
+                setLocalBrandColor(updates.brandColor);
+            }
         } catch (err) {
             alert('Failed to update embed settings');
         } finally {
@@ -269,74 +277,108 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
                     )}
 
                     {activeTab === 'embed' && embedConfig && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-fade-in text-zinc-100">
-                            <div className="space-y-8">
-                                <div className="glass-card rounded-3xl p-8 space-y-8 border-emerald-500/10">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-emerald-500 rounded-lg">
-                                            <Monitor size={20} className="text-black" />
-                                        </div>
-                                        <h3 className="text-lg font-bold">Authentication Widget</h3>
-                                    </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in slide-in-from-bottom-4 duration-500 text-zinc-100">
+                            <div className="space-y-10">
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                                        <Monitor className="text-emerald-500" size={24} />
+                                        Auth Customization
+                                    </h3>
+                                    <p className="text-zinc-500 text-sm font-medium">Style your white-label authentication widget to match your brand identity perfectly.</p>
+                                </div>
 
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Primary Color</label>
-                                            <div className="flex items-center gap-3">
+                                <div className="glass-card rounded-[32px] p-8 space-y-10 border border-white/5 relative overflow-hidden">
+                                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 blur-[100px] rounded-full" />
+
+                                    <div className="grid grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <Palette size={14} className="text-zinc-500" />
+                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Brand Color</label>
+                                            </div>
+                                            <div className="flex items-center gap-4 bg-zinc-950/50 p-2 rounded-2xl border border-white/5">
                                                 <input
                                                     type="color"
-                                                    value={embedConfig.brandColor}
-                                                    onChange={(e) => handleUpdateEmbed({ brandColor: e.target.value })}
-                                                    className="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 cursor-pointer"
+                                                    value={localBrandColor}
+                                                    onChange={(e) => setLocalBrandColor(e.target.value)}
+                                                    onBlur={(e) => handleUpdateEmbed({ brandColor: e.target.value })}
+                                                    className="w-12 h-12 rounded-xl bg-transparent border-none cursor-pointer outline-none"
                                                 />
-                                                <code className="text-xs text-zinc-400 font-mono">{embedConfig.brandColor}</code>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-black text-white">{localBrandColor.toUpperCase()}</span>
+                                                    <span className="text-[8px] font-bold text-zinc-600 uppercase">Primary Hue</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Theme</label>
-                                            <select
-                                                value={embedConfig.theme}
-                                                onChange={(e) => handleUpdateEmbed({ theme: e.target.value })}
-                                                className="w-full bg-zinc-900 border border-white/5 px-3 py-2.5 rounded-xl text-sm text-zinc-300 focus:outline-none focus:border-emerald-500"
-                                            >
-                                                <option value="dark">Dark Mode</option>
-                                                <option value="light">Light Mode</option>
-                                                <option value="auto">System Sync</option>
-                                            </select>
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <Eye size={14} className="text-zinc-500" />
+                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Visual Theme</label>
+                                            </div>
+                                            <div className="relative group">
+                                                <select
+                                                    value={embedConfig.theme}
+                                                    onChange={(e) => handleUpdateEmbed({ theme: e.target.value })}
+                                                    className="w-full bg-zinc-950/50 border border-white/5 px-4 py-4 rounded-2xl text-sm text-zinc-300 focus:outline-none appearance-none font-bold"
+                                                >
+                                                    <option value="dark">Deep Night</option>
+                                                    <option value="light">Crisp White</option>
+                                                    <option value="auto">System Sync</option>
+                                                </select>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600 transition-colors" style={{ color: embedConfig.theme === 'dark' ? '#555' : '#ccc' }}>
+                                                    <Settings size={14} />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Allowed Origins (CORS)</label>
-                                        <input
-                                            type="text"
-                                            value={embedConfig.allowedOrigins}
-                                            onChange={(e) => setEmbedConfig({ ...embedConfig, allowedOrigins: e.target.value })}
-                                            onBlur={() => handleUpdateEmbed({ allowedOrigins: embedConfig.allowedOrigins })}
-                                            placeholder="https://example.com, https://blog.wixsite.com"
-                                            className="w-full bg-zinc-900 border border-white/5 px-4 py-3 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500"
-                                        />
-                                        <p className="text-[10px] text-zinc-600">Comma-separated domains where this widget will appear.</p>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            <Globe size={14} className="text-zinc-500" />
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">CORS Safety Whitelist</label>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={embedConfig.allowedOrigins}
+                                                onChange={(e) => setEmbedConfig({ ...embedConfig, allowedOrigins: e.target.value })}
+                                                onBlur={() => handleUpdateEmbed({ allowedOrigins: embedConfig.allowedOrigins })}
+                                                placeholder="https://example.com, https://app.acme.co"
+                                                className="w-full bg-zinc-950/50 border border-white/5 px-5 py-4 rounded-2xl text-sm text-zinc-100 focus:outline-none placeholder:text-zinc-800 transition-all"
+                                            />
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                                <Shield size={16} className="text-zinc-800" />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <button
                                             onClick={() => handleUpdateEmbed({ enableSignUp: !embedConfig.enableSignUp })}
-                                            className={`p-4 rounded-2xl border transition-all text-left ${embedConfig.enableSignUp ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-zinc-950/20 border-white/5'}`}
+                                            className={`p-5 rounded-[24px] border-2 transition-all relative overflow-hidden group/btn ${embedConfig.enableSignUp ? 'bg-zinc-950/20 border-white/5 shadow-[0_0_20px_rgba(16,185,129,0.05)]' : 'bg-zinc-950/20 border-white/5 hover:border-zinc-800'}`}
+                                            style={{ borderColor: embedConfig.enableSignUp ? localBrandColor : 'transparent' }}
                                         >
-                                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Sign Up</p>
-                                            <p className={`text-sm font-bold ${embedConfig.enableSignUp ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                                                {embedConfig.enableSignUp ? 'Enabled' : 'Disabled'}
-                                            </p>
+                                            <div className="flex flex-col gap-1 relative z-10">
+                                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">User Registration</span>
+                                                <span className={`text-sm font-black transition-colors`} style={{ color: embedConfig.enableSignUp ? localBrandColor : '#52525b' }}>
+                                                    {embedConfig.enableSignUp ? 'ACTIVE' : 'DISABLED'}
+                                                </span>
+                                            </div>
+                                            {embedConfig.enableSignUp && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: localBrandColor }} />}
                                         </button>
+
                                         <button
                                             onClick={() => handleUpdateEmbed({ enableOAuth: !embedConfig.enableOAuth })}
-                                            className={`p-4 rounded-2xl border transition-all text-left ${embedConfig.enableOAuth ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-zinc-950/20 border-white/5'}`}
+                                            className={`p-5 rounded-[24px] border-2 transition-all relative overflow-hidden group/btn ${embedConfig.enableOAuth ? 'bg-cyan-500/5 border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.05)]' : 'bg-zinc-950/20 border-white/5 hover:border-zinc-800'}`}
                                         >
-                                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">OAuth/Social</p>
-                                            <p className={`text-sm font-bold ${embedConfig.enableOAuth ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                                                {embedConfig.enableOAuth ? 'Enabled' : 'Disabled'}
-                                            </p>
+                                            <div className="flex flex-col gap-1 relative z-10">
+                                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">OAuth 2.0 / Social</span>
+                                                <span className={`text-sm font-black ${embedConfig.enableOAuth ? 'text-cyan-400' : 'text-zinc-500'}`}>
+                                                    {embedConfig.enableOAuth ? 'READY' : 'INACTIVE'}
+                                                </span>
+                                            </div>
+                                            {embedConfig.enableOAuth && <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse" />}
                                         </button>
                                     </div>
 
@@ -344,65 +386,141 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
                                         <button
                                             onClick={handleGetScript}
                                             disabled={fetchingScript}
-                                            className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-500 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                            className="w-full py-5 bg-white text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 shadow-2xl shadow-emerald-500/10"
                                         >
-                                            {fetchingScript ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
-                                            {fetchingScript ? 'Generating...' : embedScript ? 'Refresh Script' : 'Get Drop-in Script'}
+                                            {fetchingScript ? <Loader2 size={16} className="animate-spin" /> : <Code size={16} strokeWidth={3} />}
+                                            {fetchingScript ? 'PROTOCOL SYNC...' : embedScript ? 'REFRESH INTEGRATION' : 'DEPLOY DROP-IN SCRIPT'}
                                         </button>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-zinc-900/40 rounded-3xl border border-white/5 flex gap-4">
+                                    <div className="p-2 bg-zinc-800 h-fit rounded-lg text-zinc-500">
+                                        <Share2 size={16} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-xs font-bold text-white">White-label Protocol</h4>
+                                        <p className="text-[10px] text-zinc-500 leading-relaxed font-medium">
+                                            The widget runs in an isolated iframe, ensuring your site's JavaScript never touches sensitive credentials.
+                                            Session state is synchronized via cross-origin postMessage.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-6">
-                                <div className="glass-card rounded-3xl p-8 border-dashed border-zinc-800">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h3 className="text-sm font-black text-zinc-500 uppercase tracking-widest">Live Preview</h3>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Disconnected</span>
+                            <div className="space-y-8">
+                                <div className="relative group">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 rounded-[40px] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+                                    <div className="relative glass-card rounded-[40px] p-10 border border-white/10 overflow-hidden bg-black/40">
+                                        <div className="flex items-center justify-between mb-10">
+                                            <div className="space-y-1">
+                                                <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest">Real-time Preview</h3>
+                                                <p className="text-[10px] text-zinc-600 font-medium italic">Simulated frontend injection</p>
+                                            </div>
+                                            <div className="flex items-center gap-3 bg-zinc-900/80 px-4 py-2 rounded-full border border-white/5">
+                                                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: localBrandColor, boxShadow: `0 0 8px ${localBrandColor}` }} />
+                                                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: localBrandColor }}>Streaming Stats</span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            className={`p-10 rounded-3xl flex flex-col items-center gap-8 border transition-all duration-500 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden`}
+                                            style={{
+                                                backgroundColor: embedConfig.theme === 'dark' ? '#09090b' : '#ffffff',
+                                                borderColor: embedConfig.theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+                                            }}
+                                        >
+                                            {/* Logo Container */}
+                                            <div className="w-20 h-20 rounded-3xl bg-white/5 p-4 flex items-center justify-center relative group/preview">
+                                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-3xl" />
+                                                <img
+                                                    src="/AFRIBASE1.png"
+                                                    alt="Brand Logo"
+                                                    className="w-full h-full object-contain relative z-10 transition-all duration-500"
+                                                    style={{
+                                                        filter: `drop-shadow(0px 0px 10px ${localBrandColor}44) brightness(1.2)`
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="text-center space-y-2">
+                                                <h4 className={`text-xl font-black tracking-tight ${embedConfig.theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                                                    Join {projectSlug || 'the project'}
+                                                </h4>
+                                                <p className={`text-xs font-medium ${embedConfig.theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                                    Create your account to get started
+                                                </p>
+                                            </div>
+
+                                            <div className="w-full space-y-4">
+                                                <div className={`h-12 w-full rounded-2xl border transition-colors ${embedConfig.theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-black/[0.02] border-black/5'}`} />
+                                                <div className={`h-12 w-full rounded-2xl border transition-colors ${embedConfig.theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-black/[0.02] border-black/5'}`} />
+
+                                                <div className="pt-2">
+                                                    <div
+                                                        className="w-full h-14 rounded-2xl shadow-xl transition-all active:scale-[0.98] flex items-center justify-center"
+                                                        style={{
+                                                            backgroundColor: localBrandColor,
+                                                            boxShadow: `0 10px 30px -10px ${localBrandColor}66`
+                                                        }}
+                                                    >
+                                                        <div className="w-24 h-2 bg-white/20 rounded-full" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {embedConfig.enableOAuth && (
+                                                <div className="w-full pt-4 flex flex-col items-center gap-4">
+                                                    <div className="flex items-center gap-4 w-full">
+                                                        <div className="h-px flex-1 bg-zinc-800" />
+                                                        <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">or continue with</span>
+                                                        <div className="h-px flex-1 bg-zinc-800" />
+                                                    </div>
+                                                    <div className="flex gap-4">
+                                                        {[1, 2, 3].map(i => (
+                                                            <div key={i} className="w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center" />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-
-                                    <div
-                                        className={`p-10 rounded-2xl flex flex-col items-center gap-6 border border-white/5 shadow-2xl transition-colors`}
-                                        style={{ backgroundColor: embedConfig.theme === 'dark' ? '#09090b' : '#f9fafb' }}
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-                                            <Settings size={24} className="text-zinc-500" />
-                                        </div>
-                                        <div className="text-center">
-                                            <h4 className="font-bold text-zinc-400">Welcome back</h4>
-                                            <p className="text-xs text-zinc-600 mt-1">Sign in to your account</p>
-                                        </div>
-                                        <div className="w-full space-y-3">
-                                            <div className="h-10 w-full rounded-lg bg-zinc-900/50 border border-white/5" />
-                                            <div className="h-10 w-full rounded-lg bg-zinc-900/50 border border-white/5" />
-                                            <button className="w-full h-11 rounded-xl shadow-lg shadow-emerald-500/20" style={{ backgroundColor: embedConfig.brandColor }}>
-
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p className="text-center text-[10px] text-zinc-600 mt-6 italic">Simulated widget appearance on your site.</p>
                                 </div>
 
                                 {embedScript && (
-                                    <div className="bg-zinc-950 rounded-3xl p-6 border border-white/5 animate-slide-up">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Embedding Code</p>
+                                    <div className="bg-zinc-950/80 rounded-[40px] p-8 border border-white/5 animate-in slide-in-from-right-4 duration-500 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                                            <Code size={120} />
+                                        </div>
+
+                                        <div className="flex items-center justify-between mb-6 relative z-10">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
+                                                    <Code size={16} />
+                                                </div>
+                                                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Deployment Snippet</p>
+                                            </div>
                                             <button
                                                 onClick={() => copyToClipboard(embedScript, 'script')}
-                                                className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:text-white transition-colors"
+                                                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-xl text-[10px] font-black text-emerald-500 uppercase tracking-widest transition-all active:scale-95 border border-white/5"
                                             >
-                                                {copiedId === 'script' ? <Check size={12} /> : <Copy size={12} />}
-                                                {copiedId === 'script' ? 'Copied' : 'Copy Code'}
+                                                {copiedId === 'script' ? <Check size={12} className="text-white" /> : <Copy size={12} />}
+                                                {copiedId === 'script' ? 'COPIED TO CLIPBOARD' : 'COPY SNIPPET'}
                                             </button>
                                         </div>
-                                        <pre className="p-4 bg-black/50 rounded-xl overflow-x-auto text-[10px] text-blue-400 font-mono leading-relaxed border border-white/5">
-                                            {embedScript}
-                                        </pre>
-                                        <p className="mt-4 text-[10px] text-zinc-600 leading-relaxed">
-                                            Paste this script before the <code className="text-zinc-400">{'</body>'}</code> tag on your WordPress, Wix, or custom site. Call <code className="text-zinc-400">new AfribaseAuth('#container')</code> to initialize.
-                                        </p>
+
+                                        <div className="relative z-10">
+                                            <pre className="p-6 bg-black/80 rounded-2xl overflow-x-auto text-[11px] text-blue-400 font-mono leading-relaxed border border-white/5 shadow-inner">
+                                                {embedScript}
+                                            </pre>
+                                        </div>
+
+                                        <div className="mt-6 flex gap-3 p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl relative z-10">
+                                            <AlertCircle size={14} className="text-blue-500 shrink-0 mt-0.5" />
+                                            <p className="text-[10px] text-zinc-500 leading-relaxed font-medium italic">
+                                                Initialize with <code className="text-zinc-300">new AfribaseAuth('#container')</code>. Custom hooks for React & Vue available in the <span className="text-white cursor-pointer hover:underline">documentation</span>.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -512,7 +630,6 @@ export default function NocodeManager({ projectId }: NocodeManagerProps) {
                 </>
             )}
 
-            {/* Create Key Modal */}
             {showKeyModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowKeyModal(false)} />

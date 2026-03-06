@@ -161,6 +161,7 @@ export default function DashboardLayout({
         forum: 'forum',
         health: 'health',
         nocode: 'nocode',
+        deeplinks: 'deeplinks',
         settings: 'settings',
       };
 
@@ -201,6 +202,7 @@ export default function DashboardLayout({
       forum: '/dashboard/forum',
       health: '/dashboard/health',
       nocode: '/dashboard/nocode',
+      deeplinks: '/dashboard/deeplinks',
       settings: '/dashboard/settings',
     };
 

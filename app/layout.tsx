@@ -11,11 +11,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Afribase - Business Platform for African Entrepreneurs",
   description: "The all-in-one platform for African businesses. Manage payments, track inventory, and grow your business with tools built for the African market.",
-  icons: {
-    icon: "/AFRIBASE1.png?v=1",
-    shortcut: "/AFRIBASE1.png?v=1",
-    apple: "/AFRIBASE1.png?v=1",
-  },
 };
 
 export default function RootLayout({
