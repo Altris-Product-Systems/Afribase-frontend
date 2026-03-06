@@ -31,6 +31,9 @@ import RealtimeConfig from '@/components/RealtimeConfig';
 import LogDrainsManager from '@/components/LogDrainsManager';
 import AdvancedConfig from '@/components/AdvancedConfig';
 import ForumManager from '@/components/ForumManager';
+import HealthMonitor from '@/components/HealthMonitor';
+import NocodeManager from '@/components/NocodeManager';
+import DeepLinkManager from '@/components/DeepLinkManager';
 
 export default function ProjectDetailsPage() {
   const router = useRouter();
@@ -624,7 +627,25 @@ export default function ProjectDetailsPage() {
             </div>
           )}
 
-          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced', 'forum'].includes(activeTab) && (
+          {activeTab === 'health' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <HealthMonitor projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'nocode' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <NocodeManager projectId={project.id} />
+            </div>
+          )}
+
+          {activeTab === 'deeplinks' && (
+            <div className="max-w-6xl mx-auto h-full p-4">
+              <DeepLinkManager projectId={project.id} projectSlug={project.slug} />
+            </div>
+          )}
+
+          {!['dashboard', 'auth', 'users', 'policies', 'api', 'settings', 'usage', 'storage', 'edge-functions', 'cron', 'logs', 'migrations', 'tables', 'sql', 'backups', 'branches', 'webhooks', 'vault', 'sso', 'domains', 'network', 'pooler', 'realtime', 'log-drains', 'advanced', 'forum', 'health', 'nocode', 'deeplinks'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <h3 className="text-xl font-semibold text-black dark:text-white mb-2">

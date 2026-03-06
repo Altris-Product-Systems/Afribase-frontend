@@ -6,6 +6,7 @@ import { getOrganizations, isAuthenticated, Organization, getUser, User, getProj
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+import { User as UserIcon } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -40,6 +41,7 @@ export default function DashboardLayout({
 
     if (projectIdFromPath) {
       if (!project || project.id !== projectIdFromPath) {
+        setProject(null); // Clear stale project
         loadProjectData(projectIdFromPath);
       }
     } else {
@@ -157,6 +159,8 @@ export default function DashboardLayout({
         vault: 'vault',
         advanced: 'advanced',
         forum: 'forum',
+        health: 'health',
+        nocode: 'nocode',
         settings: 'settings',
       };
 
@@ -195,6 +199,8 @@ export default function DashboardLayout({
       vault: '/dashboard/vault',
       advanced: '/dashboard/advanced',
       forum: '/dashboard/forum',
+      health: '/dashboard/health',
+      nocode: '/dashboard/nocode',
       settings: '/dashboard/settings',
     };
 
@@ -244,17 +250,19 @@ export default function DashboardLayout({
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Platform Healthy</span>
-            </div> */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${project?.status === 'degraded' || true ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-lg ${project?.status === 'degraded' || true ? 'bg-red-500 shadow-red-500/50' : 'bg-emerald-500 shadow-emerald-500/50'}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                {project?.status === 'degraded' || true ? '1 Issue' : 'Systems Healthy'}
+              </span>
+            </div>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
               {user?.user_metadata?.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
                   {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) ||
-                    user?.email?.slice(0, 2).toUpperCase() || '??'}
+                    user?.email?.slice(0, 2).toUpperCase() || <UserIcon size={14} className="text-emerald-400/50" />}
                 </span>
               )}
             </div>

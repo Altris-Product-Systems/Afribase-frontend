@@ -70,6 +70,8 @@ import NetworkRestrictions from '@/components/NetworkRestrictions';
 import VaultManager from '@/components/VaultManager';
 import AdvancedConfig from '@/components/AdvancedConfig';
 import ForumManager from '@/components/ForumManager';
+import HealthMonitor from '@/components/HealthMonitor';
+import NocodeManager from '@/components/NocodeManager';
 import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
@@ -109,7 +111,7 @@ const TABS = [
   'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
   'api-keys', 'storage', 'edge-functions', 'realtime',
   'migrations', 'backups', 'branches', 'webhooks', 'pooler',
-  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'settings',
+  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'health', 'nocode', 'settings',
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -136,6 +138,21 @@ export default function ProjectDetailPage() {
       setActiveTab(tab);
     }
   }, [searchParams]);
+  const tabTitles: Record<string, string> = {
+    overview: project?.name || 'Project Overview',
+    database: 'Table Editor',
+    sql: 'SQL Editor',
+    auth: 'Authentication',
+    users: 'Users',
+    policies: 'RLS Policies',
+    storage: 'Storage',
+    'edge-functions': 'Edge Functions',
+    nocode: 'No-Code Hub',
+    health: 'Health & Monitoring',
+    forum: 'Developer Forum',
+    domains: 'Custom Domains',
+    settings: 'Project Settings',
+  };
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
@@ -378,7 +395,7 @@ export default function ProjectDetailPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">
-                  {project.name}
+                  {tabTitles[activeTab] || project.name}
                 </h1>
                 <span
                   className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active'
@@ -1531,6 +1548,28 @@ export default function ProjectDetailPage() {
         activeTab === 'forum' && (
           <div className="animate-fade-in">
             <ForumManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          HEALTH TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'health' && (
+          <div className="animate-fade-in">
+            <HealthMonitor projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          NOCODE TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'nocode' && (
+          <div className="animate-fade-in">
+            <NocodeManager projectId={project.id} />
           </div>
         )
       }

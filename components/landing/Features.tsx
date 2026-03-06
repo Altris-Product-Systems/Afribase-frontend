@@ -10,7 +10,8 @@ import {
     Zap,
     Box,
     Table2,
-    CheckCircle2
+    CheckCircle2,
+    GitMerge
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "@/components/lightswind/border-beam";
@@ -81,6 +82,30 @@ const features = [
         icon: <Table2 className="w-6 h-6" />,
         color: "#2E7D32", // Success Green
         glow: "rgba(46, 125, 50, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Self-host Super Easy",
+        description: "Deploy Afribase on your own infrastructure with a single command.",
+        icon: <HardDrive className="w-6 h-6" />,
+        color: "#1A237E", // Indigo
+        glow: "rgba(26, 35, 126, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Explicit Free Tier",
+        description: "Fair limits that let you grow without surprise bills.",
+        icon: <Zap className="w-6 h-6" />,
+        color: "#FF9800", // Orange
+        glow: "rgba(255, 152, 0, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Supabase Migration",
+        description: "Seamlessly migrate your data and config from Supabase to Afribase.",
+        icon: <GitMerge className="w-6 h-6" />,
+        color: "#EF5350", // Coral/Red
+        glow: "rgba(239, 83, 80, 0.2)",
         className: "md:col-span-1",
     }
 ];

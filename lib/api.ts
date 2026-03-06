@@ -122,6 +122,80 @@ export interface ListProjectUsersResponse {
   users: ProjectUser[];
 }
 
+// ── No-Code Integrations ─────────────────────────────────────────────────────
+
+export interface APIKey {
+  id: string;
+  projectId: string;
+  userId: string;
+  name: string;
+  keyPrefix: string;
+  scope: 'read' | 'read_write' | 'admin';
+  allowedOrigins: string;
+  allowedTables: string;
+  rateLimit: number;
+  expiresAt?: string;
+  lastUsedAt?: string;
+  requestCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAPIKeyRequest {
+  name: string;
+  scope?: string;
+  allowedOrigins?: string;
+  allowedTables?: string;
+  rateLimit?: number;
+  expiresInDays?: number;
+}
+
+export interface APIKeyResponse {
+  id: string;
+  projectId: string;
+  userId: string;
+  name: string;
+  keyPrefix: string;
+  scope: string;
+  isActive: boolean;
+  key: string; // Plain key
+}
+
+export interface EmbedConfig {
+  id: string;
+  projectId: string;
+  enabled: boolean;
+  allowedOrigins: string;
+  brandColor: string;
+  logoUrl?: string;
+  appName?: string;
+  enableSignUp: boolean;
+  enableOAuth: boolean;
+  oauthProviders?: string;
+  enableMagicLink: boolean;
+  redirectUrl?: string;
+  customCss?: string;
+  theme: 'dark' | 'light' | 'auto';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateEmbedConfigRequest {
+  enabled?: boolean;
+  allowedOrigins?: string;
+  brandColor?: string;
+  logoUrl?: string;
+  appName?: string;
+  enableSignUp?: boolean;
+  enableOAuth?: boolean;
+  oauthProviders?: string;
+  enableMagicLink?: boolean;
+  redirectUrl?: string;
+  customCss?: string;
+  theme?: string;
+}
+
 export class APIError extends Error {
   constructor(public statusCode: number, message: string) {
     super(message);
@@ -1325,6 +1399,182 @@ export async function createDatabaseMigration(projectId: string, name: string, s
   return data;
 }
 
+export interface SupabaseMigrationRequest {
+  source_project_ref: string;
+  service_role_key: string;
+  supabase_url?: string;
+  import_schema?: boolean;
+  import_data?: boolean;
+  import_auth_users?: boolean;
+  import_rls?: boolean;
+  import_storage?: boolean;
+}
+
+export interface DeepLinkConfig {
+  id: string;
+  projectId: string;
+  enabled: boolean;
+  iosBundleId: string;
+  iosTeamId: string;
+  iosAppStoreId: string;
+  androidPackage: string;
+  androidSha256Fingerprint: string;
+  customScheme: string;
+  redirectUrls: string[];
+  defaultRedirectUrl: string;
+  magicLinkTemplate: string;
+  oauthCallbackUrl: string;
+  passwordResetUrl: string;
+  emailConfirmUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DeepLinkConfigRequest {
+  enabled: boolean;
+  iosBundleId: string;
+  iosTeamId: string;
+  iosAppStoreId: string;
+  androidPackage: string;
+  androidSha256Fingerprint: string;
+  customScheme: string;
+  redirectUrls: string[];
+  defaultRedirectUrl: string;
+  magicLinkTemplate: string;
+  oauthCallbackUrl: string;
+  passwordResetUrl: string;
+  emailConfirmUrl: string;
+}
+
+export interface RLSPolicy {
+  name: string;
+  schema: string;
+  table: string;
+  command: 'ALL' | 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';
+  roles: string;
+  using?: string;
+  withCheck?: string;
+  permissive?: boolean;
+}
+
+export interface TableRLSStatus {
+  schema: string;
+  table: string;
+  rlsEnabled: boolean;
+}
+
+// ─── RLS Policies ──────────────────────────────────────────
+
+export async function listRLSStatus(projectId: string): Promise<TableRLSStatus[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/rls`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch RLS status');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function enableRLS(projectId: string, payload: { schema: string; table: string; enable: boolean }): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/rls`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to update RLS status');
+  }
+}
+
+export async function listPolicies(projectId: string, schema: string, table: string): Promise<RLSPolicy[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/policies?schema=${schema}&table=${table}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch policies');
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createPolicy(projectId: string, policy: RLSPolicy): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/policies`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(policy)
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to create policy');
+  }
+}
+
+export async function deletePolicy(projectId: string, payload: { name: string; schema: string; table: string }): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/database/policies`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete policy');
+  }
+}
+
+export interface MigrationJob {
+  id: string;
+  project_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  current_step: string;
+  progress: number;
+  error_message?: string;
+  steps: Record<string, { status: string; message?: string }>;
+}
+
+export async function startSupabaseMigration(projectId: string, req: SupabaseMigrationRequest): Promise<MigrationJob> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/migrate/from-supabase`, {
+    method: "POST",
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(req)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to start migration');
+  return data;
+}
+
+export async function getMigrationJobStatus(projectId: string, jobId: string): Promise<MigrationJob> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/migrate/jobs/${jobId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch migration job status');
+  return data;
+}
+
 // Project Logs — LogQueryRequest: { service, level, search, since, until, limit }
 export async function queryProjectLogs(projectId: string, service: string, limit: number = 50): Promise<any[]> {
   const token = getAuthToken();
@@ -1673,7 +1923,7 @@ export async function listCustomDomains(projectId: string): Promise<any[]> {
   });
   const data = await response.json();
   if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list domains');
-  return Array.isArray(data) ? data : [];
+  return data.domains || [];
 }
 
 export async function addCustomDomain(projectId: string, domain: string): Promise<any> {
@@ -2240,3 +2490,131 @@ export async function voteForumComment(commentId: string, voteType: 'up' | 'down
   }
 }
 
+
+// ── No-Code API Keys ─────────────────────────────────────────────────────────
+
+export async function getAPIKeys(projectId: string): Promise<APIKey[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/api-keys`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch API keys');
+  return data.keys || [];
+}
+
+export async function createAPIKey(projectId: string, req: CreateAPIKeyRequest): Promise<APIKeyResponse> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/api-keys`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to create API key');
+  return data;
+}
+
+export async function deleteAPIKey(projectId: string, keyId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/api-keys/${keyId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete API key');
+  }
+}
+
+export async function revokeAPIKey(projectId: string, keyId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/api-keys/${keyId}/revoke`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to revoke API key');
+  }
+}
+
+// ── Embeddable Auth ───────────────────────────────────────────────────────────
+
+export async function getEmbedConfig(projectId: string): Promise<EmbedConfig> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/embed/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch embed config');
+  return data;
+}
+
+export async function updateEmbedConfig(projectId: string, req: UpdateEmbedConfigRequest): Promise<EmbedConfig> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/embed/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update embed config');
+  return data;
+}
+
+export async function getEmbedScript(projectId: string): Promise<{ script: string }> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/embed/script`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch embed script');
+  return { script: data.snippet || data.script };
+}
+
+// ── Deep Linking ─────────────────────────────────────────────────────────────
+
+export async function getDeepLinkConfig(projectId: string): Promise<DeepLinkConfig> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/deeplinks/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Deep link config not found');
+  return data;
+}
+
+export async function upsertDeepLinkConfig(projectId: string, req: DeepLinkConfigRequest): Promise<DeepLinkConfig> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/deeplinks/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to update deep link config');
+  return data;
+}
+
+export async function deleteDeepLinkConfig(projectId: string): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/deeplinks/config`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete deep link config');
+  }
+}

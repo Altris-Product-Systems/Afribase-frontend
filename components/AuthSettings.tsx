@@ -143,8 +143,9 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-8">
+            <div className="space-y-8">
+                {/* Email and OAuth Sections - Full Width */}
+                <div className="space-y-8">
                     {/* Email Settings */}
                     <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
                         <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
@@ -196,13 +197,13 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                     <div className="space-y-4">
                         <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 px-1">External OAuth Providers</h3>
 
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {providers.map((provider) => {
                                 const isEnabled = config?.providers ? config.providers[provider.id]?.enabled : false;
                                 const isEditing = editingProvider === provider.id;
 
                                 return (
-                                    <div key={provider.id} className={`glass-card rounded-2xl border transition-all duration-300 ${isEditing ? 'border-emerald-500/30 ring-1 ring-emerald-500/20' : 'border-white/5'}`}>
+                                    <div key={provider.id} className={`glass-card rounded-2xl border transition-all duration-300 ${isEditing ? 'border-emerald-500/30 ring-1 ring-emerald-500/20 col-span-full' : 'border-white/5'}`}>
                                         <div className="p-5 flex items-center justify-between">
                                             <div className="flex items-center gap-4">
                                                 <div className={`p-2 rounded-xl bg-zinc-900 border border-white/5 ${provider.color}`}>
@@ -295,10 +296,10 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                     </div>
                 </div>
 
-                {/* Right Sidebar Info */}
-                <div className="space-y-8">
+                {/* Bottom Section - Integration and Security Info */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
                     {/* SDK Snippet Card */}
-                    <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                    <div className="lg:col-span-2 glass-card rounded-2xl border border-white/5 overflow-hidden">
                         <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -339,7 +340,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                         {copiedStates[`sdk-${activeSdk}`] ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                                     </button>
                                 </div>
-                                <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed max-h-[400px] custom-scrollbar">
+                                <pre className="p-4 bg-black/40 border border-white/5 rounded-xl overflow-x-auto text-[10px] font-mono text-emerald-400 leading-relaxed max-h-[300px] custom-scrollbar">
                                     {(config?.sdkSnippet as any)?.[activeSdk] || `// No snippet available`}
                                 </pre>
                             </div>
@@ -350,7 +351,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                         </div>
                     </div>
 
-                    <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-4">
+                    <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-4 flex flex-col justify-center">
                         <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/20">
                             <Shield className="text-emerald-400" size={20} />
                         </div>
