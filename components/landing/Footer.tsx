@@ -7,13 +7,8 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
                     <div className="col-span-2">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                                <span className="text-black font-black text-xl">A</span>
-                            </div>
-                            <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-                                Afribase
-                            </span>
+                        <div className="flex items-center mb-6">
+                            <img src="/AFR.png" alt="Afribase Logo" className="h-10 w-auto object-contain drop-shadow-lg" />
                         </div>
                         <p className="text-zinc-500 text-sm max-w-sm leading-relaxed font-medium">
                             The high-performance platform for modern applications.

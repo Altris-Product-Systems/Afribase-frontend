@@ -24,13 +24,8 @@ export default function Navbar() {
             )}
         >
             <div className="container mx-auto flex items-center justify-between">
-                <Link href="/" className="flex items-center space-x-2 shrink-0">
-                    <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
-                        <span className="text-black font-black text-xl">A</span>
-                    </div>
-                    <span className="text-lg md:text-xl font-black text-white tracking-tighter uppercase hidden min-[450px]:block">
-                        Afribase
-                    </span>
+                <Link href="/" className="flex items-center shrink-0">
+                    <img src="/AFR.png" alt="Afribase Logo" className="h-10 md:h-12 w-auto object-contain drop-shadow-md" />
                 </Link>
 
                 <div className="hidden md:flex items-center space-x-8">

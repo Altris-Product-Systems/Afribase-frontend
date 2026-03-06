@@ -17,13 +17,8 @@ export default function ForgotPasswordPage() {
       <div className="flex-1 xl:flex-none xl:w-[45%] flex items-center justify-center p-8 xl:p-16 relative z-10 border-r border-white/5 bg-[#09090b] overflow-y-auto scrollbar-hide">
         <div className="w-full max-w-sm animate-gelatinous-in">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center gap-2 mb-10 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-              <span className="text-black font-black text-lg italic">A</span>
-            </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-              Afribase
-            </span>
+          <Link href="/" className="inline-flex items-center justify-center w-full mb-10 group mt-4">
+            <img src="/AFR.png" alt="Afribase Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-md" />
           </Link>
 
           {/* Heading */}

@@ -121,12 +121,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-xl relative z-10">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 mb-12 justify-center group">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-            <span className="text-black font-black text-xl italic">A</span>
-          </div>
-          <span className="text-2xl font-black text-white tracking-tighter uppercase italic">
-            Afribase
-          </span>
+          <img src="/AFR.png" alt="Afribase Logo" className="h-20 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-md" />
         </Link>
 
         {/* Progress Indicator */}

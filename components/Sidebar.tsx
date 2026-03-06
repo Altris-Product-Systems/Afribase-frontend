@@ -164,11 +164,12 @@ export default function Sidebar({
       `}>
         {/* Logo Section */}
         <div className={`h-16 flex items-center border-b border-white/5 relative ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-          <Link href="/dashboard" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 duration-200 flex-shrink-0">
-              <span className="text-black font-black text-lg">A</span>
-            </div>
-            {!isCollapsed && <span className="text-lg font-bold tracking-tighter text-white">Afribase</span>}
+          <Link href="/dashboard" className="flex items-center group">
+            <img
+              src={isCollapsed ? "/AFRIBASE1.png" : "/AFR.png"}
+              alt="Afribase Logo"
+              className={`object-contain transition-transform group-hover:scale-105 duration-200 flex-shrink-0 drop-shadow-md ${isCollapsed ? 'h-8' : 'h-10 ml-2'}`}
+            />
           </Link>
 
           <button onClick={onToggleCollapse} className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-zinc-900 border border-white/10 rounded-md items-center justify-center text-zinc-400 hover:text-white hover:border-emerald-500/50 transition-all z-[60] shadow-xl">
@@ -277,9 +278,14 @@ export default function Sidebar({
             <>
               {/* Organization/Global Level Sections */}
               <div className="space-y-4">
-                <div className="px-3 py-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl mb-4">
-                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 text-center">Active Workspace</p>
-                  <p className="text-xs font-bold text-white text-center truncate">{selectedOrg?.name || 'Loading...'}</p>
+                <div className={`bg-emerald-500/5 border border-emerald-500/10 rounded-xl mb-4 flex flex-col items-center justify-center ${isCollapsed ? 'mx-2 py-3 px-1' : 'px-3 py-4'}`}>
+                  {!isCollapsed && <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 text-center">Active Workspace</p>}
+                  <p
+                    className={`font-bold text-white text-center ${isCollapsed ? 'text-sm' : 'text-xs truncate w-full'}`}
+                    title={isCollapsed ? selectedOrg?.name : undefined}
+                  >
+                    {isCollapsed ? (selectedOrg?.name?.substring(0, 2).toUpperCase() || '..') : (selectedOrg?.name || 'Loading...')}
+                  </p>
                 </div>
 
                 <div className="space-y-1">

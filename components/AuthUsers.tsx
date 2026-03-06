@@ -297,9 +297,7 @@ export default function AuthUsers({ projectId }: AuthUsersProps) {
 
             {/* Integration Guide */}
             <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 border border-white/5 flex flex-col md:flex-row items-center gap-6">
-                <div className="w-16 h-16 bg-white flex items-center justify-center rounded-2xl shadow-xl flex-shrink-0">
-                    <span className="text-black font-black text-2xl">A</span>
-                </div>
+                <img src="/AFR.png" alt="Afribase Logo" className="h-16 w-auto object-contain drop-shadow-lg flex-shrink-0" />
                 <div className="flex-1 space-y-1 text-center md:text-left">
                     <h4 className="text-white font-bold">Implement Sign In in minutes</h4>
                     <p className="text-zinc-500 text-sm font-medium">Use the Afribase SDK to add Google, GitHub and magic links to your React, Vue or Flutter apps.</p>
