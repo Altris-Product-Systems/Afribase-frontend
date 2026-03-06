@@ -71,7 +71,7 @@ export default function LogsManager({ projectId }: LogsManagerProps) {
                     <select
                         value={limit}
                         onChange={e => setLimit(Number(e.target.value))}
-                        className="text-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg px-3 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                        className="text-xs font-black uppercase tracking-widest border border-white/10 bg-black/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
                     >
                         <option value={50}>Last 50</option>
                         <option value={100}>Last 100</option>
@@ -80,9 +80,9 @@ export default function LogsManager({ projectId }: LogsManagerProps) {
                     <button
                         onClick={loadLogs}
                         disabled={loading}
-                        className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-80 text-sm font-medium rounded-lg flex items-center gap-2"
+                        className="px-5 py-3 bg-zinc-900 border border-white/10 hover:border-emerald-500/50 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
                     >
-                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                        <RefreshCw size={14} className={loading ? 'animate-spin text-emerald-500' : 'text-zinc-500'} />
                         Refresh
                     </button>
                 </div>
@@ -94,12 +94,12 @@ export default function LogsManager({ projectId }: LogsManagerProps) {
                     <button
                         key={s.id}
                         onClick={() => setService(s.id)}
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-full flex items-center gap-1.5 transition-colors ${service === s.id
-                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400'
-                            : 'bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center gap-2 transition-colors border ${service === s.id
+                            ? 'bg-purple-500/20 text-purple-400 border-purple-500/30 shadow-[0_0_15px_-5px_rgba(168,85,247,0.4)]'
+                            : 'bg-black/40 text-zinc-500 border-white/5 hover:bg-white/5 hover:text-zinc-300'
                             }`}
                     >
-                        <s.icon size={12} />
+                        <s.icon size={14} />
                         {s.label}
                     </button>
                 ))}

@@ -211,10 +211,10 @@ export default function ProjectDetailPage() {
         const projectKeys = await getProjectKeys(projectId);
         setKeys(projectKeys);
       } catch {
-        console.error('Failed to load project keys');
+        // console.error('Failed to load project keys');
       }
     } catch (err: unknown) {
-      console.error('Failed to load project:', err);
+      // console.error('Failed to load project:', err);
       setError(err instanceof Error ? err.message : 'Failed to load project');
     } finally {
       setIsLoading(false);
@@ -271,7 +271,7 @@ export default function ProjectDetailPage() {
         setCopiedKey(type);
         setTimeout(() => setCopiedKey(null), 2000);
       } catch (err) {
-        console.error('Failed to copy text: ', err);
+        // console.error('Failed to copy text: ', err);
       }
     }
   };

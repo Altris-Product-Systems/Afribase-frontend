@@ -33,7 +33,7 @@ export default function ProjectUsage({ project }: ProjectUsageProps) {
             setUsage(data);
         } catch (err: any) {
             toast.error('Failed to load usage data');
-            console.error(err);
+            // console.error(err);
         } finally {
             setIsLoading(false);
         }

@@ -457,7 +457,7 @@ export const Tooltips = Tooltip;
 // Deprecated TooltipContent, kept for backward compatibility with a warning
 export const TooltipContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   (props, _ref) => {
-    console.warn("TooltipContent is deprecated. Use the Tooltip component with content prop instead.");
+    // console.warn("TooltipContent is deprecated. Use the Tooltip component with content prop instead.");
     return <div {...props} />;
   }
 );

@@ -54,7 +54,7 @@ function SignInContent() {
         }
       } catch (orgErr) {
         // If we can't check organizations, default to onboarding
-        console.error('Failed to check organizations:', orgErr);
+        // console.error('Failed to check organizations:', orgErr);
         router.push('/onboarding');
       }
     } catch (err) {
@@ -64,7 +64,7 @@ function SignInContent() {
       } else {
         setError('An unexpected error occurred');
       }
-      console.error('Login error:', err);
+      // console.error('Login error:', err);
       setIsLoading(false);
     }
   };

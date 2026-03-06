@@ -28,7 +28,7 @@ export default function PoliciesPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for policies', err);
+      // console.error('Failed to load projects for policies', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

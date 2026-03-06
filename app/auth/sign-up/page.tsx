@@ -44,7 +44,7 @@ export default function SignUpPage() {
           router.push('/onboarding');
         }
       } catch (orgErr) {
-        console.error('Failed to fetch organizations:', orgErr);
+        // console.error('Failed to fetch organizations:', orgErr);
         router.push('/onboarding');
       }
     } catch (err) {
@@ -53,7 +53,7 @@ export default function SignUpPage() {
       } else {
         setError('Failed to create account. Please try again later.');
       }
-      console.error('Signup error:', err);
+      // console.error('Signup error:', err);
       setIsLoading(false);
     }
   };

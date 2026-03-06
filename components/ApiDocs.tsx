@@ -32,7 +32,7 @@ export default function ApiDocs({ projectId, projectSlug, anonKey }: ApiDocsProp
             const data = await getAuthConfig(projectId);
             setConfig(data);
         } catch (err) {
-            console.error('Failed to load SDK snippets:', err);
+            // console.error('Failed to load SDK snippets:', err);
         } finally {
             setIsLoading(false);
         }

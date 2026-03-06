@@ -65,7 +65,7 @@ export default function StorageManager({ projectId }: StorageManagerProps) {
             const data = await getStorageObjects(projectId, bucketId);
             setObjects(data.objects || []);
         } catch (err: any) {
-            console.error('Failed to load objects:', err);
+            // console.error('Failed to load objects:', err);
         } finally {
             setObjectsLoading(false);
         }

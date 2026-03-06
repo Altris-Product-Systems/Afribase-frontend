@@ -28,7 +28,7 @@ export default function BranchesPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for branches', err);
+      // console.error('Failed to load projects for branches', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

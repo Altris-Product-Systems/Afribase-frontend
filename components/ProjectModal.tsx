@@ -75,7 +75,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, preselectedOr
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations:', err);
+      // console.error('Failed to load organizations:', err);
       setError('Failed to load organizations');
     }
   };

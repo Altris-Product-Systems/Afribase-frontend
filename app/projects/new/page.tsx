@@ -47,7 +47,7 @@ export default function NewProjectPage() {
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations:', err);
+      // console.error('Failed to load organizations:', err);
     }
   };
 

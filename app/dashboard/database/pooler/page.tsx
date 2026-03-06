@@ -28,7 +28,7 @@ export default function PoolerPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for pooler', err);
+      // console.error('Failed to load projects for pooler', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

@@ -58,7 +58,7 @@ const BreadcrumbLink = React.forwardRef<
         ...props, // Spread any other props to the child
       });
     }
-    console.warn("BreadcrumbLink: When `asChild` is true, a single React element child is expected.");
+    // console.warn("BreadcrumbLink: When `asChild` is true, a single React element child is expected.");
     return null;
   }
 

@@ -28,7 +28,7 @@ export default function RealtimePage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for realtime', err);
+      // console.error('Failed to load projects for realtime', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

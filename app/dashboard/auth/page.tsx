@@ -28,7 +28,7 @@ export default function AuthPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for auth', err);
+      // console.error('Failed to load projects for auth', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

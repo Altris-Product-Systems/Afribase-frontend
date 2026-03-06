@@ -79,7 +79,7 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
                 setLocalBrandColor(configData.brandColor);
             }
         } catch (err) {
-            console.error('Failed to load nocode data:', err);
+            // console.error('Failed to load nocode data:', err);
         } finally {
             setLoading(false);
         }
@@ -145,7 +145,7 @@ export default function NocodeManager({ projectId, projectSlug }: NocodeManagerP
                 toast.error('Success, but no script snippet was found. Please check your config.');
             }
         } catch (err: any) {
-            console.error('Script fetch error:', err);
+            // console.error('Script fetch error:', err);
             toast.error(`Failed to fetch embed script: ${err.message || 'Unknown error'}`);
         } finally {
             setFetchingScript(false);

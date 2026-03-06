@@ -28,7 +28,7 @@ export default function SqlEditorPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for SQL', err);
+      // console.error('Failed to load projects for SQL', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

@@ -51,7 +51,7 @@ export default function OnboardingPage() {
         }
         setIsDataLoading(false);
       } catch (err) {
-        console.error('Failed to check organizations:', err);
+        // console.error('Failed to check organizations:', err);
         setIsDataLoading(false);
       } finally {
         setGlobalLoading(false);

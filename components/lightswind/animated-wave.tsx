@@ -147,7 +147,7 @@ const parseColor = (color: string): THREE.Color => {
         );
       }
     }
-    console.warn(`Could not parse color: ${color}. Falling back to white.`);
+    // console.warn(`Could not parse color: ${color}. Falling back to white.`);
     return new THREE.Color(0xffffff); // Default fallback
   }
 };
@@ -475,7 +475,7 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
   // Main setup function for the Three.js scene
   const setupScene = useCallback(() => {
     if (!containerRef.current) {
-      console.warn("Container ref not available, cannot setup scene.");
+      // console.warn("Container ref not available, cannot setup scene.");
       return;
     }
 
@@ -483,7 +483,7 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
     // This is vital for React's strict mode and fast refresh,
     // preventing multiple scenes/renderers from running simultaneously.
     if (sceneElementsRef.current.renderer) {
-      console.log("Cleaning up existing Three.js scene before re-setup.");
+      // console.log("Cleaning up existing Three.js scene before re-setup.");
       if (sceneElementsRef.current.animationFrameId) {
         cancelAnimationFrame(sceneElementsRef.current.animationFrameId); // Stop previous animation loop
       }
@@ -540,7 +540,7 @@ const AnimatedWave: React.FC<AnimatedWaveProps> = ({
       container.appendChild(renderer.domElement); // Add the canvas to the container div
       setWebGLFailed(false); // Clear any previous WebGL failure state
     } catch (e) {
-      console.error("Failed to create WebGL context:", e);
+      // console.error("Failed to create WebGL context:", e);
       setWebGLFailed(true); // Set error state if WebGL initialization fails
       return; // Stop execution if renderer cannot be created
     }

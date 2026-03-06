@@ -86,7 +86,7 @@ export default function DataTable({ projectId, schema, tableName }: DataTablePro
                 setTotalRows(Number(countResult.rows[0].count));
             }
         } catch (err: any) {
-            console.error('Failed to load table data:', err);
+            // console.error('Failed to load table data:', err);
             setError(err.message || 'Failed to load data');
         } finally {
             setIsLoading(false);

@@ -30,9 +30,9 @@ export default function StoragePage() {
           description="Buckets are where you store your files. Create your first bucket to start uploading images, videos, and documents."
           icon={HardDrive}
           actionLabel="Create Bucket"
-          onAction={() => console.log('Create bucket')}
+          onAction={() => // console.log('Create bucket')}
           secondaryActionLabel="Storage Docs"
-          onSecondaryAction={() => console.log('Docs')}
+          onSecondaryAction={() => // console.log('Docs')}
         />
       </div>
 

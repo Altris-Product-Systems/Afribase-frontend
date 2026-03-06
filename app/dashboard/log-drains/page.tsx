@@ -28,7 +28,7 @@ export default function LogDrainsPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for log drains', err);
+      // console.error('Failed to load projects for log drains', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

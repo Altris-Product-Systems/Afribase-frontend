@@ -58,7 +58,7 @@ export default function ProjectsPage() {
       const projectsData = await getProjects(id);
       setProjects(Array.isArray(projectsData) ? projectsData : []);
     } catch (err) {
-      console.error('Failed to reload projects');
+      // console.error('Failed to reload projects');
     }
   };
 

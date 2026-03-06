@@ -85,7 +85,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
     const loadCategories = async () => {
         try {
             const cats = await listForumCategories();
-            console.log('Categories loaded:', cats);
+            // console.log('Categories loaded:', cats);
             setCategories(cats);
 
             // If we have categories and none is selected for creation, pick the first one
@@ -93,7 +93,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
                 setNewPostCategoryId(cats[0].id);
             }
         } catch (err: any) {
-            console.error('Failed to load categories:', err);
+            // console.error('Failed to load categories:', err);
             setError(`Could not load categories: ${err.message || 'Unknown error'}`);
             toast.error('Failed to load forum categories');
         }
@@ -114,7 +114,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
             setTotalPosts(response.total);
         } catch (err) {
             setError('Failed to load posts');
-            console.error(err);
+            // console.error(err);
         } finally {
             setIsLoading(false);
         }
@@ -243,7 +243,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
             // Sync the updated view count back to the main list
             setPosts(prev => prev.map(p => p.id === post.id ? { ...p, viewCount: freshPost.viewCount } : p));
         } catch (err) {
-            console.error('Failed to fetch full post details:', err);
+            // console.error('Failed to fetch full post details:', err);
             // Fallback to the post data we already have if the fetch fails
             setSelectedPost(post);
         }
@@ -255,7 +255,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
             const res = await listForumComments(postId);
             setComments(res.comments);
         } catch (err) {
-            console.error('Failed to load comments:', err);
+            // console.error('Failed to load comments:', err);
         } finally {
             setIsLoadingComments(false);
         }
@@ -312,7 +312,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
             setNewPostContent('');
             loadPosts();
         } catch (err: any) {
-            console.error('Create post error:', err);
+            // console.error('Create post error:', err);
             // If it's an APIError, it will have a message from the backend
             toast.error(err.message || 'Failed to create discussion');
         } finally {

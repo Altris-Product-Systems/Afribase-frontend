@@ -28,7 +28,7 @@ export default function SSOPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for SSO', err);
+      // console.error('Failed to load projects for SSO', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

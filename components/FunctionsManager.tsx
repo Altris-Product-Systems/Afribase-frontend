@@ -52,7 +52,7 @@ export default function FunctionsManager({ projectId }: FunctionsManagerProps) {
             const data = await getFunctionDeployments(projectId, functionId);
             setDeployments(data || []);
         } catch (err: any) {
-            console.error('Failed to load deployments:', err);
+            // console.error('Failed to load deployments:', err);
         } finally { setDeploymentsLoading(false); }
     };
 

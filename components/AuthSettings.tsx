@@ -42,7 +42,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
             const data = await getAuthConfig(projectId);
             setConfig(data);
         } catch (err) {
-            console.error('Failed to load auth config:', err);
+            // console.error('Failed to load auth config:', err);
             setMessage({ type: 'error', text: 'Failed to load authentication settings.' });
         } finally {
             setIsLoading(false);

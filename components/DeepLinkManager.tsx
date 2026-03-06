@@ -60,7 +60,7 @@ export default function DeepLinkManager({ projectId, projectSlug }: DeepLinkMana
             setConfig(data);
         } catch (err: any) {
             if (err.status !== 404) {
-                console.error('Failed to load deep link config:', err);
+                // console.error('Failed to load deep link config:', err);
             }
             // If 404, we just keep the default empty state
         } finally {

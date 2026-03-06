@@ -67,7 +67,7 @@ export default function MigrationsManager({ projectId }: MigrationsManagerProps)
                         }
                     }
                 } catch (err) {
-                    console.error('Polling error:', err);
+                    // console.error('Polling error:', err);
                 }
             }, 3000);
         }

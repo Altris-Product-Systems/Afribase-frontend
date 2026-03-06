@@ -21,7 +21,7 @@ const hexToRgbNormalized = (hex: string): [number, number, number] => {
     g = parseInt(cleanHex.substring(2, 4), 16);
     b = parseInt(cleanHex.substring(4, 6), 16);
   } else {
-    console.warn(`Invalid hex color: ${hex}. Falling back to black.`);
+    // console.warn(`Invalid hex color: ${hex}. Falling back to black.`);
     return [0, 0, 0];
   }
 

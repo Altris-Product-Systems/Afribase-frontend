@@ -216,7 +216,7 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Login failed response:', { status: response.status, data });
+      // console.error('Login failed response:', { status: response.status, data });
 
       // GoTrue often uses 'msg' or 'error_description' for errors
       const errorMsg = data.msg || data.message || data.error_description || data.detail || data.error;
@@ -298,9 +298,9 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResponse> 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Signup failed response:', { status: response.status, data });
+      // console.error('Signup failed response:', { status: response.status, data });
       // DEBUG: Log the full data object to see all fields
-      console.log('DEBUG: Full signup error data:', data);
+      // console.log('DEBUG: Full signup error data:', data);
 
       // Handle specific error cases with better message extraction
       // GoTrue often uses 'msg' or 'error_description'

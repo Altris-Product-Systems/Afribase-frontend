@@ -28,7 +28,7 @@ export default function TablesPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for tables', err);
+      // console.error('Failed to load projects for tables', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

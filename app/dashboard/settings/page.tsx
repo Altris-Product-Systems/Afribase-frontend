@@ -31,7 +31,7 @@ export default function SettingsPage() {
         setOrg(currentOrg);
       }
     } catch (err) {
-      console.error('Failed to load organization:', err);
+      // console.error('Failed to load organization:', err);
     }
   };
 

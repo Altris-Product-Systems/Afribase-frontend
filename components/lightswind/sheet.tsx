@@ -78,7 +78,7 @@ const SheetTrigger = React.forwardRef<HTMLButtonElement, SheetTriggerProps>(
 
     if (asChild) {
       if (!React.isValidElement(child)) {
-        console.error("SheetTrigger with `asChild` expects a single valid React element child.");
+        // console.error("SheetTrigger with `asChild` expects a single valid React element child.");
         return null;
       }
 

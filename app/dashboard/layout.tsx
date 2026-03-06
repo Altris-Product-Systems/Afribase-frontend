@@ -62,7 +62,7 @@ export default function DashboardLayout({
       const found = await getProject(id);
       setProject(found);
     } catch (err) {
-      console.error('Failed to load project context for sidebar:', err);
+      // console.error('Failed to load project context for sidebar:', err);
       setProject(null);
     }
   };
@@ -92,7 +92,7 @@ export default function DashboardLayout({
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations', err);
+      // console.error('Failed to load organizations', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);
@@ -251,24 +251,7 @@ export default function DashboardLayout({
               {selectedOrg?.name || 'Afribase'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${project?.status === 'degraded' || true ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-lg ${project?.status === 'degraded' || true ? 'bg-red-500 shadow-red-500/50' : 'bg-emerald-500 shadow-emerald-500/50'}`} />
-              <span className="text-[10px] font-black uppercase tracking-widest">
-                {project?.status === 'degraded' || true ? '1 Issue' : 'Systems Healthy'}
-              </span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
-              {user?.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-                  {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) ||
-                    user?.email?.slice(0, 2).toUpperCase() || <UserIcon size={14} className="text-emerald-400/50" />}
-                </span>
-              )}
-            </div>
-          </div>
+          
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#09090b]">

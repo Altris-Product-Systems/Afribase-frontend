@@ -87,7 +87,7 @@ export default function ProjectDetailsPage() {
           setSelectedOrg(projectOrg);
         }
       } catch (err) {
-        console.error('Failed to load organizations:', err);
+        // console.error('Failed to load organizations:', err);
       }
 
       // Try to fetch keys
@@ -95,11 +95,11 @@ export default function ProjectDetailsPage() {
         const projectKeys = await getProjectKeys(foundProject.id);
         setKeys(projectKeys);
       } catch (err) {
-        console.error('Failed to load project keys:', err);
+        // console.error('Failed to load project keys:', err);
       }
     } catch (err) {
       setError('Failed to load project');
-      console.error(err);
+      // console.error(err);
     } finally {
       setIsLoading(false);
     }

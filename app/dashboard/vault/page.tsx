@@ -28,7 +28,7 @@ export default function VaultPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for vault', err);
+      // console.error('Failed to load projects for vault', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

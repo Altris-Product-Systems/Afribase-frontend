@@ -28,7 +28,7 @@ export default function NetworkPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for network', err);
+      // console.error('Failed to load projects for network', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

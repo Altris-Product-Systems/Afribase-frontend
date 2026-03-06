@@ -39,7 +39,7 @@ export default function MembersPage() {
             const data = await getOrganizationMembers(orgId);
             setMembers(data);
         } catch (err) {
-            console.error('Failed to load members:', err);
+            // console.error('Failed to load members:', err);
             toast.error('Failed to load team members');
         } finally {
             setIsLoading(false);

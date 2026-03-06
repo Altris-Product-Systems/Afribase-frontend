@@ -28,7 +28,7 @@ export default function CronPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for cron', err);
+      // console.error('Failed to load projects for cron', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);

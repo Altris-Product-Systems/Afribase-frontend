@@ -91,7 +91,7 @@ const DropdownMenuTrigger = React.forwardRef<
     // This should now correctly refer to the DOM element after the ref callback runs
     if (!triggerRef.current) {
       // Fallback or throw an error if triggerRef.current is not set
-      console.warn(
+      // console.warn(
         "DropdownMenuTrigger ref is null. Ensure children forward their ref when asChild is true."
       );
       return document.createElement("button"); // Return a dummy element to satisfy the type
