@@ -3,8 +3,6 @@ import * as React from "react";
 import { cn } from "../../lib/utils";
 import { CircleXIcon } from "lucide-react";
 
-// --- Context and Props (with the new prop added) ---
-
 interface PopoverContextType {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,17 +17,15 @@ interface PopoverProps {
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  closeOnOutsideClick?: boolean; // New prop for controlling outside click behavior
+  closeOnOutsideClick?: boolean;
 }
-
-// --- The Updated Popover Component ---
 
 const Popover: React.FC<PopoverProps> = ({
   children,
   defaultOpen = false,
   open: controlledOpen,
   onOpenChange,
-  closeOnOutsideClick = true, // <-- CHANGE #1: Destructure the prop with a default value of 'true'
+  closeOnOutsideClick = true,
 }) => {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
 
@@ -49,10 +45,7 @@ const Popover: React.FC<PopoverProps> = ({
     [isControlled, onOpenChange, open]
   );
 
-  // Close popover when clicking outside (now conditional)
   React.useEffect(() => {
-    // <-- CHANGE #2: The entire effect is now conditional
-    // If the prop is false, we don't add the event listener at all.
     if (!open || !closeOnOutsideClick) {
       return;
     }
@@ -78,10 +71,8 @@ const Popover: React.FC<PopoverProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-    // <-- CHANGE #3: Add the new prop to the dependency array
   }, [open, setOpen, closeOnOutsideClick]);
 
-  // Hide/show body scrollbar based on popover open state
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -99,9 +90,6 @@ const Popover: React.FC<PopoverProps> = ({
     </PopoverContext.Provider>
   );
 };
-
-// --- PopoverTrigger and PopoverContent remain the same ---
-// (No changes needed for the other components)
 
 interface PopoverTriggerProps {
   asChild?: boolean;
@@ -132,13 +120,13 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child)) {
             const childProps = {
-              ...child.props,
+              ...(child.props as Record<string, unknown>),
               onClick: (e: React.MouseEvent) => {
                 handleClick(e as React.MouseEvent<HTMLElement>);
-                if (child.props.onClick) child.props.onClick(e);
+                if ((child.props as any).onClick) (child.props as any).onClick(e);
               },
             };
-            return React.cloneElement(child, childProps);
+            return React.cloneElement(child as React.ReactElement<any>, childProps);
           }
           return child;
         })}

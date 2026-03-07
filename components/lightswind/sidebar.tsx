@@ -3,10 +3,10 @@ import * as React from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, useInView, HTMLMotionProps } from "framer-motion";
 import { twMerge } from "tailwind-merge";
-import clsx from "clsx";
+import { clsx, type ClassValue } from "clsx";
 
 // Re-implementing the 'cn' utility function directly for self-containment
-function cn(...inputs: clsx.ClassValue[]) {
+function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
@@ -22,7 +22,7 @@ interface SidebarContextType {
     height: number;
   }>;
   menuItemRefs: React.MutableRefObject<Map<string, HTMLDivElement | null>>;
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: React.RefObject<HTMLDivElement | null>;
   updateIndicatorPosition: (id: string | null) => void;
   // New: Function to notify provider when a menu item ref is added/removed
   notifyMenuItemRefChange: () => void;
@@ -203,7 +203,7 @@ export function useSidebar() {
   return context;
 }
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className, children, ...props }: SidebarProps) {
   const { expanded } = useSidebar();
@@ -228,7 +228,7 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
 }
 
 interface SidebarTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 export function SidebarTrigger({ className, ...props }: SidebarTriggerProps) {
   const { expanded, onChange } = useSidebar();
@@ -257,7 +257,7 @@ export function SidebarTrigger({ className, ...props }: SidebarTriggerProps) {
   );
 }
 
-interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarHeader({
   className,
@@ -280,7 +280,7 @@ export function SidebarHeader({
   );
 }
 
-interface SidebarContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarContentProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarContent({
   className,
@@ -304,7 +304,7 @@ export function SidebarContent({
   );
 }
 
-interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarGroup({
   className,
@@ -318,7 +318,7 @@ export function SidebarGroup({
   );
 }
 
-interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarGroupLabel({
   className,
@@ -345,7 +345,7 @@ export function SidebarGroupLabel({
 }
 
 interface SidebarGroupContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+  extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarGroupContent({
   className,
@@ -359,7 +359,7 @@ export function SidebarGroupContent({
   );
 }
 
-interface SidebarFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarFooterProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarFooter({
   className,
@@ -384,7 +384,7 @@ export function SidebarFooter({
   );
 }
 
-interface SidebarMenuProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarMenuProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function SidebarMenu({
   className,
@@ -507,8 +507,8 @@ export function SidebarMenuButton({
       const dummyEvent = {
         currentTarget: {} as EventTarget & HTMLDivElement,
         target: {} as EventTarget,
-        preventDefault: () => {},
-        stopPropagation: () => {},
+        preventDefault: () => { },
+        stopPropagation: () => { },
       } as React.MouseEvent<HTMLDivElement>;
       props.onClick(dummyEvent);
     }
@@ -528,14 +528,14 @@ export function SidebarMenuButton({
         >
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child)) {
-              return React.cloneElement(child, {
-                ...child.props,
+              return React.cloneElement(child as React.ReactElement<any>, {
+                ...(child.props as Record<string, unknown>),
                 className: cn(
                   sharedClassName,
                   "justify-center p-2",
                   "hover:bg-primary/10 hover:scale-110",
                   isActive ? "text-primary font-medium" : "",
-                  child.props?.className
+                  (child.props as any)?.className
                 ),
               });
             }
@@ -576,14 +576,14 @@ export function SidebarMenuButton({
       >
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child)) {
-            return React.cloneElement(child, {
-              ...child.props,
+            return React.cloneElement(child as React.ReactElement<any>, {
+              ...(child.props as Record<string, unknown>),
               className: cn(
                 sharedClassName,
                 "justify-start gap-2",
                 "hover:bg-primary/10 hover:translate-x-1",
                 isActive ? "text-primary font-medium" : "",
-                child.props?.className
+                (child.props as any)?.className
               ),
             });
           }

@@ -71,7 +71,7 @@ const RippleLoader: React.FC<RippleLoaderProps> = ({
             style={{ display: "inline-block", width: "100%", height: "100%" }}
           >
             {icon &&
-              React.cloneElement(icon as React.ReactElement, {
+              React.cloneElement(icon as React.ReactElement<any>, {
                 style: {
                   width: "100%",
                   height: "100%",

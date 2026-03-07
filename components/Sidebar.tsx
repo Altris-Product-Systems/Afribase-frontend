@@ -38,6 +38,7 @@ import {
   Layers,
   HelpCircle,
   Smartphone,
+  Key,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -226,6 +227,7 @@ export default function Sidebar({
               {/* Project Specific Sections */}
               <div className="space-y-4">
                 <NavigationItem id="overview" label="Project Home" icon={LayoutGrid} />
+                <NavigationItem id="api-keys" label="API Keys" icon={Key} />
 
                 <div className="space-y-1">
                   <SectionHeader id="database" label="Database" icon={Database} />

@@ -21,7 +21,7 @@ interface TopStickyBarProps {
    */
   scrollThreshold?: number;
   /**
-   * The content to display inside the sticky bar. Can be a string, JSX, or any React Node.
+   * The content to display inside the sticky bar. Can be a string, or any React Node.
    */
   children: React.ReactNode;
   /**

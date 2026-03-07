@@ -88,12 +88,7 @@ const DropdownMenuTrigger = React.forwardRef<
 
   React.useImperativeHandle(ref, () => {
     // Ensure triggerRef.current is not null before returning
-    // This should now correctly refer to the DOM element after the ref callback runs
     if (!triggerRef.current) {
-      // Fallback or throw an error if triggerRef.current is not set
-      // console.warn(
-        "DropdownMenuTrigger ref is null. Ensure children forward their ref when asChild is true."
-      );
       return document.createElement("button"); // Return a dummy element to satisfy the type
     }
     return triggerRef.current as HTMLButtonElement;
@@ -140,8 +135,8 @@ const DropdownMenuTrigger = React.forwardRef<
       );
     }
 
-    return React.cloneElement(child, {
-      ...child.props,
+    return React.cloneElement(child as React.ReactElement<any>, {
+      ...(child.props as Record<string, unknown>),
       ref: (node: HTMLElement | null) => {
         // Update the internal triggerRef
         triggerRef.current = node;
@@ -167,15 +162,15 @@ const DropdownMenuTrigger = React.forwardRef<
       },
       onClick: (e: React.MouseEvent) => {
         handleClick(e as React.MouseEvent<HTMLButtonElement>);
-        if (child.props.onClick) child.props.onClick(e);
+        if ((child.props as any).onClick) (child.props as any).onClick(e);
       },
       onMouseEnter: (e: React.MouseEvent) => {
         handleMouseEnter(e as React.MouseEvent<HTMLElement>);
-        if (child.props.onMouseEnter) child.props.onMouseEnter(e);
+        if ((child.props as any).onMouseEnter) (child.props as any).onMouseEnter(e);
       },
       onMouseLeave: (e: React.MouseEvent) => {
         handleMouseLeaveTrigger(e as React.MouseEvent<HTMLElement>);
-        if (child.props.onMouseLeave) child.props.onMouseLeave(e);
+        if ((child.props as any).onMouseLeave) (child.props as any).onMouseLeave(e);
       },
     });
   }
@@ -222,10 +217,10 @@ const dropdownMenuContentVariants = cva(
 interface DropdownMenuContentProps
   extends Omit<
     React.HTMLAttributes<HTMLDivElement>,
-    | "onAnimationStart" // Omit this
-    | "onAnimationEnd" // Omit this
-    | "onTransitionEnd" // Omit this
-    | "onTransitionCancel" // Omit this
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onTransitionEnd"
+    | "onTransitionCancel"
     | "onDrag"
     | "onDragEnd"
     | "onDragEnter"
@@ -448,7 +443,6 @@ const DropdownMenuContent = React.forwardRef<
             className={cn(
               dropdownMenuContentVariants({ variant }),
               "dropdown-scrollbar",
-              // "scrollbar-hide",
               className
             )}
             style={{
@@ -476,7 +470,7 @@ const DropdownMenuContent = React.forwardRef<
 );
 DropdownMenuContent.displayName = "DropdownMenuContent";
 
-interface DropdownMenuLabelProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface DropdownMenuLabelProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const DropdownMenuLabel = React.forwardRef<
   HTMLDivElement,
@@ -541,7 +535,7 @@ const DropdownMenuItem = React.forwardRef<
 DropdownMenuItem.displayName = "DropdownMenuItem";
 
 interface DropdownMenuSeparatorProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+  extends React.HTMLAttributes<HTMLDivElement> { }
 
 const DropdownMenuSeparator = React.forwardRef<
   HTMLDivElement,
@@ -555,7 +549,7 @@ const DropdownMenuSeparator = React.forwardRef<
 ));
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
 
-interface DropdownMenuGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface DropdownMenuGroupProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const DropdownMenuGroup = React.forwardRef<
   HTMLDivElement,

@@ -10,8 +10,8 @@ import {
   useVelocity,
   useAnimationFrame,
   useMotionValue,
-} from 'motion/react';
-import { wrap } from '@motionone/utils';
+  wrap,
+} from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 interface TextScrollMarqueeProps {

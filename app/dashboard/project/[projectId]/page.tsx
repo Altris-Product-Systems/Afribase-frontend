@@ -152,6 +152,7 @@ export default function ProjectDetailPage() {
     health: 'Health & Monitoring',
     forum: 'Developer Forum',
     domains: 'Custom Domains',
+    'api-keys': 'Project Keys & API Settings',
     settings: 'Project Settings',
   };
 
@@ -1054,94 +1055,117 @@ export default function ProjectDetailPage() {
       ════════════════════════════════════════════ */}
       {
         activeTab === 'api-keys' && (
-          <div className="space-y-8 max-w-4xl animate-fade-in">
-            <div>
-              <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
-              <p className="text-zinc-500 text-sm font-medium mt-1">
-                Your project comes with two keys: a public <em>anon</em> key and a secret{' '}
-                <em>service_role</em> key.
+          <div className="space-y-10 max-w-5xl animate-fade-in pb-20">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
+              <p className="text-zinc-500 text-sm font-medium">
+                Use these keys to authenticate your client-side and server-side requests.
+                Your project comes with two keys: a public <span className="text-zinc-300 font-bold">anon</span> key and a secret <span className="text-red-400 font-bold uppercase tracking-tighter italic">service_role</span> key.
               </p>
             </div>
 
-            {/* Connection URLs */}
-            {(keys?.postgrest_url || project.postgrestUrl) && (
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest">Connection URLs</h4>
-                {[
-                  { label: 'REST / PostgREST URL', value: keys?.postgrest_url || project.postgrestUrl },
-                  { label: 'Realtime URL', value: project.realtimeUrl },
-                  { label: 'Storage URL', value: project.storageUrl },
-                ]
-                  .filter((u) => u.value)
-                  .map(({ label, value }) => (
-                    <div key={label} className="space-y-1.5">
-                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2.5 font-mono text-[11px] text-zinc-400 truncate">
-                          {value}
+            <div className="grid grid-cols-1 gap-8">
+              {/* Connection URLs */}
+              {(keys?.postgrest_url || project.postgrestUrl) && (
+                <div className="glass-card p-8 rounded-[2rem] border border-white/5 space-y-6 bg-zinc-950/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-400">
+                      <Globe size={20} />
+                    </div>
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest">Project Infrastructure URLs</h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { label: 'REST / PostgREST URL', value: keys?.postgrest_url || project.postgrestUrl },
+                      { label: 'Realtime WebSocket URL', value: project.realtimeUrl },
+                      { label: 'Storage CDN URL', value: project.storageUrl },
+                      { label: 'Auth Endpoint', value: project.authUrl },
+                    ]
+                      .filter((u) => u.value)
+                      .map(({ label, value }) => (
+                        <div key={label} className="space-y-2">
+                          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
+                          <div className="flex items-center gap-2 group">
+                            <div className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 font-mono text-[11px] text-zinc-400 truncate group-hover:border-white/10 transition-colors">
+                              {value}
+                            </div>
+                            <button
+                              onClick={() => handleCopy(value!, label)}
+                              className="shrink-0 w-10 h-10 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95"
+                              title="Copy URL"
+                            >
+                              {copiedKey === label ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleCopy(value!, label)}
-                          className="shrink-0 w-9 h-9 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg flex items-center justify-center text-zinc-400 transition-all"
-                        >
-                          {copiedKey === label ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                {/* Anon Key */}
+                <div className="glass-card p-8 rounded-[2rem] border border-white/5 space-y-6 bg-emerald-500/[0.02]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                        <Key size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-black text-white uppercase italic">anon</h4>
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/10">Public</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 font-medium mt-1 max-w-md">Safe to use in browsers and client-side code. This key is subject to RLS policies you define on your tables.</p>
                       </div>
                     </div>
-                  ))}
-              </div>
-            )}
+                    <button
+                      onClick={() => handleCopy(keys?.anon_key || project.anonKey || '', 'anon')}
+                      className="px-6 py-3 bg-white text-black hover:bg-zinc-200 border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-xl shrink-0"
+                    >
+                      {copiedKey === 'anon' ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copiedKey === 'anon' ? 'Copied to clipboard' : 'Copy Public Key'}
+                    </button>
+                  </div>
+                  <div className="p-5 bg-black/40 rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-400 break-all select-all leading-relaxed group hover:border-white/10 transition-colors">
+                    {keys?.anon_key || project.anonKey || 'Key not available'}
+                  </div>
+                </div>
 
-            <div className="space-y-6">
-              {/* Anon Key */}
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                      <Key size={18} />
+                {/* Service Key */}
+                <div className="glass-card p-8 rounded-[2rem] border border-red-500/5 space-y-6 bg-red-500/[0.02]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                        <Shield size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-black text-white uppercase italic">service_role</h4>
+                          <span className="px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest border border-red-500/10">Secret</span>
+                        </div>
+                        <p className="text-xs text-rose-500/70 font-black uppercase tracking-tight mt-1">
+                          CRITICAL: NEVER expose this key in client-side code.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white uppercase">anon (public)</h4>
-                      <p className="text-[10px] text-zinc-500 font-medium">Safe to use in browsers and client-side code.</p>
+                    <button
+                      onClick={() => handleCopy(keys?.service_key || project.serviceKey || '', 'service')}
+                      className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 border border-red-500/20 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-2xl shrink-0"
+                    >
+                      {copiedKey === 'service' ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                      {copiedKey === 'service' ? 'Copied to clipboard' : 'Copy Secret Key'}
+                    </button>
+                  </div>
+                  <div className="relative group">
+                    <div className="p-5 bg-black/40 rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-600 break-all blur-md group-hover:blur-none transition-all duration-300 cursor-pointer select-all leading-relaxed">
+                      {keys?.service_key || project.serviceKey || 'Key not available'}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 bg-black/80 px-4 py-2 rounded-lg border border-white/5 backdrop-blur-sm">Hover to reveal secret key</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleCopy(keys?.anon_key || project.anonKey || '', 'anon')}
-                    className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
-                  >
-                    {copiedKey === 'anon' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                    {copiedKey === 'anon' ? 'Copied' : 'Copy Key'}
-                  </button>
-                </div>
-                <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all select-all">
-                  {keys?.anon_key || project.anonKey || 'Key not available'}
-                </div>
-              </div>
-
-              {/* Service Key */}
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                      <Shield size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white uppercase">service_role (secret)</h4>
-                      <p className="text-[10px] text-rose-500/70 font-black uppercase tracking-tighter">
-                        Never expose this key in client-side code.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleCopy(keys?.service_key || project.serviceKey || '', 'service')}
-                    className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
-                  >
-                    {copiedKey === 'service' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                    {copiedKey === 'service' ? 'Copied' : 'Copy Key'}
-                  </button>
-                </div>
-                <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all blur-sm hover:blur-none transition-all cursor-pointer select-all">
-                  {keys?.service_key || project.serviceKey || 'Key not available'}
                 </div>
               </div>
             </div>

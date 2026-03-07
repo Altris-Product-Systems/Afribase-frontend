@@ -33,10 +33,10 @@ export interface ScrollCarouselProps {
 
 // --- Custom Hook for Animations ---
 const useFeatureAnimations = (
-  containerRef: React.RefObject<HTMLDivElement>,
-  scrollContainerRef: React.RefObject<HTMLDivElement>,
-  scrollContainerRef2: React.RefObject<HTMLDivElement>,
-  progressBarRef: React.RefObject<HTMLDivElement>,
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>,
+  scrollContainerRef2: React.RefObject<HTMLDivElement | null>,
+  progressBarRef: React.RefObject<HTMLDivElement | null>,
   cardRefs: React.MutableRefObject<HTMLDivElement[]>,
   cardRefs2: React.MutableRefObject<HTMLDivElement[]>,
   isDesktop: boolean,
@@ -58,47 +58,55 @@ const useFeatureAnimations = (
         // Use the provided maxScrollHeight or the calculated offset as the scroll distance
         const scrollDistance = maxScrollHeight || finalOffset1;
 
-        gsap.set(scrollContainerRef2.current, {
-          x: -finalOffset2 + viewportOffset * 2,
-        });
+        if (scrollContainerRef2.current) {
+          gsap.set(scrollContainerRef2.current, {
+            x: -finalOffset2 + viewportOffset * 2,
+          });
+        }
 
-        gsap
-          .timeline({
+        if (scrollContainerRef.current) {
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top top",
+                end: () => `+=${scrollDistance}`,
+                scrub: 1,
+                pin: true,
+              },
+            })
+            .fromTo(
+              scrollContainerRef.current,
+              { x: viewportOffset },
+              { x: -finalOffset1 + viewportOffset, ease: "none" }
+            );
+        }
+
+        if (scrollContainerRef2.current) {
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top top",
+                end: () => `+=${scrollDistance}`,
+                scrub: 1,
+              },
+            })
+            .to(scrollContainerRef2.current, { x: viewportOffset, ease: "none" });
+        }
+
+        if (progressBarRef.current) {
+          gsap.to(progressBarRef.current, {
+            width: "100%",
+            ease: "none",
             scrollTrigger: {
               trigger: containerRef.current,
               start: "top top",
               end: () => `+=${scrollDistance}`,
-              scrub: 1,
-              pin: true,
+              scrub: true,
             },
-          })
-          .fromTo(
-            scrollContainerRef.current,
-            { x: viewportOffset },
-            { x: -finalOffset1 + viewportOffset, ease: "none" }
-          );
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top top",
-              end: () => `+=${scrollDistance}`,
-              scrub: 1,
-            },
-          })
-          .to(scrollContainerRef2.current, { x: viewportOffset, ease: "none" });
-
-        gsap.to(progressBarRef.current, {
-          width: "100%",
-          ease: "none",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top top",
-            end: () => `+=${scrollDistance}`,
-            scrub: true,
-          },
-        });
+          });
+        }
       } else {
         // Mobile vertical scroll logic
         const allCards = [...cardRefs.current, ...cardRefs2.current];

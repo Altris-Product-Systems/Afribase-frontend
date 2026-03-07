@@ -49,10 +49,9 @@ interface SheetTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const SheetTrigger = React.forwardRef<HTMLButtonElement, SheetTriggerProps>(
   ({ children, asChild, ...props }, forwardedRef) => {
-    const { setOpen } = React.useContext(SheetContext) || { setOpen: () => {} };
+    const { setOpen } = React.useContext(SheetContext) || { setOpen: () => { } };
 
     // Derive dependencies for the hook before the hook itself.
-    // This logic can be conditional as it does not involve hooks.
     const child = asChild ? React.Children.only(children) : null;
     const childRef = child && React.isValidElement(child) ? (child as any).ref : undefined;
 
@@ -78,17 +77,15 @@ const SheetTrigger = React.forwardRef<HTMLButtonElement, SheetTriggerProps>(
 
     if (asChild) {
       if (!React.isValidElement(child)) {
-        // console.error("SheetTrigger with `asChild` expects a single valid React element child.");
         return null;
       }
 
-      // Use the memoized `mergedRef` inside the conditional block.
-      return React.cloneElement(child, {
-        ...child.props,
-        ...props, // Pass down props like className, etc., to the child
+      return React.cloneElement(child as React.ReactElement<any>, {
+        ...(child.props as Record<string, unknown>),
+        ...props,
         onClick: (e: React.MouseEvent) => {
           setOpen(true);
-          if (child.props.onClick) child.props.onClick(e);
+          if ((child.props as any).onClick) (child.props as any).onClick(e);
         },
         ref: mergedRef,
       });
@@ -281,7 +278,7 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
           </SheetPortal>
         )}
       </AnimatePresence>,
-      document.body
+      typeof document !== 'undefined' ? document.body : ({} as any)
     );
   }
 );
