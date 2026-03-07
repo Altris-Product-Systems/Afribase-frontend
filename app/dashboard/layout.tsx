@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { getOrganizations, isAuthenticated, Organization, getUser, User, getProject, Project } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
@@ -49,6 +49,7 @@ export default function DashboardLayout({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  const dataLoadedRef = useRef(false);
 
 
 
@@ -71,7 +72,10 @@ export default function DashboardLayout({
       router.push('/auth/sign-in');
       return;
     }
-    loadSidebarData();
+    if (!dataLoadedRef.current) {
+      loadSidebarData();
+      dataLoadedRef.current = true;
+    }
   }, [router]);
 
   const loadProjectData = async (id: string) => {

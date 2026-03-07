@@ -251,32 +251,46 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
   }
 }
 
+// Request deduplication promises
+let userPromise: Promise<User> | null = null;
+let organizationsPromise: Promise<Organization[]> | null = null;
+
 export async function getUser(): Promise<User> {
-  const token = getAuthToken();
-  if (!token) throw new APIError(401, 'Not authenticated');
+  if (userPromise) return userPromise;
 
-  try {
-    const response = await apiFetch(`${API_BASE_URL}/api/user`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+  userPromise = (async () => {
+    const token = getAuthToken();
+    if (!token) throw new APIError(401, 'Not authenticated');
 
-    const data = await response.json();
+    try {
+      const response = await apiFetch(`${API_BASE_URL}/api/user`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    if (!response.ok) {
-      throw new APIError(response.status, data.error || data.message || 'Failed to fetch user');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new APIError(response.status, data.error || data.message || 'Failed to fetch user');
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
+      }
+      if (error instanceof APIError) throw error;
+      throw new APIError(500, 'An unexpected error occurred. Please try again.');
+    } finally {
+      // Clear the promise after a short delay to deduplicate concurrent calls
+      // but allow fresh fetches soon after
+      setTimeout(() => { userPromise = null; }, 1000);
     }
+  })();
 
-    return data;
-  } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}.`);
-    }
-    if (error instanceof APIError) throw error;
-    throw new APIError(500, 'An unexpected error occurred. Please try again.');
-  }
+  return userPromise;
 }
 
 export function signInWithGitHub(): void {
@@ -487,35 +501,44 @@ export async function createOrganization(data: CreateOrganizationRequest): Promi
 }
 
 export async function getOrganizations(): Promise<Organization[]> {
-  const token = getAuthToken();
-  if (!token) throw new APIError(401, 'Not authenticated');
+  if (organizationsPromise) return organizationsPromise;
 
-  try {
-    const response = await apiFetch(`${API_BASE_URL}/api/organizations`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+  organizationsPromise = (async () => {
+    const token = getAuthToken();
+    if (!token) throw new APIError(401, 'Not authenticated');
 
-    const data = await response.json();
+    try {
+      const response = await apiFetch(`${API_BASE_URL}/api/organizations`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    if (!response.ok) {
-      const errorMessage = data.message || data.detail || data.error || `Error ${response.status}`;
-      throw new APIError(response.status, `[${response.status}] ${errorMessage}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.detail || data.error || `Error ${response.status}`;
+        throw new APIError(response.status, `[${response.status}] ${errorMessage}`);
+      }
+
+      // Ensure we return an array
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
+      }
+      if (error instanceof APIError) {
+        throw error;
+      }
+      throw new APIError(500, 'An unexpected error occurred. Please try again.');
+    } finally {
+      // Clear the promise after a short delay to deduplicate concurrent calls
+      setTimeout(() => { organizationsPromise = null; }, 1000);
     }
+  })();
 
-    // Ensure we return an array
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new APIError(0, `Cannot connect to server at ${API_BASE_URL}. Please check if the backend is running.`);
-    }
-    if (error instanceof APIError) {
-      throw error;
-    }
-    throw new APIError(500, 'An unexpected error occurred. Please try again.');
-  }
+  return organizationsPromise;
 }
 
 // Project interfaces and functions

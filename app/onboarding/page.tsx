@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createOrganization, createProject, getOrganizations, isAuthenticated, APIError } from '@/lib/api';
@@ -25,6 +25,7 @@ export default function OnboardingPage() {
   const [region, setRegion] = useState('lagos-01');
   const [plan, setPlan] = useState('free');
   const [databasePassword, setDatabasePassword] = useState('');
+  const initialCheckDoneRef = useRef(false);
 
   const generatePassword = () => {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
@@ -58,7 +59,10 @@ export default function OnboardingPage() {
       }
     };
 
-    checkExistingOrganizations();
+    if (!initialCheckDoneRef.current) {
+      checkExistingOrganizations();
+      initialCheckDoneRef.current = true;
+    }
   }, [router, setGlobalLoading]);
 
   const handleOrgNameChange = (name: string) => {

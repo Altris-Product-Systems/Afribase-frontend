@@ -11,9 +11,15 @@ export default function Home() {
     <main className="min-h-screen bg-brand-background">
       <Navbar />
       <Hero />
-      <Features />
-      <HowItWorks />
-      <Languages />
+      <div id="features">
+        <Features />
+      </div>
+      <div id="how-it-works">
+        <HowItWorks />
+      </div>
+      <div id="languages">
+        <Languages />
+      </div>
       <Footer />
     </main>
   );
