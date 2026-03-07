@@ -48,10 +48,36 @@ export interface ProviderSummary {
   redirectUri: string;
 }
 
+export interface SmtpConfig {
+  enabled: boolean;
+  host: string;
+  port: number;
+  user: string;
+  pass?: string;
+  adminEmail: string;
+  senderName: string;
+  maxFrequency: string;
+}
+
+export interface EmailTemplate {
+  subject: string;
+  content: string;
+}
+
+export interface EmailTemplatesConfig {
+  invite: EmailTemplate;
+  confirmation: EmailTemplate;
+  recovery: EmailTemplate;
+  magicLink: EmailTemplate;
+  emailChange: EmailTemplate;
+}
+
 export interface ProjectAuthConfig {
   emailEnabled: boolean;
   emailAutoConfirm: boolean;
   phoneEnabled: boolean;
+  smtp: SmtpConfig;
+  templates: EmailTemplatesConfig;
   google: OAuthProviderConfig;
   github: OAuthProviderConfig;
   facebook: OAuthProviderConfig;
@@ -60,10 +86,23 @@ export interface ProjectAuthConfig {
   discord: OAuthProviderConfig;
 }
 
+export interface SmtpSummary {
+  enabled: boolean;
+  host: string;
+  port: number;
+  user: string;
+  passSet: boolean;
+  adminEmail: string;
+  senderName: string;
+  maxFrequency: string;
+}
+
 export interface AuthConfigResponse {
   emailEnabled: boolean;
   emailAutoConfirm: boolean;
   phoneEnabled: boolean;
+  smtp: SmtpSummary;
+  templates: EmailTemplatesConfig;
   providers: Record<string, ProviderSummary>;
   sdkSnippet: {
     javascript: string;
@@ -78,6 +117,8 @@ export interface UpdateAuthConfigRequest {
   emailEnabled?: boolean;
   emailAutoConfirm?: boolean;
   phoneEnabled?: boolean;
+  smtp?: Partial<SmtpConfig>;
+  templates?: Partial<EmailTemplatesConfig>;
   google?: OAuthProviderConfig;
   github?: OAuthProviderConfig;
   facebook?: OAuthProviderConfig;

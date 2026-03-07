@@ -8,8 +8,9 @@ import {
     AuthConfigResponse,
     OAuthProviderConfig
 } from '@/lib/api';
-import { Shield, Mail, Phone, Github, Globe, Save, Check, Copy, ExternalLink, Key, Code, Smartphone, Terminal } from 'lucide-react';
+import { Shield, Mail, Phone, Github, Globe, Save, Check, Copy, ExternalLink, Key, Code, Smartphone, Terminal, PenTool, Database, FileText, ChevronRight, X } from 'lucide-react';
 import { FaGoogle, FaGithub, FaDiscord, FaFacebook, FaApple, FaTwitter } from 'react-icons/fa';
+import { SmtpConfig, EmailTemplatesConfig, EmailTemplate } from '@/lib/api';
 
 interface AuthSettingsProps {
     projectId: string;
@@ -31,6 +32,15 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
         secret: '',
         redirectUri: ''
     });
+
+    // SMTP Form state
+    const [editingSmtp, setEditingSmtp] = useState(false);
+    const [smtpForm, setSmtpForm] = useState<Partial<SmtpConfig>>({});
+
+    // Template Form state
+    const [editingTemplate, setEditingTemplate] = useState<keyof EmailTemplatesConfig | null>(null);
+    const [templateForm, setTemplateForm] = useState<EmailTemplate>({ subject: '', content: '' });
+    const [previewMode, setPreviewMode] = useState(false);
 
     useEffect(() => {
         loadConfig();
@@ -101,6 +111,39 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
         setTimeout(() => {
             setCopiedStates({ ...copiedStates, [id]: false });
         }, 2000);
+    };
+
+    const handleSaveSmtp = async () => {
+        setIsSaving(true);
+        try {
+            const updated = await updateAuthConfig(projectId, { smtp: smtpForm });
+            setConfig(updated);
+            setEditingSmtp(false);
+            setMessage({ type: 'success', text: 'SMTP settings updated.' });
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to update SMTP settings.' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveTemplate = async () => {
+        if (!editingTemplate) return;
+        setIsSaving(true);
+        try {
+            const updated = await updateAuthConfig(projectId, {
+                templates: {
+                    [editingTemplate]: templateForm
+                }
+            });
+            setConfig(updated);
+            setEditingTemplate(null);
+            setMessage({ type: 'success', text: `Email template for ${editingTemplate} updated.` });
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to update email template.' });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (isLoading) {
@@ -190,6 +233,250 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                     <div className="w-9 h-5 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500/50"></div>
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* SMTP Configuration */}
+                    <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Database className="text-zinc-400" size={18} />
+                                <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Custom SMTP (Mailtrap/Resend)</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={config?.smtp?.enabled || false}
+                                    onChange={(e) => setSmtpForm({ ...config?.smtp, enabled: e.target.checked })}
+                                />
+                                <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+                        <div className="p-6">
+                            {!editingSmtp ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-zinc-500 font-medium">Use your own email provider to send transactional emails and avoid the daily limit.</p>
+                                        <button
+                                            onClick={() => {
+                                                setEditingSmtp(true);
+                                                setSmtpForm(config?.smtp || {});
+                                            }}
+                                            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all"
+                                        >
+                                            Configure SMTP
+                                        </button>
+                                    </div>
+                                    {config?.smtp?.enabled && (
+                                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-black text-zinc-500 uppercase">Provider Host</span>
+                                                <span className="text-xs font-mono text-emerald-400">{config?.smtp?.host}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-black text-zinc-500 uppercase">Sender Name</span>
+                                                <span className="text-xs font-medium text-white">{config?.smtp?.senderName}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-5 animate-slide-up-modest">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SMTP Host</label>
+                                            <input
+                                                type="text"
+                                                value={smtpForm.host || ''}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, host: e.target.value })}
+                                                placeholder="smtp.mailtrap.io"
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">SMTP Port</label>
+                                            <input
+                                                type="number"
+                                                value={smtpForm.port || ''}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, port: parseInt(e.target.value) })}
+                                                placeholder="587"
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">User / Username</label>
+                                            <input
+                                                type="text"
+                                                value={smtpForm.user || ''}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, user: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Password</label>
+                                            <input
+                                                type="password"
+                                                value={smtpForm.pass || ''}
+                                                placeholder={config?.smtp?.passSet ? "••••••••••••••••" : "Enter password"}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, pass: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Sender Email</label>
+                                            <input
+                                                type="email"
+                                                value={smtpForm.adminEmail || ''}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, adminEmail: e.target.value })}
+                                                placeholder="hello@yourdomain.com"
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Sender Name</label>
+                                            <input
+                                                type="text"
+                                                value={smtpForm.senderName || ''}
+                                                onChange={(e) => setSmtpForm({ ...smtpForm, senderName: e.target.value })}
+                                                placeholder="Afribase Support"
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3 pt-4">
+                                        <button
+                                            disabled={isSaving}
+                                            onClick={handleSaveSmtp}
+                                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-black font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {isSaving ? <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <Save size={14} />}
+                                            Save SMTP Settings
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingSmtp(false)}
+                                            className="px-6 py-3 bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Email Templates */}
+                    <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <FileText className="text-zinc-400" size={18} />
+                                <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Auth Email Templates</span>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            {editingTemplate ? (
+                                <div className="space-y-5 animate-slide-up-modest">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="text-white font-bold text-sm uppercase flex items-center gap-2 italic">
+                                            <PenTool size={14} className="text-emerald-500" />
+                                            Editing {editingTemplate} Template
+                                        </h4>
+                                        <div className="flex items-center gap-1 bg-zinc-900 border border-white/5 p-1 rounded-lg">
+                                            <button
+                                                onClick={() => setPreviewMode(false)}
+                                                className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!previewMode ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                            >
+                                                Code
+                                            </button>
+                                            <button
+                                                onClick={() => setPreviewMode(true)}
+                                                className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${previewMode ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                            >
+                                                Visual Preview
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Subject Line</label>
+                                            <input
+                                                type="text"
+                                                value={templateForm.subject}
+                                                onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Email Content (HTML)</label>
+                                                <span className="text-[10px] text-zinc-600 font-medium italic">Standard supah-template syntax enabled</span>
+                                            </div>
+
+                                            {previewMode ? (
+                                                <div className="w-full h-[300px] bg-white rounded-xl overflow-hidden border border-white/10 p-1">
+                                                    <iframe
+                                                        srcDoc={templateForm.content.replace(/\{\{\s*\.ConfirmationURL\s*\}\}/g, '#').replace(/\{\{\s*\.Email\s*\}\}/g, 'user@example.com')}
+                                                        className="w-full h-full border-none rounded-lg"
+                                                        title="Email Preview"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="relative group">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-zinc-900/50 border-r border-white/5 rounded-l-xl flex flex-col items-center pt-3 text-[10px] text-zinc-600 font-mono select-none pointer-events-none">
+                                                        {Array.from({ length: 12 }).map((_, i) => <div key={i} className="h-[21px]">{i + 1}</div>)}
+                                                    </div>
+                                                    <textarea
+                                                        rows={12}
+                                                        value={templateForm.content}
+                                                        onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-[13px] text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 transition-colors resize-none leading-[21px]"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <p className="text-[10px] text-zinc-600 font-medium">Available variables: {'{ .ConfirmationURL }'}, {'{ .Email }'}, {'{ .Token }'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            disabled={isSaving}
+                                            onClick={handleSaveTemplate}
+                                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-black font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {isSaving ? <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <Save size={14} />}
+                                            Update Template
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingTemplate(null)}
+                                            className="px-6 py-3 bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {(['invite', 'confirmation', 'recovery', 'magicLink', 'emailChange'] as const).map((key) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => {
+                                                setEditingTemplate(key);
+                                                setTemplateForm(config?.templates?.[key] || { subject: '', content: '' });
+                                            }}
+                                            className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 hover:border-white/10 transition-all group group relative"
+                                        >
+                                            <div className="text-left">
+                                                <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">{key}</h5>
+                                                <p className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">
+                                                    {config?.templates?.[key]?.subject || `Default ${key} subject`}
+                                                </p>
+                                            </div>
+                                            <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors" size={16} />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
