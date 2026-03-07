@@ -1,12 +1,35 @@
 'use client';
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { getOrganizations, isAuthenticated, Organization, getUser, User, getProject, Project } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
-import { User as UserIcon } from 'lucide-react';
+
+function SearchParamsHandler({
+  organizations,
+  setSelectedOrg,
+  setActiveTab,
+}: {
+  organizations: Organization[];
+  setSelectedOrg: (org: Organization | null) => void;
+  setActiveTab: (tab: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const orgId = searchParams.get('orgId');
+    if (orgId && organizations.length > 0) {
+      const found = organizations.find((o) => o.id === orgId);
+      if (found) setSelectedOrg(found);
+    }
+
+    const tab = searchParams.get('tab');
+    setActiveTab(tab);
+  }, [searchParams, organizations, setSelectedOrg, setActiveTab]);
+
+  return null;
+}
 
 export default function DashboardLayout({
   children,
@@ -15,7 +38,6 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { setIsLoading: setGlobalLoading } = useLoader();
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -26,14 +48,9 @@ export default function DashboardLayout({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  useEffect(() => {
-    const orgId = searchParams.get('orgId');
-    if (orgId && organizations.length > 0) {
-      const found = organizations.find(o => o.id === orgId);
-      if (found) setSelectedOrg(found);
-    }
-  }, [searchParams, organizations]);
+
 
   useEffect(() => {
     const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
@@ -112,12 +129,9 @@ export default function DashboardLayout({
   };
 
   const getActiveId = () => {
+    if (activeTab) return activeTab;
     if (pathname === '/dashboard') return 'dashboard';
     if (pathname.startsWith('/dashboard/projects')) return 'projects';
-
-    // If we have a tab parameter, that is our active ID
-    const tab = searchParams.get('tab');
-    if (tab) return tab;
 
     if (pathname === '/dashboard/libraries') return 'libraries';
 
@@ -251,7 +265,7 @@ export default function DashboardLayout({
               {selectedOrg?.name || 'Afribase'}
             </h1>
           </div>
-          
+
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#09090b]">
@@ -264,6 +278,13 @@ export default function DashboardLayout({
         onClose={() => setShowOnboardingModal(false)}
         onSuccess={loadSidebarData}
       />
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          organizations={organizations}
+          setSelectedOrg={setSelectedOrg}
+          setActiveTab={setActiveTab}
+        />
+      </Suspense>
     </div>
   );
 }

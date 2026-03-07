@@ -1,6 +1,6 @@
 
-import React, { useState, useCallback } from 'react';
-import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { useState, useCallback } from 'react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface ConfirmOptions {
     title: string;
@@ -40,15 +40,15 @@ export function useConfirm() {
     const ConfirmDialog = () => (
         options ? (
             <ConfirmModal
-                isOpen={isOpen}
-                onClose={handleCancel}
-                onConfirm={handleConfirm}
-                title={options.title}
-                message={options.message}
-                confirmText={options.confirmText}
-                cancelText={options.cancelText}
-                variant={options.variant}
-            />
+                isOpen= { isOpen }
+                onClose = { handleCancel }
+    onConfirm = { handleConfirm }
+    title = { options.title }
+    message = { options.message }
+    confirmText = { options.confirmText }
+    cancelText = { options.cancelText }
+    variant = { options.variant }
+        />
         ) : null
     );
 

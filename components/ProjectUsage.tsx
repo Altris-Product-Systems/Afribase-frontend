@@ -11,7 +11,7 @@ import {
     RefreshCw,
     LayoutGrid
 } from 'lucide-react';
-import { getProjectUsage, ProjectUsage, Project } from '@/lib/api';
+import { getProjectUsage, ProjectUsage as ProjectUsageData, Project } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface ProjectUsageProps {
@@ -19,7 +19,7 @@ interface ProjectUsageProps {
 }
 
 export default function ProjectUsage({ project }: ProjectUsageProps) {
-    const [usage, setUsage] = useState<ProjectUsage | null>(null);
+    const [usage, setUsage] = useState<ProjectUsageData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
