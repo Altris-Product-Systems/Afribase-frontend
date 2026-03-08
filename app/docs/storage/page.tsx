@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { HardDrive, Upload, Folder, Shield, Globe, Layers } from 'lucide-react';

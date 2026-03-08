@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { Activity, Radio, Users, Shield, Zap, MessageSquare } from 'lucide-react';

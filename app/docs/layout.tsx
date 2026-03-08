@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  BookOpen, 
-  Database, 
-  Users, 
-  HardDrive, 
-  Zap, 
-  Activity, 
-  Menu, 
-  X, 
+import {
+  BookOpen,
+  Database,
+  Users,
+  HardDrive,
+  Zap,
+  Activity,
+  Menu,
+  X,
   ChevronRight,
   Search,
   Github
@@ -61,7 +61,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
             <div className="hidden md:flex items-center gap-6">
               <Link href="/dashboard" className="text-sm font-medium hover:text-white transition-colors">Dashboard</Link>
-              <a href="https://github.com/afribase" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-white transition-colors flex items-center gap-2">
+              <a href="https://github.com/Altris-Product-Systems/Afribase-frontend" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-white transition-colors flex items-center gap-2">
                 <Github size={16} />
                 GitHub
               </a>
@@ -74,8 +74,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               <span className="text-xs text-zinc-500 group-hover:text-white font-medium">Search documentation...</span>
               <kbd className="text-[10px] bg-white/5 border border-white/10 px-1 rounded text-zinc-600">⌘K</kbd>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="lg:hidden p-2 text-zinc-400 hover:text-white"
             >
@@ -87,7 +87,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
       <div className="max-w-[1440px] mx-auto flex pt-16">
         {/* Sidebar Navigation */}
-        <aside 
+        <aside
           className={`fixed inset-0 top-16 z-40 lg:sticky lg:h-[calc(100vh-64px)] lg:w-72 lg:block
             ${isSidebarOpen ? 'bg-[#050505] translate-x-0' : '-translate-x-full lg:translate-x-0'}
             transition-transform duration-300 ease-in-out border-r border-white/5 overflow-y-auto px-6 py-10
@@ -106,8 +106,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                         key={link.href}
                         href={link.href}
                         className={`group flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                          ${isActive 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]' 
+                          ${isActive
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
                             : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'
                           }
                         `}
@@ -127,7 +127,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         {/* Content Area */}
         <main className="flex-1 w-full min-w-0 p-8 lg:p-12 xl:p-16 max-w-4xl animate-fade-in scroll-smooth">
           {children}
-          
+
           <div className="mt-20 pt-10 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6">
             <p className="text-xs text-zinc-600 font-medium">© 2026 Afribase Cloud Infrastructure. Produced by Altris Product Systems.</p>
             <div className="flex items-center gap-6">

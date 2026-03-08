@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { Zap, Terminal, Code, Activity, Cpu, Share2 } from 'lucide-react';

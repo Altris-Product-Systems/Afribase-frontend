@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { Layers, Cpu, Globe, Database, ShieldCheck, Zap } from 'lucide-react';

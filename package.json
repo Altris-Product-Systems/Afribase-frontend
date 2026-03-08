@@ -41,6 +41,7 @@
     "three": "^0.183.1"
   },
   "devDependencies": {
+    "@tailwindcss/oxide-win32-x64-msvc": "4.2.1",
     "@tailwindcss/postcss": "^4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",

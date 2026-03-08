@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { Database, Terminal, Search, ExternalLink, ShieldAlert, Cpu } from 'lucide-react';

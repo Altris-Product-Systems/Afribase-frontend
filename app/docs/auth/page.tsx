@@ -1,4 +1,4 @@
-'use call';
+'use client';
 
 import React from 'react';
 import { Users, ShieldCheck, Mail, Key, Lock, Fingerprint } from 'lucide-react';
