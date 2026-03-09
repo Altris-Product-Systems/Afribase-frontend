@@ -10,13 +10,13 @@ export default function AuthDocsPage() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3 text-emerald-500 mb-2">
                     <Users size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Identity</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Identity & Access</span>
                 </div>
                 <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
-                    Secure <span className="text-emerald-500">Authentication</span>
+                    Mission-Critical <span className="text-emerald-500">Authentication</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase Auth provides a complete authentication solution. Manage users, enable social providers, and define secure access control policies in record time.
+                    Afribase Auth provides a hardened, enterprise-grade authentication solution built on the industry-standard **GoTrue** API. Deploy secure social login, magic links, and multi-factor authentication across your entire organization with zero infrastructure management.
                 </p>
             </section>
 
@@ -52,7 +52,10 @@ export default function AuthDocsPage() {
                     <div className="space-y-4">
                         <Step number="01" title="Sign Up / Sign In">
                             Users can sign up for a new account or sign in with their existing credentials.
-                            <CodeBlock code={`// Sign Up
+                            <div className="space-y-6 mt-4">
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                    <CodeBlock code={`// Sign Up
 const { data, error } = await afribase.auth.signUp({
   email: 'user@example.com',
   password: 'securePassword123'
@@ -63,15 +66,58 @@ const { data, error } = await afribase.auth.signInWithPassword({
   email: 'user@example.com',
   password: 'securePassword123'
 });`} language="typescript" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                    <CodeBlock code={`# Sign Up
+client.auth.sign_up(email="user@example.com", password="securePassword123")
+
+# Sign In with Password
+client.auth.sign_in_with_password(email="user@example.com", password="securePassword123")`} language="python" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
+                                    <CodeBlock code={`// Sign Up
+await client.auth.signUp(email: 'user@example.com', password: 'securePassword123');
+
+// Sign In with Password
+await client.auth.signInWithPassword(email: 'user@example.com', password: 'securePassword123');`} language="dart" />
+                                </div>
+                            </div>
                         </Step>
 
                         <Step number="02" title="Passwordless & OAuth">
                             Send one-time passwords (OTP) or magic links, and handle Social Logins like Google or GitHub.
-                            <CodeBlock code={`// Send OTP / Magic Link
+                            <div className="space-y-6 mt-4">
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                    <CodeBlock code={`// Send OTP / Magic Link
 await afribase.auth.signInWithOtp({ email: 'user@example.com' });
 
 // Social Login
 const { url } = await afribase.auth.signInWithOAuth({ provider: 'google' });`} language="typescript" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                    <CodeBlock code={`# Send OTP / Magic Link
+client.auth.sign_in_with_otp(email="user@example.com")
+
+# Social Login
+url = client.auth.sign_in_with_oauth(provider="google")`} language="python" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
+                                    <CodeBlock code={`// Send OTP / Magic Link
+await client.auth.signInWithOtp(email: 'user@example.com');
+
+// Social Login
+final url = await client.auth.signInWithOAuth(provider: 'google');`} language="dart" />
+                                </div>
+                            </div>
                         </Step>
                     </div>
                 </div>

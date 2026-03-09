@@ -10,13 +10,13 @@ export default function DatabaseDocsPage() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3 text-emerald-500 mb-2">
                     <Database size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Infrastructure</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Persistence Layer</span>
                 </div>
                 <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
-                    High-performance <span className="text-emerald-500">Database</span>
+                    Elastic <span className="text-emerald-500">PostgreSQL</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase provides a full PostgreSQL database for every project. This is a relational database that is highly scalable and supports complex queries, relationships, and advanced data types.
+                    Every Afribase project comes with a dedicated, high-performance PostgreSQL instance. We automatically generate a secure, unified REST API via **PostgREST**, allowing you to interact with your data directly from the client with zero backend code.
                 </p>
             </section>
 
@@ -118,6 +118,11 @@ CREATE POLICY "Users can see only their own profile"
                     <div className="space-y-3">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
                         <CodeBlock code={`data = client.from_("posts").select("*").eq("id", "1").execute()`} language="python" />
+                    </div>
+
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
+                        <CodeBlock code={`final response = await client.from('posts').select('*').eq('id', 1).execute();`} language="dart" />
                     </div>
                 </div>
             </section>

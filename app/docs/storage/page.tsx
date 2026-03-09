@@ -10,13 +10,13 @@ export default function StorageDocsPage() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3 text-emerald-500 mb-2">
                     <HardDrive size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Object Store</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Object Storage</span>
                 </div>
                 <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
-                    Global <span className="text-emerald-500">Storage</span>
+                    Enterprise <span className="text-emerald-500">Asset Storage</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase Storage is high-performance file storage for any digital asset. Store, serve, and transform media with built-in security and global distribution.
+                    Store and serve massive digital assets with our S3-compatible object storage. Automatically optimized by a global CDN, Afribase Storage provides lightning-fast delivery for images, videos, and documents across the continent.
                 </p>
             </section>
 
@@ -60,11 +60,28 @@ export default function StorageDocsPage() {
 
                     <Step number="03" title="Generate Public Link">
                         Retrieve a high-speed public URL for your media assets.
-                        <CodeBlock code={`const { data } = afribase.storage
+                        <div className="space-y-6 mt-4">
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                <CodeBlock code={`const { data } = afribase.storage
   .from('avatars')
   .getPublicUrl('profiles/avatar-1.png');
 
 console.log(data.publicUrl);`} language="typescript" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                <CodeBlock code={`url = client.storage.from_("avatars").get_public_url("profiles/avatar-1.png")
+print(url)`} language="python" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
+                                <CodeBlock code={`final publicUrl = client.storage.from('avatars').getPublicUrl('profiles/avatar-1.png');
+print(publicUrl);`} language="dart" />
+                            </div>
+                        </div>
                     </Step>
                 </div>
             </section>

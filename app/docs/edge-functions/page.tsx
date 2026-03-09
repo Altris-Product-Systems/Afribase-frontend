@@ -65,9 +65,22 @@ serve(async (req) => {
 
                     <Step number="03" title="Invoke from Client">
                         Invoke your serverless function from any client library.
-                        <CodeBlock code={`const { data, error } = await afribase.functions.invoke('hello-world', {
+                        <div className="space-y-6 mt-4">
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                <CodeBlock code={`const { data, error } = await afribase.functions.invoke('hello-world', {
   body: { name: 'Afribase User' }
 });`} language="typescript" />
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                <CodeBlock code={`result = client.functions.invoke("hello-world", body={"name": "Afribase User"})`} language="python" />
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
+                                <CodeBlock code={`final result = await client.functions.invoke('hello-world', body: {'name': 'Afribase User'});`} language="dart" />
+                            </div>
+                        </div>
                     </Step>
                 </div>
             </section>
