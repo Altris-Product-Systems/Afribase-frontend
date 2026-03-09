@@ -69,48 +69,6 @@ export default function AfricaMapLoader({ isLoading, message = "Initializing..."
                         </svg>
                     </div>
 
-                    <div className="flex flex-col items-center gap-3">
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="flex items-center gap-3"
-                        >
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 whitespace-nowrap">
-                                System Protocol: <span className="text-white">{message}</span>
-                            </span>
-                        </motion.div>
-
-                        <div className="w-32 h-[1px] bg-white/5 relative overflow-hidden">
-                            <motion.div
-                                className="absolute top-0 left-0 h-full bg-emerald-500"
-                                initial={{ left: "-100%" }}
-                                animate={{ left: "100%" }}
-                                transition={{
-                                    duration: 1.5,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Technical Metadata Decoration */}
-                    <div className="absolute bottom-12 flex items-center gap-12">
-                        <div className="flex flex-col items-center">
-                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mb-1">Region</span>
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Global South</span>
-                        </div>
-                        <div className="flex flex-col items-center border-x border-white/5 px-12">
-                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mb-1">Status</span>
-                            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest animate-pulse">Syncing</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mb-1">Node</span>
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">AFR-MASTER-01</span>
-                        </div>
-                    </div>
                 </motion.div>
             )}
         </AnimatePresence>

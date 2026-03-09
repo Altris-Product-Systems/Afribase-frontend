@@ -28,7 +28,7 @@ export default function AuthPage() {
       const filtered = orgId ? data.filter(p => p.organizationId === orgId) : data;
       setProjects(filtered);
     } catch (err) {
-      console.error('Failed to load projects for auth', err);
+      // console.error('Failed to load projects for auth', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);
@@ -87,15 +87,32 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-auto">
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tighter block mb-1">Users</span>
-                <span className="text-sm font-bold text-white">-</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tighter block mb-1">Status</span>
-                <span className="text-[10px] font-black text-emerald-500 uppercase">ACTIVE</span>
-              </div>
+            <div className="grid grid-cols-2 gap-3 mt-auto pt-6">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/project/${project.id}?tab=auth`);
+                }}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all group/btn"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover/btn:scale-110 transition-transform mb-2">
+                  <ShieldCheck size={16} />
+                </div>
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Auth</span>
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/project/${project.id}?tab=api-keys`);
+                }}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-all group/btn"
+              >
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover/btn:text-white group-hover/btn:scale-110 transition-transform mb-2">
+                  <Key size={16} />
+                </div>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">API Keys</span>
+              </button>
             </div>
           </button>
         ))}

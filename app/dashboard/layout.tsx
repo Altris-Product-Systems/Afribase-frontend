@@ -1,11 +1,35 @@
 'use client';
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { getOrganizations, isAuthenticated, Organization, getUser, User } from '@/lib/api';
+import { getOrganizations, isAuthenticated, Organization, getUser, User, getProject, Project } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+
+function SearchParamsHandler({
+  organizations,
+  setSelectedOrg,
+  setActiveTab,
+}: {
+  organizations: Organization[];
+  setSelectedOrg: (org: Organization | null) => void;
+  setActiveTab: (tab: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const orgId = searchParams.get('orgId');
+    if (orgId && organizations.length > 0) {
+      const found = organizations.find((o) => o.id === orgId);
+      if (found) setSelectedOrg(found);
+    }
+
+    const tab = searchParams.get('tab');
+    setActiveTab(tab);
+  }, [searchParams, organizations, setSelectedOrg, setActiveTab]);
+
+  return null;
+}
 
 export default function DashboardLayout({
   children,
@@ -14,32 +38,55 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { setIsLoading: setGlobalLoading } = useLoader();
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const dataLoadedRef = useRef(false);
+
+
 
   useEffect(() => {
-    const orgId = searchParams.get('orgId');
-    if (orgId && organizations.length > 0) {
-      const found = organizations.find(o => o.id === orgId);
-      if (found) setSelectedOrg(found);
+    const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
+    const projectIdFromPath = projectMatch ? projectMatch[1] : null;
+
+    if (projectIdFromPath) {
+      if (!project || project.id !== projectIdFromPath) {
+        setProject(null); // Clear stale project
+        loadProjectData(projectIdFromPath);
+      }
+    } else {
+      setProject(null);
     }
-  }, [searchParams, organizations]);
+  }, [pathname]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/auth/sign-in');
       return;
     }
-    loadSidebarData();
+    if (!dataLoadedRef.current) {
+      loadSidebarData();
+      dataLoadedRef.current = true;
+    }
   }, [router]);
+
+  const loadProjectData = async (id: string) => {
+    try {
+      const found = await getProject(id);
+      setProject(found);
+    } catch (err) {
+      // console.error('Failed to load project context for sidebar:', err);
+      setProject(null);
+    }
+  };
 
   const loadSidebarData = async () => {
     try {
@@ -66,7 +113,7 @@ export default function DashboardLayout({
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations', err);
+      // console.error('Failed to load organizations', err);
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);
@@ -86,8 +133,12 @@ export default function DashboardLayout({
   };
 
   const getActiveId = () => {
+    if (activeTab) return activeTab;
     if (pathname === '/dashboard') return 'dashboard';
     if (pathname.startsWith('/dashboard/projects')) return 'projects';
+
+    if (pathname === '/dashboard/libraries') return 'libraries';
+
     return pathname.split('/').pop() || 'dashboard';
   };
 
@@ -99,12 +150,37 @@ export default function DashboardLayout({
     if (projectId) {
       // If in project context, certain IDs should stay within the project detail tabs
       const projectTabs: Record<string, string> = {
+        overview: 'overview',
         tables: 'tables',
         sql: 'sql',
-        api: 'api-keys',
+        api: 'api',
+        libraries: 'libraries',
+        'api-keys': 'api-keys',
         auth: 'auth',
         users: 'users',
         policies: 'policies',
+        sso: 'sso',
+        storage: 'storage',
+        'edge-functions': 'edge-functions',
+        realtime: 'realtime',
+        migrations: 'migrations',
+        backups: 'backups',
+        branches: 'branches',
+        webhooks: 'webhooks',
+        pooler: 'pooler',
+        cron: 'cron',
+        logs: 'logs',
+        'log-drains': 'log-drains',
+        usage: 'usage',
+        domains: 'domains',
+        network: 'network',
+        vault: 'vault',
+        advanced: 'advanced',
+        forum: 'forum',
+        health: 'health',
+        nocode: 'nocode',
+        deeplinks: 'deeplinks',
+        settings: 'settings',
       };
 
       if (projectTabs[id]) {
@@ -120,12 +196,31 @@ export default function DashboardLayout({
       tables: '/dashboard/database/tables',
       sql: '/dashboard/database/sql',
       api: '/dashboard/database/api',
+      migrations: '/dashboard/database/migrations',
+      backups: '/dashboard/database/backups',
+      branches: '/dashboard/database/branches',
+      webhooks: '/dashboard/database/webhooks',
+      pooler: '/dashboard/database/pooler',
       auth: '/dashboard/auth',
       users: '/dashboard/auth/users',
       policies: '/dashboard/auth/policies',
+      sso: '/dashboard/auth/sso',
       storage: '/dashboard/storage',
       'edge-functions': '/dashboard/edge-functions',
+      realtime: '/dashboard/realtime',
+      cron: '/dashboard/cron',
       logs: '/dashboard/logs',
+      'log-drains': '/dashboard/log-drains',
+      usage: '/dashboard/usage',
+      libraries: '/dashboard/libraries',
+      domains: '/dashboard/domains',
+      network: '/dashboard/network',
+      vault: '/dashboard/vault',
+      advanced: '/dashboard/advanced',
+      forum: '/dashboard/forum',
+      health: '/dashboard/health',
+      nocode: '/dashboard/nocode',
+      deeplinks: '/dashboard/deeplinks',
       settings: '/dashboard/settings',
     };
 
@@ -151,6 +246,11 @@ export default function DashboardLayout({
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         onNewOrganization={() => setShowOnboardingModal(true)}
+        projectId={project?.id}
+        projectName={project?.name}
+        projectPlan={project?.plan}
+        projectRegion={project?.region}
+        projectStatus={project?.status}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
@@ -169,22 +269,7 @@ export default function DashboardLayout({
               {selectedOrg?.name || 'Afribase'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Platform Healthy</span>
-            </div> */}
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
-              {user?.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-                  {user?.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) ||
-                    user?.email?.slice(0, 2).toUpperCase() || '??'}
-                </span>
-              )}
-            </div>
-          </div>
+
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#09090b]">
@@ -197,6 +282,13 @@ export default function DashboardLayout({
         onClose={() => setShowOnboardingModal(false)}
         onSuccess={loadSidebarData}
       />
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          organizations={organizations}
+          setSelectedOrg={setSelectedOrg}
+          setActiveTab={setActiveTab}
+        />
+      </Suspense>
     </div>
   );
 }

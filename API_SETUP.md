@@ -28,25 +28,25 @@ NEXT_PUBLIC_API_BASE_URL=http://192.168.1.113:8000
 
 **For production:**
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.afriibase.com
+NEXT_PUBLIC_API_BASE_URL=https://api.afribase.com
 ```
 
 ### 3. Troubleshooting "name resolution failed" Error
 
 This error means the frontend cannot connect to your backend server. Check:
 
-#### ✅ Backend Server Status
+#### Backend Server Status
 ```bash
 # Make sure your backend is running
 # Check if the server is listening on the correct port
 ```
 
-#### ✅ Correct IP Address
+#### Correct IP Address
 - If backend is on the same machine: use `http://localhost:8000`
 - If backend is on another machine: use the correct IP address
 - Make sure the port number (8000) is correct
 
-#### ✅ Network Connectivity
+#### Network Connectivity
 ```bash
 # Test if the backend is reachable
 curl http://192.168.1.113:8000/health
@@ -54,11 +54,11 @@ curl http://192.168.1.113:8000/health
 curl http://localhost:8000/health
 ```
 
-#### ✅ Firewall Settings
+#### Firewall Settings
 - Ensure your firewall allows connections to port 8000
 - If using Windows Defender, add an exception for the port
 
-#### ✅ CORS Configuration
+#### CORS Configuration
 Make sure your backend allows requests from the frontend domain
 
 ### 4. Restart Development Server

@@ -15,12 +15,18 @@ export default function Home() {
     <main className="min-h-screen bg-brand-background scroll-smooth">
       <Navbar />
       <Hero />
-      <Features />
+      <div id="features">
+        <Features />
+      </div>
       <AIFeatures />
       <AfricaFirst />
       <OfflineFirst />
-      <HowItWorks />
-      <Languages />
+      <div id="how-it-works">
+        <HowItWorks />
+      </div>
+      <div id="languages">
+        <Languages />
+      </div>
       <Pricing />
       <CTA />
       <Footer />

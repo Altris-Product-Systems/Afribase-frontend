@@ -8,19 +8,37 @@ import {
   LayoutGrid,
   Database,
   Users,
-  FolderLock,
   Zap,
   Settings,
   LogOut,
   ChevronDown,
   ChevronRight,
-  Plus,
   Terminal,
   ShieldCheck,
   HardDrive,
   Activity,
+  HeartPulse,
   Code,
-  BarChart3
+  BarChart3,
+  Archive,
+  GitBranch,
+  Webhook,
+  Lock,
+  Globe,
+  Shield,
+  Radio,
+  Rss,
+  Cpu,
+  Table,
+  Server,
+  Library,
+  MessageSquare,
+  Share2,
+  Home,
+  Layers,
+  HelpCircle,
+  Smartphone,
+  Key,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +54,7 @@ interface SidebarProps {
   onMobileClose?: () => void;
   onNewOrganization?: () => void;
   // Project context props
+  projectId?: string;
   projectName?: string;
   projectPlan?: string;
   projectRegion?: string;
@@ -54,6 +73,7 @@ export default function Sidebar({
   isMobileOpen = false,
   onMobileClose,
   onNewOrganization,
+  projectId,
   projectName,
   projectPlan,
   projectRegion,
@@ -79,7 +99,7 @@ export default function Sidebar({
     id,
     label,
     icon: Icon,
-    isSubItem = false
+    isSubItem = false,
   }: {
     id: string;
     label: string;
@@ -111,7 +131,7 @@ export default function Sidebar({
     return (
       <div className="space-y-1">
         <button
-          onClick={() => !isCollapsed && toggleSection(id)}
+          onClick={() => toggleSection(id)}
           className={`w-full flex items-center justify-between px-3 py-2 text-zinc-500 hover:text-zinc-300 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
         >
           <div className="flex items-center gap-3">
@@ -124,12 +144,14 @@ export default function Sidebar({
         </button>
         {(!isCollapsed && isExpanded) && (
           <div className="space-y-0.5 mt-1">
-            {/* children implementation will be in the nav list */}
+            {/* children handled in parent */}
           </div>
         )}
       </div>
     );
   };
+
+  const projectMode = !!projectId;
 
   return (
     <>
@@ -143,11 +165,12 @@ export default function Sidebar({
       `}>
         {/* Logo Section */}
         <div className={`h-16 flex items-center border-b border-white/5 relative ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-          <Link href="/dashboard" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 duration-200 flex-shrink-0">
-              <span className="text-black font-black text-lg">A</span>
-            </div>
-            {!isCollapsed && <span className="text-lg font-bold tracking-tighter text-white">Afriibase</span>}
+          <Link href="/dashboard" className="flex items-center group">
+            <img
+              src={isCollapsed ? "/AFRIBASE1.png" : "/AFR.png"}
+              alt="Afribase Logo"
+              className={`object-contain transition-transform group-hover:scale-105 duration-200 flex-shrink-0 drop-shadow-md ${isCollapsed ? 'h-8' : 'h-10 ml-2'}`}
+            />
           </Link>
 
           <button onClick={onToggleCollapse} className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-zinc-900 border border-white/10 rounded-md items-center justify-center text-zinc-400 hover:text-white hover:border-emerald-500/50 transition-all z-[60] shadow-xl">
@@ -155,99 +178,137 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Organization Selector */}
-        {showOrgSelector && (
-          <div className={`py-5 border-b border-white/5 relative ${isCollapsed ? 'px-3 flex justify-center' : 'px-5'}`}>
-            <button
-              onClick={() => setShowOrgDropdown(!showOrgDropdown)}
-              className={`flex items-center justify-between bg-white/[0.03] rounded-xl hover:bg-white/[0.06] transition-all duration-200 border border-white/5 hover:border-white/10 ${isCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full px-3 py-2 text-sm'}`}
-            >
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-4 h-4 rounded bg-gradient-to-br from-emerald-500 to-cyan-500 flex-shrink-0" />
-                {!isCollapsed && <span className="text-zinc-200 font-bold truncate">{selectedOrg?.name || 'Select Workspace'}</span>}
-              </div>
-              {!isCollapsed && <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} />}
-            </button>
-
-            {showOrgDropdown && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowOrgDropdown(false)} />
-                <div className={`absolute left-4 right-4 mt-2 bg-zinc-950/95 backdrop-blur-2xl rounded-2xl shadow-2xl z-20 border border-white/10 animate-scale-in ${isCollapsed ? 'left-16 w-64' : ''}`}>
-                  <div className="p-3 border-b border-white/5">
-                    <input
-                      type="text"
-                      value={orgSearch}
-                      onChange={(e) => setOrgSearch(e.target.value)}
-                      placeholder="Filter workspaces..."
-                      className="w-full px-3 py-2 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none text-white placeholder-zinc-600"
-                    />
-                  </div>
-                  <div className="py-1 max-h-60 overflow-y-auto">
-                    {organizations.filter(o => o.name.toLowerCase().includes(orgSearch.toLowerCase())).map(org => (
-                      <button key={org.id} onClick={() => { onOrgChange?.(org); setShowOrgDropdown(false); }} className="w-full px-4 py-2.5 text-left hover:bg-white/5 transition-colors flex items-center justify-between group">
-                        <span className={`text-xs font-medium ${selectedOrg?.id === org.id ? 'text-emerald-400' : 'text-zinc-400 group-hover:text-white'}`}>{org.name}</span>
-                        {selectedOrg?.id === org.id && <div className="w-1 h-1 bg-emerald-500 rounded-full" />}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="p-2 border-t border-white/5">
-                    <button onClick={onNewOrganization} className="w-full text-center px-4 py-2 text-[10px] font-black text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all uppercase tracking-widest">+ New Workspace</button>
-                  </div>
-                </div>
-              </>
-            )}
+        {/* Top-level Navigation (Always visible) */}
+        {!projectMode && (
+          <div className={`py-4 border-b border-white/5 ${isCollapsed ? 'px-3' : 'px-4'} space-y-1`}>
+            <NavigationItem id="dashboard" label="Organizations" icon={Home} />
+            <NavigationItem id="projects" label="Projects" icon={Layers} />
+            <NavigationItem id="forum" label="Developer Forum" icon={MessageSquare} />
+            <NavigationItem id="settings" label="Global Settings" icon={Settings} />
           </div>
         )}
 
-        {/* Global Navigation */}
+        {/* Project Back Button & Name */}
+        {projectMode && (
+          <div className={`py-4 border-b border-white/5 ${isCollapsed ? 'px-3' : 'px-4'}`}>
+            <button
+              onClick={() => router.push('/dashboard/projects')}
+              className="flex items-center gap-2 text-zinc-500 hover:text-zinc-100 transition-colors mb-4 group"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-0.5 transition-transform" />
+              {!isCollapsed && <span className="text-xs font-bold uppercase tracking-widest">Back to Projects</span>}
+            </button>
+
+            <div className="flex items-center gap-3 w-full overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <Database size={18} className="text-emerald-400" />
+              </div>
+              {!isCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-black text-white truncate uppercase italic tracking-tighter">{projectName}</h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="px-1.5 py-0.5 rounded-[4px] bg-zinc-800 text-zinc-500 border border-white/5 text-[8px] font-black uppercase">
+                      {projectStatus || 'Active'}
+                    </span>
+                    <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">
+                      {projectPlan || 'Free'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic Contextual Navigation */}
         <nav className={`flex-1 overflow-y-auto py-6 space-y-6 scrollbar-hide ${isCollapsed ? 'px-3' : 'px-4'}`}>
-          {/* General Section */}
-          <div className="space-y-1">
-            <NavigationItem id="dashboard" label="Dashboard" icon={LayoutGrid} />
-            <NavigationItem id="projects" label="Projects" icon={Activity} />
-          </div>
+          {projectMode ? (
+            <>
+              {/* Project Specific Sections */}
+              <div className="space-y-4">
+                <NavigationItem id="overview" label="Project Home" icon={LayoutGrid} />
+                <NavigationItem id="api-keys" label="API Keys" icon={Key} />
 
-          {/* Development Section */}
-          <div className="space-y-4">
-            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Development</div>}
-
-            <div className="space-y-1">
-              <SectionHeader id="database" label="Database" icon={Database} />
-              {(!isCollapsed && expandedSections.includes('database')) && (
-                <div className="space-y-0.5">
-                  <NavigationItem id="tables" label="Table Editor" icon={ChevronRight} isSubItem />
-                  <NavigationItem id="sql" label="SQL Editor" icon={Terminal} isSubItem />
-                  <NavigationItem id="api" label="API Docs" icon={Code} isSubItem />
+                <div className="space-y-1">
+                  <SectionHeader id="database" label="Database" icon={Database} />
+                  {expandedSections.includes('database') && (
+                    <div className="space-y-0.5">
+                      <NavigationItem id="tables" label="Table Editor" icon={Table} isSubItem />
+                      <NavigationItem id="sql" label="SQL Editor" icon={Terminal} isSubItem />
+                      <NavigationItem id="api" label="API Docs" icon={Code} isSubItem />
+                      <NavigationItem id="libraries" label="Client Libraries" icon={Library} isSubItem />
+                      <NavigationItem id="migrations" label="Migrations" icon={ChevronRight} isSubItem />
+                      <NavigationItem id="backups" label="Backups" icon={Archive} isSubItem />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="space-y-1">
-              <SectionHeader id="auth" label="Authentication" icon={Users} />
-              {(!isCollapsed && expandedSections.includes('auth')) && (
-                <div className="space-y-0.5">
-                  <NavigationItem id="auth" label="Configuration" icon={Settings} isSubItem />
-                  <NavigationItem id="users" label="Users" icon={Users} isSubItem />
-                  <NavigationItem id="policies" label="Policies" icon={ShieldCheck} isSubItem />
+                <div className="space-y-1">
+                  <SectionHeader id="auth" label="Authentication" icon={Users} />
+                  {expandedSections.includes('auth') && (
+                    <div className="space-y-0.5">
+                      <NavigationItem id="auth" label="Configuration" icon={Settings} isSubItem />
+                      <NavigationItem id="users" label="Users" icon={Users} isSubItem />
+                      <NavigationItem id="policies" label="Policies" icon={ShieldCheck} isSubItem />
+                      <NavigationItem id="deeplinks" label="Deep Linking" icon={Smartphone} isSubItem />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <NavigationItem id="storage" label="Storage" icon={HardDrive} />
-            <NavigationItem id="edge-functions" label="Edge Functions" icon={Zap} />
-          </div>
+                <NavigationItem id="storage" label="Storage" icon={HardDrive} />
+                <NavigationItem id="edge-functions" label="Edge Functions" icon={Zap} />
 
-          {/* Infrastructure Section */}
-          <div className="space-y-4 pt-2">
-            {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Platform</div>}
-            <NavigationItem id="logs" label="Logs" icon={Activity} />
-            <NavigationItem id="usage" label="Usage" icon={BarChart3} />
-          </div>
+                {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest pt-2">Integrations</div>}
+                <NavigationItem id="nocode" label="No-Code Hub" icon={Share2} />
+              </div>
+
+              <div className="space-y-4 pt-2">
+                {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Monitoring</div>}
+                <NavigationItem id="health" label="Health" icon={HeartPulse} />
+                <NavigationItem id="logs" label="Logs" icon={Terminal} />
+                <NavigationItem id="usage" label="Usage" icon={BarChart3} />
+              </div>
+
+              <div className="space-y-4 pt-2">
+                {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">Infrastructure</div>}
+                <NavigationItem id="domains" label="Custom Domains" icon={Globe} />
+                <NavigationItem id="vault" label="Vault / Secrets" icon={Lock} />
+                <NavigationItem id="settings" label="Project Settings" icon={Settings} />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Organization/Global Level Sections */}
+              <div className="space-y-4">
+                <div className={`bg-emerald-500/5 border border-emerald-500/10 rounded-xl mb-4 flex flex-col items-center justify-center ${isCollapsed ? 'mx-2 py-3 px-1' : 'px-3 py-4'}`}>
+                  {!isCollapsed && <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 text-center">Active Workspace</p>}
+                  <p
+                    className={`font-bold text-white text-center ${isCollapsed ? 'text-sm' : 'text-xs truncate w-full'}`}
+                    title={isCollapsed ? selectedOrg?.name : undefined}
+                  >
+                    {isCollapsed ? (selectedOrg?.name?.substring(0, 2).toUpperCase() || '..') : (selectedOrg?.name || 'Loading...')}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2">Management</div>}
+                  <NavigationItem id="org-settings" label="Org Settings" icon={Settings} />
+                  <NavigationItem id="members" label="Members" icon={Users} />
+                  <NavigationItem id="billing" label="Billing" icon={Zap} />
+                </div>
+
+                <div className="space-y-1 pt-4">
+                  {!isCollapsed && <div className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2">Support</div>}
+                  <NavigationItem id="docs" label="Documentation" icon={Library} />
+                  <NavigationItem id="support" label="Contact Support" icon={HelpCircle} />
+                </div>
+              </div>
+            </>
+          )}
         </nav>
 
         {/* Footer */}
         <div className={`p-4 border-t border-white/5 space-y-1 ${isCollapsed ? 'flex flex-col items-center px-2' : ''}`}>
-          <NavigationItem id="settings" label="Settings" icon={Settings} />
           <button
             onClick={handleSignOut}
             className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group ${isCollapsed ? 'justify-center' : ''}`}

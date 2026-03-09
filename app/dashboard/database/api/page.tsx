@@ -33,7 +33,7 @@ export default function ApiDocsPage() {
             actionLabel="View Table Editor"
             onAction={() => window.location.href='/dashboard/database/tables'}
             secondaryActionLabel="API Reference"
-            onSecondaryAction={() => console.log('Docs')}
+            onSecondaryAction={() => {}}
           />
         </div>
 

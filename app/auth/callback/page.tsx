@@ -33,7 +33,7 @@ function CallbackContent() {
                         router.push('/onboarding');
                     }
                 } catch (err) {
-                    console.error('Callback: Failed to check organizations', err);
+                    // console.error('Callback: Failed to check organizations', err);
                     router.push('/onboarding');
                 }
             };
@@ -46,7 +46,7 @@ function CallbackContent() {
             checkAndRedirect();
         } else {
             // No token found, redirect to sign-in
-            console.error('Callback: No access token found in URL');
+            // console.error('Callback: No access token found in URL');
             router.push('/auth/sign-in?error=auth_failed');
         }
     }, [router]);

@@ -27,10 +27,10 @@ export default function GlobalLoaderProvider({ children }: { children: React.Rea
     // Identify if we are on an auth page
     const isAuthPage = pathname?.includes('/auth/');
 
-    const setIsLoading = (loading: boolean, msg?: string) => {
+    const setIsLoading = React.useCallback((loading: boolean, msg?: string) => {
         if (msg) setMessage(msg);
         setIsLoadingState(loading);
-    };
+    }, []);
 
     useEffect(() => {
         setIsMounted(true);

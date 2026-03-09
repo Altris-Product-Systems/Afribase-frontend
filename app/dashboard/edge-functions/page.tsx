@@ -30,9 +30,9 @@ export default function EdgeFunctionsPage() {
           description="Scale your logic to the edge. Edge Functions are Deno-based and triggered via HTTP requests or database hooks."
           icon={Zap}
           actionLabel="Create Function"
-          onAction={() => console.log('Create function')}
+          onAction={() => {}}
           secondaryActionLabel="Deno Docs"
-          onSecondaryAction={() => console.log('Deno docs')}
+          onSecondaryAction={() => {}}
         />
       </div>
 
@@ -56,7 +56,7 @@ export default function EdgeFunctionsPage() {
             <Terminal size={20} />
           </div>
           <h4 className="text-sm font-bold text-white">CLI Deploy</h4>
-          <p className="text-xs text-zinc-500 leading-relaxed font-medium">Use the Afriibase CLI to deploy functions directly from your local environment.</p>
+          <p className="text-xs text-zinc-500 leading-relaxed font-medium">Use the Afribase CLI to deploy functions directly from your local environment.</p>
         </div>
       </div>
     </div>

@@ -48,10 +48,32 @@ import {
 } from 'lucide-react';
 
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+import ApiDocs from '@/components/ApiDocs';
+import ClientLibraries from '@/components/ClientLibraries';
 import AuthSettings from '@/components/AuthSettings';
 import AuthUsers from '@/components/AuthUsers';
 import AuthPolicies from '@/components/AuthPolicies';
-import toast, { Toaster } from 'react-hot-toast';
+import SSOManager from '@/components/SSOManager';
+import StorageManager from '@/components/StorageManager';
+import FunctionsManager from '@/components/FunctionsManager';
+import RealtimeConfig from '@/components/RealtimeConfig';
+import MigrationsManager from '@/components/MigrationsManager';
+import BackupsManager from '@/components/BackupsManager';
+import BranchesManager from '@/components/BranchesManager';
+import WebhooksManager from '@/components/WebhooksManager';
+import PoolerConfig from '@/components/PoolerConfig';
+import CronManager from '@/components/CronManager';
+import LogsManager from '@/components/LogsManager';
+import LogDrainsManager from '@/components/LogDrainsManager';
+import DomainsManager from '@/components/DomainsManager';
+import NetworkRestrictions from '@/components/NetworkRestrictions';
+import VaultManager from '@/components/VaultManager';
+import AdvancedConfig from '@/components/AdvancedConfig';
+import ForumManager from '@/components/ForumManager';
+import HealthMonitor from '@/components/HealthMonitor';
+import NocodeManager from '@/components/NocodeManager';
+import DeepLinkManager from '@/components/DeepLinkManager';
+import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
 
@@ -65,11 +87,33 @@ function formatBytes(bytes?: number): string {
 }
 
 function usagePct(used?: number, limit?: number): number {
-  if (!used || !limit) return 0;
+  if (!used || !limit || limit === 0) return 0;
   return Math.min(100, Math.round((used / limit) * 100));
 }
 
-const TABS = ['overview', 'tables', 'sql', 'auth', 'users', 'policies', 'api-keys', 'usage', 'settings'] as const;
+function parseSizeToBytes(sizeStr?: string | number): number {
+  if (sizeStr == null) return 0;
+  if (typeof sizeStr === 'number') return sizeStr;
+  const match = sizeStr.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]*)$/);
+  if (!match) return 0;
+  const value = parseFloat(match[1]);
+  const unit = match[2].toUpperCase();
+  const units: Record<string, number> = {
+    'B': 1,
+    'KB': 1024,
+    'MB': 1024 * 1024,
+    'GB': 1024 * 1024 * 1024,
+    'TB': 1024 * 1024 * 1024 * 1024,
+  };
+  return value * (units[unit] || 1);
+}
+
+const TABS = [
+  'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
+  'api-keys', 'storage', 'edge-functions', 'realtime',
+  'migrations', 'backups', 'branches', 'webhooks', 'pooler',
+  'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'health', 'nocode', 'deeplinks', 'settings',
+] as const;
 type Tab = (typeof TABS)[number];
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
@@ -95,6 +139,22 @@ export default function ProjectDetailPage() {
       setActiveTab(tab);
     }
   }, [searchParams]);
+  const tabTitles: Record<string, string> = {
+    overview: project?.name || 'Project Overview',
+    database: 'Table Editor',
+    sql: 'SQL Editor',
+    auth: 'Authentication',
+    users: 'Users',
+    policies: 'RLS Policies',
+    storage: 'Storage',
+    'edge-functions': 'Edge Functions',
+    nocode: 'No-Code Hub',
+    health: 'Health & Monitoring',
+    forum: 'Developer Forum',
+    domains: 'Custom Domains',
+    'api-keys': 'Project Keys & API Settings',
+    settings: 'Project Settings',
+  };
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
@@ -152,10 +212,10 @@ export default function ProjectDetailPage() {
         const projectKeys = await getProjectKeys(projectId);
         setKeys(projectKeys);
       } catch {
-        console.error('Failed to load project keys');
+        // console.error('Failed to load project keys');
       }
     } catch (err: unknown) {
-      console.error('Failed to load project:', err);
+      // console.error('Failed to load project:', err);
       setError(err instanceof Error ? err.message : 'Failed to load project');
     } finally {
       setIsLoading(false);
@@ -196,9 +256,25 @@ export default function ProjectDetailPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const handleCopy = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(type);
-    setTimeout(() => setCopiedKey(null), 2000);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(type);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } else {
+      // Fallback for older browsers or insecure contexts
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopiedKey(type);
+        setTimeout(() => setCopiedKey(null), 2000);
+      } catch (err) {
+        // console.error('Failed to copy text: ', err);
+      }
+    }
   };
 
   const handleRunQuery = async () => {
@@ -321,7 +397,7 @@ export default function ProjectDetailPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">
-                  {project.name}
+                  {tabTitles[activeTab] || project.name}
                 </h1>
                 <span
                   className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active'
@@ -357,22 +433,7 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex items-center gap-8 border-b border-white/5 overflow-x-auto scrollbar-hide">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => handleTabChange(tab)}
-            className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative whitespace-nowrap ${activeTab === tab ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-          >
-            {tab.replace('-', ' ')}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Navigation is handled by the sidebar */}
 
       {/* ════════════════════════════════════════════
           OVERVIEW TAB
@@ -410,7 +471,7 @@ export default function ProjectDetailPage() {
               <div className="relative z-10 space-y-6">
                 <div>
                   <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">
-                    Connect to Afriibase
+                    Connect to Afribase
                   </h3>
                   <p className="text-zinc-500 text-sm max-w-md font-medium leading-relaxed">
                     Instantly integrate your database using our high-performance client libraries.
@@ -423,11 +484,11 @@ export default function ProjectDetailPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                          Node.js (Afriibase-js)
+                          Node.js (Afribase-js)
                         </span>
                       </div>
                       <button
-                        onClick={() => handleCopy('npm install @afriibase/afriibase-js', 'npm')}
+                        onClick={() => handleCopy('npm install @afribase/afribase-js', 'npm')}
                         className="text-zinc-500 hover:text-white transition-colors"
                       >
                         {copiedKey === 'npm' ? (
@@ -438,7 +499,7 @@ export default function ProjectDetailPage() {
                       </button>
                     </div>
                     <div className="p-4 font-mono text-[11px] text-zinc-400 bg-[#0c0c0e]">
-                      <span className="text-emerald-500">npm</span> install @afriibase/afriibase-js
+                      <span className="text-emerald-500">npm</span> install @afribase/afribase-js
                     </div>
                   </div>
 
@@ -453,7 +514,7 @@ export default function ProjectDetailPage() {
                       <button
                         onClick={() =>
                           handleCopy(
-                            `import { createClient } from '@afriibase/afriibase-js'\nconst afriibase = createClient('${keys?.postgrest_url || project.postgrestUrl || ''}', '${keys?.anon_key || project.anonKey || ''}')`,
+                            `import { createClient } from '@afribase/afribase-js'\nconst afribase = createClient('http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}', '${keys?.anon_key || project.anonKey || ''}')`,
                             'init'
                           )
                         }
@@ -470,14 +531,14 @@ export default function ProjectDetailPage() {
                       <p>
                         <span className="text-purple-500">import</span> {"{ createClient }"}{' '}
                         <span className="text-purple-500">from</span>{' '}
-                        <span className="text-emerald-500">'@afriibase/afriibase-js'</span>
+                        <span className="text-emerald-500">'@afribase/afribase-js'</span>
                       </p>
                       <p>
-                        <span className="text-purple-500">const</span> afriibase ={' '}
+                        <span className="text-purple-500">const</span> afribase ={' '}
                         <span className="text-cyan-400">createClient</span>(
                       </p>
                       <p className="pl-4 text-emerald-500 truncate">
-                        '{keys?.postgrest_url || project.postgrestUrl || 'https://your-project.afriibase.co'}'
+                        {`'http://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/rest/v1/${project.slug}'`}
                       </p>
                       <p className="pl-4 text-yellow-500">
                         '{keys?.anon_key ? keys.anon_key.slice(0, 24) + '…' : 'your-anon-key'}'
@@ -955,99 +1016,156 @@ export default function ProjectDetailPage() {
         )
       }
 
+      {
+        activeTab === 'sso' && (
+          <div className="animate-fade-in">
+            <SSOManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          API / SDK DOCS TAB
+      ───────────────────────────────────────────────────────────────────────────── */}
+      {
+        activeTab === 'api' && (
+          <div className="animate-fade-in">
+            <ApiDocs
+              projectId={project.id}
+              projectSlug={project.slug}
+              anonKey={keys?.anon_key || project.anonKey || ''}
+            />
+          </div>
+        )
+      }
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          CLIENT LIBRARIES (SDK GALLERY)
+      ───────────────────────────────────────────────────────────────────────────── */}
+      {
+        activeTab === 'libraries' && (
+          <div className="animate-fade-in">
+            <ClientLibraries />
+          </div>
+        )
+      }
+
       {/* ════════════════════════════════════════════
           API KEYS TAB
       ════════════════════════════════════════════ */}
       {
         activeTab === 'api-keys' && (
-          <div className="space-y-8 max-w-4xl animate-fade-in">
-            <div>
-              <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
-              <p className="text-zinc-500 text-sm font-medium mt-1">
-                Your project comes with two keys: a public <em>anon</em> key and a secret{' '}
-                <em>service_role</em> key.
+          <div className="space-y-10 max-w-5xl animate-fade-in pb-20">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
+              <p className="text-zinc-500 text-sm font-medium">
+                Use these keys to authenticate your client-side and server-side requests.
+                Your project comes with two keys: a public <span className="text-zinc-300 font-bold">anon</span> key and a secret <span className="text-red-400 font-bold uppercase tracking-tighter italic">service_role</span> key.
               </p>
             </div>
 
-            {/* Connection URLs */}
-            {(keys?.postgrest_url || project.postgrestUrl) && (
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest">Connection URLs</h4>
-                {[
-                  { label: 'REST / PostgREST URL', value: keys?.postgrest_url || project.postgrestUrl },
-                  { label: 'Realtime URL', value: project.realtimeUrl },
-                  { label: 'Storage URL', value: project.storageUrl },
-                ]
-                  .filter((u) => u.value)
-                  .map(({ label, value }) => (
-                    <div key={label} className="space-y-1.5">
-                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2.5 font-mono text-[11px] text-zinc-400 truncate">
-                          {value}
+            <div className="grid grid-cols-1 gap-8">
+              {/* Connection URLs */}
+              {(keys?.postgrest_url || project.postgrestUrl) && (
+                <div className="glass-card p-8 rounded-[2rem] border border-white/5 space-y-6 bg-zinc-950/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-400">
+                      <Globe size={20} />
+                    </div>
+                    <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest">Project Infrastructure URLs</h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { label: 'REST / PostgREST URL', value: keys?.postgrest_url || project.postgrestUrl },
+                      { label: 'Realtime WebSocket URL', value: project.realtimeUrl },
+                      { label: 'Storage CDN URL', value: project.storageUrl },
+                      { label: 'Auth Endpoint', value: project.authUrl },
+                    ]
+                      .filter((u) => u.value)
+                      .map(({ label, value }) => (
+                        <div key={label} className="space-y-2">
+                          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
+                          <div className="flex items-center gap-2 group">
+                            <div className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 font-mono text-[11px] text-zinc-400 truncate group-hover:border-white/10 transition-colors">
+                              {value}
+                            </div>
+                            <button
+                              onClick={() => handleCopy(value!, label)}
+                              className="shrink-0 w-10 h-10 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95"
+                              title="Copy URL"
+                            >
+                              {copiedKey === label ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleCopy(value!, label)}
-                          className="shrink-0 w-9 h-9 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg flex items-center justify-center text-zinc-400 transition-all"
-                        >
-                          {copiedKey === label ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                {/* Anon Key */}
+                <div className="glass-card p-8 rounded-[2rem] border border-white/5 space-y-6 bg-emerald-500/[0.02]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                        <Key size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-black text-white uppercase italic">anon</h4>
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/10">Public</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 font-medium mt-1 max-w-md">Safe to use in browsers and client-side code. This key is subject to RLS policies you define on your tables.</p>
                       </div>
                     </div>
-                  ))}
-              </div>
-            )}
+                    <button
+                      onClick={() => handleCopy(keys?.anon_key || project.anonKey || '', 'anon')}
+                      className="px-6 py-3 bg-white text-black hover:bg-zinc-200 border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-xl shrink-0"
+                    >
+                      {copiedKey === 'anon' ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copiedKey === 'anon' ? 'Copied to clipboard' : 'Copy Public Key'}
+                    </button>
+                  </div>
+                  <div className="p-5 bg-black/40 rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-400 break-all select-all leading-relaxed group hover:border-white/10 transition-colors">
+                    {keys?.anon_key || project.anonKey || 'Key not available'}
+                  </div>
+                </div>
 
-            <div className="space-y-6">
-              {/* Anon Key */}
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                      <Key size={18} />
+                {/* Service Key */}
+                <div className="glass-card p-8 rounded-[2rem] border border-red-500/5 space-y-6 bg-red-500/[0.02]">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                        <Shield size={24} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-black text-white uppercase italic">service_role</h4>
+                          <span className="px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest border border-red-500/10">Secret</span>
+                        </div>
+                        <p className="text-xs text-rose-500/70 font-black uppercase tracking-tight mt-1">
+                          CRITICAL: NEVER expose this key in client-side code.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white uppercase">anon (public)</h4>
-                      <p className="text-[10px] text-zinc-500 font-medium">Safe to use in browsers and client-side code.</p>
+                    <button
+                      onClick={() => handleCopy(keys?.service_key || project.serviceKey || '', 'service')}
+                      className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 border border-red-500/20 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-2xl shrink-0"
+                    >
+                      {copiedKey === 'service' ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                      {copiedKey === 'service' ? 'Copied to clipboard' : 'Copy Secret Key'}
+                    </button>
+                  </div>
+                  <div className="relative group">
+                    <div className="p-5 bg-black/40 rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-600 break-all blur-md group-hover:blur-none transition-all duration-300 cursor-pointer select-all leading-relaxed">
+                      {keys?.service_key || project.serviceKey || 'Key not available'}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 bg-black/80 px-4 py-2 rounded-lg border border-white/5 backdrop-blur-sm">Hover to reveal secret key</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleCopy(keys?.anon_key || project.anonKey || '', 'anon')}
-                    className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
-                  >
-                    {copiedKey === 'anon' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                    {copiedKey === 'anon' ? 'Copied' : 'Copy Key'}
-                  </button>
-                </div>
-                <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all select-all">
-                  {keys?.anon_key || project.anonKey || 'Key not available'}
-                </div>
-              </div>
-
-              {/* Service Key */}
-              <div className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                      <Shield size={18} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white uppercase">service_role (secret)</h4>
-                      <p className="text-[10px] text-rose-500/70 font-black uppercase tracking-tighter">
-                        Never expose this key in client-side code.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleCopy(keys?.service_key || project.serviceKey || '', 'service')}
-                    className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 transition-all"
-                  >
-                    {copiedKey === 'service' ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                    {copiedKey === 'service' ? 'Copied' : 'Copy Key'}
-                  </button>
-                </div>
-                <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-500 break-all blur-sm hover:blur-none transition-all cursor-pointer select-all">
-                  {keys?.service_key || project.serviceKey || 'Key not available'}
                 </div>
               </div>
             </div>
@@ -1089,8 +1207,8 @@ export default function ProjectDetailPage() {
                 {[
                   {
                     label: 'Database Storage',
-                    used: usage?.databaseSize,
-                    limit: usage?.databaseSizeLimit,
+                    used: usage?.db_size,
+                    limit: usage?.db_size_limit,
                     fallbackUsed: '— MB',
                     fallbackLimit: '500 MB',
                     color: 'bg-emerald-500',
@@ -1098,9 +1216,20 @@ export default function ProjectDetailPage() {
                     icon: HardDrive,
                   },
                   {
-                    label: 'Egress Traffic',
-                    used: usage?.egressBytes,
-                    limit: usage?.egressBytesLimit,
+                    label: 'Row Count',
+                    used: usage?.row_count,
+                    limit: 1000000,
+                    fallbackUsed: '—',
+                    fallbackLimit: '1M',
+                    color: 'bg-cyan-500',
+                    shadow: '',
+                    icon: Table,
+                    raw: true,
+                  },
+                  {
+                    label: 'Bandwidth (Egress)',
+                    used: usage?.bandwidth,
+                    limit: usage?.bandwidth_limit,
                     fallbackUsed: '— GB',
                     fallbackLimit: '5 GB',
                     color: 'bg-blue-500',
@@ -1108,20 +1237,19 @@ export default function ProjectDetailPage() {
                     icon: Activity,
                   },
                   {
-                    label: 'Realtime Connections',
-                    used: usage?.realtimeConnections,
-                    limit: usage?.realtimeConnectionsLimit,
-                    fallbackUsed: '—',
-                    fallbackLimit: '200',
+                    label: 'File Storage',
+                    used: usage?.storage,
+                    limit: usage?.storage_limit,
+                    fallbackUsed: '— GB',
+                    fallbackLimit: '1 GB',
                     color: 'bg-purple-500',
                     shadow: 'shadow-[0_0_10px_rgba(168,85,247,0.3)]',
-                    icon: Zap,
-                    raw: true,
+                    icon: HardDrive,
                   },
                   {
                     label: 'Monthly Active Users',
-                    used: usage?.monthlyActiveUsers,
-                    limit: usage?.monthlyActiveUsersLimit,
+                    used: usage?.auth_users,
+                    limit: usage?.auth_users_limit,
                     fallbackUsed: '—',
                     fallbackLimit: '50,000',
                     color: 'bg-amber-500',
@@ -1130,17 +1258,12 @@ export default function ProjectDetailPage() {
                     raw: true,
                   },
                 ].map(({ label, used, limit, fallbackUsed, fallbackLimit, color, shadow, icon: Icon, raw }) => {
-                  const pct = usagePct(used, limit);
-                  const usedStr = used == null
-                    ? fallbackUsed
-                    : raw
-                      ? used.toLocaleString()
-                      : formatBytes(used);
-                  const limitStr = limit == null
-                    ? fallbackLimit
-                    : raw
-                      ? limit.toLocaleString()
-                      : formatBytes(limit);
+                  const usedVal = parseSizeToBytes(used as any);
+                  const limitVal = parseSizeToBytes(limit as any);
+                  const pct = usagePct(usedVal, limitVal);
+
+                  const usedStr = used != null ? used.toLocaleString() : fallbackUsed;
+                  const limitStr = limit != null ? limit.toLocaleString() : fallbackLimit;
                   return (
                     <div key={label} className="glass-card p-6 rounded-3xl border border-white/5 space-y-4">
                       <div className="flex items-center justify-between">
@@ -1170,6 +1293,171 @@ export default function ProjectDetailPage() {
                 })}
               </div>
             )}
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          STORAGE TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'storage' && (
+          <div className="animate-fade-in">
+            <StorageManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          EDGE FUNCTIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'edge-functions' && (
+          <div className="animate-fade-in">
+            <FunctionsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          REALTIME TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'realtime' && (
+          <div className="animate-fade-in">
+            <RealtimeConfig projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          MIGRATIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'migrations' && (
+          <div className="animate-fade-in">
+            <MigrationsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          BACKUPS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'backups' && (
+          <div className="animate-fade-in">
+            <BackupsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          BRANCHES TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'branches' && (
+          <div className="animate-fade-in">
+            <BranchesManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          WEBHOOKS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'webhooks' && (
+          <div className="animate-fade-in">
+            <WebhooksManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CONNECTION POOLER TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'pooler' && (
+          <div className="animate-fade-in">
+            <PoolerConfig projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CRON JOBS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'cron' && (
+          <div className="animate-fade-in">
+            <CronManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          LOGS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'logs' && (
+          <div className="animate-fade-in">
+            <LogsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          LOG DRAINS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'log-drains' && (
+          <div className="animate-fade-in">
+            <LogDrainsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          CUSTOM DOMAINS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'domains' && (
+          <div className="animate-fade-in">
+            <DomainsManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          NETWORK RESTRICTIONS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'network' && (
+          <div className="animate-fade-in">
+            <NetworkRestrictions projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          VAULT / SECRETS TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'vault' && (
+          <div className="animate-fade-in">
+            <VaultManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          ADVANCED (AI / GRAPHQL / TYPES) TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'advanced' && (
+          <div className="animate-fade-in">
+            <AdvancedConfig projectId={project.id} />
           </div>
         )
       }
@@ -1277,6 +1565,48 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+
+      {/* ════════════════════════════════════════════
+          FORUM TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'forum' && (
+          <div className="animate-fade-in">
+            <ForumManager projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          HEALTH TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'health' && (
+          <div className="animate-fade-in">
+            <HealthMonitor projectId={project.id} />
+          </div>
+        )
+      }
+
+      {/* ════════════════════════════════════════════
+          NOCODE TAB
+      ════════════════════════════════════════════ */}
+      {
+        activeTab === 'nocode' && (
+          <div className="animate-fade-in">
+            <NocodeManager projectId={project.id} projectSlug={project.slug} />
+          </div>
+        )
+      }
+
+      {
+        activeTab === 'deeplinks' && (
+          <div className="animate-fade-in">
+            <DeepLinkManager projectId={project.id} projectSlug={project.slug} />
+          </div>
+        )
+      }
+
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
@@ -1347,21 +1677,6 @@ export default function ProjectDetailPage() {
         </p>
       </Modal>
 
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: '#18181b',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.05)',
-            fontSize: '12px',
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            borderRadius: '12px'
-          },
-        }}
-      />
     </div>
   )
 }

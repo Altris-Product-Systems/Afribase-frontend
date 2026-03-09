@@ -16,13 +16,23 @@ export default function NewProjectPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [orgSearch, setOrgSearch] = useState('');
+  const [databasePassword, setDatabasePassword] = useState('');
+
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 16; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setDatabasePassword(password);
+  };
 
   const regions = [
-    { id: 'lagos-01', name: 'Lagos, Nigeria', flag: '🇳🇬' },
-    { id: 'accra-01', name: 'Accra, Ghana', flag: '🇬🇭' },
-    { id: 'nairobi-01', name: 'Nairobi, Kenya', flag: '🇰🇪' },
-    { id: 'cape-town-01', name: 'Cape Town, South Africa', flag: '🇿🇦' },
-    { id: 'cairo-01', name: 'Cairo, Egypt', flag: '🇪🇬' },
+    { id: 'lagos-01', name: 'Lagos, Nigeria' },
+    { id: 'accra-01', name: 'Accra, Ghana' },
+    { id: 'nairobi-01', name: 'Nairobi, Kenya' },
+    { id: 'cape-town-01', name: 'Cape Town, South Africa' },
+    { id: 'cairo-01', name: 'Cairo, Egypt' },
   ];
 
   useEffect(() => {
@@ -37,13 +47,13 @@ export default function NewProjectPage() {
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations:', err);
+      // console.error('Failed to load organizations:', err);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedOrg) {
       setError('Please select an organization');
       return;
@@ -63,8 +73,9 @@ export default function NewProjectPage() {
         description: description || undefined,
         region: region,
         organizationId: selectedOrg.id,
+        databasePassword,
       });
-      
+
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof APIError) {
@@ -241,6 +252,32 @@ export default function NewProjectPage() {
               />
             </div>
 
+            {/* Database Password */}
+            <div>
+              <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                Database Password
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={databasePassword}
+                  onChange={(e) => setDatabasePassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Min. 8 characters"
+                  className="flex-1 px-4 py-2.5 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition-colors font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={generatePassword}
+                  className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  Generate
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">Save this password — it cannot be recovered once set.</p>
+            </div>
+
             {/* Region */}
             <div>
               <label className="block text-sm font-medium text-black dark:text-white mb-2">
@@ -254,7 +291,6 @@ export default function NewProjectPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span>{selectedRegion?.flag}</span>
                       <span className="text-black dark:text-white">{selectedRegion?.name}</span>
                     </div>
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +313,6 @@ export default function NewProjectPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span>{r.flag}</span>
                             <span className="text-black dark:text-white">{r.name}</span>
                           </div>
                           {region === r.id && (

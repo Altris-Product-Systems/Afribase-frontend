@@ -54,7 +54,7 @@ function SignInContent() {
         }
       } catch (orgErr) {
         // If we can't check organizations, default to onboarding
-        console.error('Failed to check organizations:', orgErr);
+        // console.error('Failed to check organizations:', orgErr);
         router.push('/onboarding');
       }
     } catch (err) {
@@ -64,13 +64,13 @@ function SignInContent() {
       } else {
         setError('An unexpected error occurred');
       }
-      console.error('Login error:', err);
+      // console.error('Login error:', err);
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0c0c0e] flex flex-col lg:flex-row text-white relative overflow-hidden">
+    <div className="h-screen bg-[#0c0c0e] flex flex-col xl:flex-row text-white relative overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
         <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px]" />
@@ -78,25 +78,20 @@ function SignInContent() {
       </div>
 
       {/* Left Side - Form */}
-      <div className="w-full lg:w-[45%] flex items-center justify-center p-8 lg:p-16 relative z-10 border-r border-white/5 bg-[#09090b]">
+      <div className="flex-1 xl:flex-none xl:w-[45%] flex items-center justify-center p-8 xl:p-16 relative z-10 border-r border-white/5 bg-[#09090b] overflow-y-auto scrollbar-hide">
         <div className="w-full max-w-sm animate-gelatinous-in">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center gap-2 mb-10 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-              <span className="text-black font-black text-lg italic">A</span>
-            </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase italic">
-              Afriibase
-            </span>
+          <Link href="/" className="inline-flex items-center justify-center w-full mb-10 group mt-4">
+            <img src="/AFR.png" alt="Afribase Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-md" />
           </Link>
 
           {/* Heading */}
           <div className="mb-10">
-            <h1 className="text-3xl font-black text-white mb-3 tracking-tighter italic uppercase">
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
               Welcome back
             </h1>
-            <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">
-              Infrastructure for the <span className="text-emerald-500">Global South</span>
+            <p className="text-zinc-500 text-sm font-medium">
+              Sign in to your account to continue
             </p>
           </div>
 
@@ -120,7 +115,7 @@ function SignInContent() {
           {/* Email Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+              <label htmlFor="email" className="block text-xs font-medium text-zinc-400">
                 Email Address
               </label>
               <input
@@ -130,18 +125,18 @@ function SignInContent() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                placeholder="developer@afriibase.io"
+                placeholder="developer@afribase.io"
                 className="w-full px-4 py-3.5 border border-white/5 rounded-xl bg-white/[0.02] text-sm text-white placeholder-zinc-700 focus:border-emerald-500/50 focus:outline-none transition-all disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-                  Secret Key
+                <label htmlFor="password" className="block text-xs font-medium text-zinc-400">
+                  Password
                 </label>
-                <Link href="/auth/forgot-password" title="Wait, you meant password?" className="text-[10px] font-black text-zinc-600 hover:text-emerald-500 transition-colors uppercase tracking-widest">
-                  Reset
+                <Link href="/auth/forgot-password" core-message="Forgot password?" className="text-xs text-zinc-500 hover:text-emerald-500 transition-colors">
+                  Forgot password?
                 </Link>
               </div>
               <div className="relative">
@@ -177,15 +172,15 @@ function SignInContent() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:transform-none uppercase tracking-widest text-xs shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] mt-4"
+              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:transform-none text-sm shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)] mt-4"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <RefreshCw className="animate-spin h-4 w-4" />
-                  Processing...
+                  Signing in...
                 </span>
               ) : (
-                'Initialize Session'
+                'Sign In'
               )}
             </button>
           </form>
@@ -195,9 +190,9 @@ function SignInContent() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/5" />
             </div>
-            <div className="relative flex justify-center text-[10px]">
-              <span className="px-4 bg-[#09090b] text-zinc-600 font-black uppercase tracking-widest">
-                Identity Providers
+            <div className="relative flex justify-center text-xs">
+              <span className="px-4 bg-[#09090b] text-zinc-600 font-medium">
+                Or continue with
               </span>
             </div>
           </div>
@@ -218,17 +213,29 @@ function SignInContent() {
           </div>
 
           {/* Sign Up Link */}
-          <p className="mt-12 text-center text-[10px] font-black uppercase tracking-widest text-zinc-600">
-            dont have account?{' '}
-            <Link href="/auth/sign-up" className="text-white hover:text-emerald-400 transition-colors ml-1 underline underline-offset-4">
-              signup
+          <p className="mt-12 text-center text-sm text-zinc-500">
+            Don't have an account?{' '}
+            <Link href="/auth/sign-up" className="text-white hover:text-emerald-400 transition-colors ml-1 font-medium underline underline-offset-4">
+              Sign Up
             </Link>
+          </p>
+
+          {/* Policy Text */}
+          <p className="mt-8 text-center text-[11px] text-zinc-600 leading-relaxed font-medium">
+            By continuing, you agree to Afribase's{' '}
+            <Link href="/terms" className="text-zinc-400 hover:text-emerald-400 transition-colors">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="text-zinc-400 hover:text-emerald-400 transition-colors">
+              Privacy Policy
+            </Link>, and to receive periodic emails with updates.
           </p>
         </div>
       </div>
 
       {/* Right Side - Africa Map Animation - Hidden on mobile */}
-      <div className="hidden lg:flex lg:w-[55%] relative items-center justify-center bg-[#060608] overflow-hidden">
+      <div className="hidden xl:flex xl:w-[55%] relative items-center justify-center bg-[#060608] overflow-hidden">
         <AfricaMapAnimation />
       </div>
     </div>
