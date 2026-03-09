@@ -121,7 +121,7 @@ export default function Features() {
                         viewport={{ once: true }}
                         className="text-3xl md:text-5xl font-black text-white mb-4"
                     >
-                        EVERYTHING YOU NEED TO <span className="text-sage">SCALE</span>
+                        Everything You Need to Build <span className="text-sage">Modern Apps</span>
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -130,8 +130,8 @@ export default function Features() {
                         transition={{ delay: 0.1 }}
                         className="text-base md:text-lg text-white/60 max-w-2xl mx-auto font-medium"
                     >
-                        Afribase provides all the enterprise-grade tools required to build,
-                        launch, and grow your digital business in Africa.
+                        Authentication, database, realtime, storage, and AI—all integrated,
+                        all hosted in Africa.
                     </motion.p>
                 </div>
 

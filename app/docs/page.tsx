@@ -20,9 +20,35 @@ export default function DocsPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         Stable v1.0.0
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors cursor-pointer">
-                        <Github size={12} />
-                        Star on GitHub
+                </div>
+            </section>
+
+            <section className="space-y-6 pt-6 border-t border-white/5">
+                <h2 className="text-xs font-black text-zinc-600 uppercase tracking-widest">Supported Languages</h2>
+                <div className="flex flex-wrap gap-6 items-center">
+                    <div className="flex items-center gap-2 bg-zinc-900/50 border border-white/5 px-4 py-2 rounded-2xl">
+                        <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                            <Activity size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-white tracking-tight">JavaScript</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-zinc-900/50 border border-white/5 px-4 py-2 rounded-2xl">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                            <Activity size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-white tracking-tight">Python</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-zinc-900/50 border border-white/5 px-4 py-2 rounded-2xl">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+                            <Activity size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-white tracking-tight">Dart / Flutter</span>
+                    </div>
+                    <div className="flex items-center gap-2 opacity-40">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-500/10 flex items-center justify-center text-zinc-500">
+                            <Activity size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-zinc-500 tracking-tight">Go (Alpha)</span>
                     </div>
                 </div>
             </section>

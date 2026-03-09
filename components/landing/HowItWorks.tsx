@@ -27,8 +27,8 @@ export default function HowItWorks() {
                     <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 mb-4">
                         how it works
                     </p>
-                    <h2 className="text-3xl md:text-6xl font-black text-white tracking-tighter">
-                        ready to provision?
+                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                        Ready to Provision?
                     </h2>
                 </div>
 
