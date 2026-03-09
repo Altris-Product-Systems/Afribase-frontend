@@ -17,7 +17,7 @@ export default function DocsPage() {
                     <span className="text-emerald-500 font-black">African Innovation</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase is the unified business platform built specifically for the African continent. We provide the mission-critical infrastructure—Databases, Auth, Storage, and Edge Functions—optimized for low-latency performance across Lagos, Nairobi, Cairo, and Johannesburg.
+                    Afribase is the unified business platform built specifically for the African continent. We provide mission-critical infrastructure optimized for low-latency performance across regional nodes—empowering both **high-code engineers** and **no-code innovators** to build and scale without limits.
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">
@@ -191,13 +191,13 @@ final client = AfribaseClient('https://your-project.useafribase.app', 'your-anon
                 <p className="text-sm text-zinc-400 font-medium leading-relaxed">
                     Afribase is built on three core principles that dictate every architectural decision we make:
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="space-y-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                             <Layers size={16} />
                         </div>
                         <h4 className="text-sm font-bold text-white uppercase tracking-tighter">Stack Agnostic</h4>
-                        <p className="text-xs text-zinc-500 leading-relaxed font-medium">Use any frontend framework. Afribase provides standard APIs that work everywhere.</p>
+                        <p className="text-xs text-zinc-500 leading-relaxed font-medium">Use any frontend framework or no-code builder. Afribase provides standard APIs that work everywhere.</p>
                     </div>
                     <div className="space-y-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -205,6 +205,13 @@ final client = AfribaseClient('https://your-project.useafribase.app', 'your-anon
                         </div>
                         <h4 className="text-sm font-bold text-white uppercase tracking-tighter">Security First</h4>
                         <p className="text-xs text-zinc-500 leading-relaxed font-medium">Built-in Row Level Security ensures your data is protected at the database layer.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <Zap size={16} />
+                        </div>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-tighter">No-Code Ready</h4>
+                        <p className="text-xs text-zinc-500 leading-relaxed font-medium">Auto-generated REST APIs and a visual dashboard mean you can build entire products without writing code.</p>
                     </div>
                     <div className="space-y-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">

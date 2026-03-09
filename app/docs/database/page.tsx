@@ -16,12 +16,12 @@ export default function DatabaseDocsPage() {
                     Elastic <span className="text-emerald-500">PostgreSQL</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Every Afribase project comes with a dedicated, high-performance PostgreSQL instance. We automatically generate a secure, unified REST API via **PostgREST**, allowing you to interact with your data directly from the client with zero backend code.
+                    Every Afribase project includes a full, dedicated PostgreSQL instance. We combine the reliability of relational data with the speed of **zero-code API generation** via PostgREST, allowing both developers and no-code creators to build robust backends instantly.
                 </p>
             </section>
 
             <section className="space-y-8">
-                <h2 className="text-2xl font-black text-white tracking-tight">Core Tooling</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Management Interface</h2>
 
                 <div className="space-y-4">
                     <div className="glass-card p-6 rounded-2xl border border-white/5 bg-zinc-900/10 group">
@@ -30,12 +30,12 @@ export default function DatabaseDocsPage() {
                                 <Terminal size={24} />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-lg font-bold text-white tracking-tight">SQL Editor</h3>
-                                <p className="text-sm text-zinc-400 leading-relaxed font-medium">The built-in SQL Editor allows you to write and execute raw SQL queries directly from the Afribase Dashboard with full IntelliSense support.</p>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Advanced SQL Workbench</h3>
+                                <p className="text-sm text-zinc-400 leading-relaxed font-medium">A robust environment for schema design and complex data manipulation. Our SQL Workbench features intelligent autocomplete, query snippets, and a complete execution history to streamline your database development.</p>
                                 <div className="flex flex-wrap gap-2 pt-2">
-                                    <span className="text-[10px] font-black text-zinc-600 border border-white/5 bg-white/5 px-2 py-0.5 rounded-full uppercase">Autocomplete</span>
-                                    <span className="text-[10px] font-black text-zinc-600 border border-white/5 bg-white/5 px-2 py-0.5 rounded-full uppercase">Save Queries</span>
-                                    <span className="text-[10px] font-black text-zinc-600 border border-white/5 bg-white/5 px-2 py-0.5 rounded-full uppercase">History</span>
+                                    <span className="text-[10px] font-black text-emerald-500/50 border border-emerald-500/10 bg-emerald-500/5 px-2 py-0.5 rounded-full uppercase tracking-widest">IntelliSense</span>
+                                    <span className="text-[10px] font-black text-zinc-600 border border-white/5 bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-widest">Postgres 15+</span>
+                                    <span className="text-[10px] font-black text-zinc-600 border border-white/5 bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-widest">Query Profiling</span>
                                 </div>
                             </div>
                         </div>
@@ -47,8 +47,8 @@ export default function DatabaseDocsPage() {
                                 <Search size={24} />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-lg font-bold text-white tracking-tight">Table Explorer</h3>
-                                <p className="text-sm text-zinc-400 leading-relaxed font-medium">A visual interface for managing your data without writing SQL. Insert, update, and manage rows via a professional spreadsheet-like UI.</p>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Visual Schema Explorer</h3>
+                                <p className="text-sm text-zinc-400 leading-relaxed font-medium">Manage your tables, relationships, and raw data via a high-fidelity visual interface. Afribase eliminates the need for external database managers by providing a seamless, spreadsheet-like experience for rapid prototyping.</p>
                             </div>
                         </div>
                     </div>
@@ -104,7 +104,7 @@ CREATE POLICY "Users can see only their own profile"
 
             <section className="space-y-8 border-t border-white/5 pt-12">
                 <h2 className="text-2xl font-black text-white tracking-tight">Application Integration</h2>
-                <p className="text-sm text-zinc-400 font-medium leading-relaxed">Query your database from any supported platform using our official client libraries.</p>
+                <p className="text-sm text-zinc-400 font-medium leading-relaxed">Query your database from any supported platform using our official client libraries. Note that Python uses <code>from_()</code> to avoid keyword conflicts.</p>
 
                 <div className="space-y-6">
                     <div className="space-y-3">
@@ -112,17 +112,38 @@ CREATE POLICY "Users can see only their own profile"
                         <CodeBlock code={`const { data, error } = await afribase
   .from('posts')
   .select('*')
-  .eq('id', '1');`} language="typescript" />
+  .eq('published', true)
+  .order('created_at', { ascending: false });`} language="typescript" />
                     </div>
 
                     <div className="space-y-3">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
-                        <CodeBlock code={`data = client.from_("posts").select("*").eq("id", "1").execute()`} language="python" />
+                        <CodeBlock code={`data = client.from_("posts").select("*").eq("published", True).order("created_at", desc=True).execute()`} language="python" />
                     </div>
 
                     <div className="space-y-3">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
-                        <CodeBlock code={`final response = await client.from('posts').select('*').eq('id', 1).execute();`} language="dart" />
+                        <CodeBlock code={`final response = await client.from('posts').select('*').eq('published', true).order('created_at', ascending: false).execute();`} language="dart" />
+                    </div>
+                </div>
+            </section>
+
+            <section className="space-y-8 border-t border-white/5 pt-12">
+                <h2 className="text-2xl font-black text-white tracking-tight">Database Functions (RPC)</h2>
+                <p className="text-sm text-zinc-400 font-medium leading-relaxed">Execute custom PostgreSQL stored procedures directly from your application logic. This allows you to offload intensive computation to the database layer.</p>
+
+                <div className="space-y-6">
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                        <CodeBlock code={`const { data, error } = await afribase.rpc('get_top_users', { limit_count: 10 });`} language="typescript" />
+                    </div>
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                        <CodeBlock code={`result = client.rpc("get_top_users", {"limit_count": 10}).execute()`} language="python" />
+                    </div>
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart</h4>
+                        <CodeBlock code={`final result = await client.rpc('get_top_users', {'limit_count': 10}).execute();`} language="dart" />
                     </div>
                 </div>
             </section>

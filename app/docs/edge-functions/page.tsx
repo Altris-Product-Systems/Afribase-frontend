@@ -10,13 +10,13 @@ export default function EdgeFunctionsDocsPage() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3 text-emerald-500 mb-2">
                     <Zap size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Serverless Compute</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Serverless Execution</span>
                 </div>
                 <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
-                    Global <span className="text-emerald-500">Edge Functions</span>
+                    Global <span className="text-emerald-500">Edge Logic</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Scale your application logic to a globally distributed network. Edge Functions are serverless, auto-scaling, and provides absolute performance with Deno.
+                    Deploy your custom server-side logic to our globally distributed network. Built on the modern **Deno** runtime, Afribase Edge Functions provide ultra-low latency, automatic scaling, and native TypeScript support without the overhead of traditional server management.
                 </p>
             </section>
 

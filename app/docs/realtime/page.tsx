@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Activity, Radio, Users, Shield, Zap, MessageSquare } from 'lucide-react';
+import { Activity, Users, Zap, Lock } from 'lucide-react';
 import { CodeBlock, Callout, Step } from '@/components/DocsComponents';
 
 export default function RealtimeDocsPage() {
@@ -21,24 +21,24 @@ export default function RealtimeDocsPage() {
             </section>
 
             <section className="space-y-8">
-                <h2 className="text-2xl font-black text-white tracking-tight">Realtime Engine</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Technical Architecture</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="glass-card p-6 rounded-2xl border border-white/5 space-y-4 group">
                         <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                            <Radio size={20} />
+                            <Zap size={20} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">Postgres Changes</h4>
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Instantly receive events when data is inserted, updated, or deleted in your PostgreSQL tables.</p>
+                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">Sub-100ms Propagation</h4>
+                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Built on a distributed messaging cluster, our Realtime engine guarantees sub-100ms message propagation between your clients and infrastructure nodes.</p>
                         </div>
                     </div>
                     <div className="glass-card p-6 rounded-2xl border border-white/5 space-y-4 group">
                         <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                            <MessageSquare size={20} />
+                            <Lock size={20} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">Broadcasting</h4>
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Send arbitrary messages across all connected clients on named channels with sub-100ms latency.</p>
+                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">Secure Broadcasting</h4>
+                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">All realtime channels are protected by JWT-based authentication. Define complex access rules to ensure data only reaches authorized subscribers.</p>
                         </div>
                     </div>
                 </div>

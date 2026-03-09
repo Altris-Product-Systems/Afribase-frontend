@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HardDrive, Upload, Folder, Shield, Globe, Layers } from 'lucide-react';
+import { HardDrive, Upload, Shield, Layers, Zap, Radio } from 'lucide-react';
 import { CodeBlock, Callout, Step } from '@/components/DocsComponents';
 
 export default function StorageDocsPage() {
@@ -21,24 +21,24 @@ export default function StorageDocsPage() {
             </section>
 
             <section className="space-y-8">
-                <h2 className="text-2xl font-black text-white tracking-tight">Buckets & Organization</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h2 className="text-2xl font-black text-white tracking-tight">Storage Infrastructure</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="glass-card p-6 rounded-2xl border border-white/5 space-y-4 group">
                         <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                            <Folder size={20} />
+                            <Zap size={20} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-white mb-2">Logical Containers</h4>
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Buckets are high-level containers for your media and files. Group files logically by application, user, or project requirements.</p>
+                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">Unified S3 Access</h4>
+                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Afribase Storage is fully S3-compatible, allowing you to use existing tools and libraries to manage your files with enterprise-grade interoperability.</p>
                         </div>
                     </div>
                     <div className="glass-card p-6 rounded-2xl border border-white/5 space-y-4 group">
                         <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                            <Globe size={20} />
+                            <Radio size={20} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-white mb-2">Edge Caching</h4>
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Every asset uploaded to Afribase is automatically distributed across our global CDN for ultra-fast, low-latency delivery to users.</p>
+                            <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tighter">African CDN Nodes</h4>
+                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">Static assets are cached at the edge across our regional nodes, ensuring your users in Lagos or Cairo receive content with minimal latency.</p>
                         </div>
                     </div>
                 </div>
@@ -59,27 +59,57 @@ export default function StorageDocsPage() {
                     </Step>
 
                     <Step number="03" title="Generate Public Link">
-                        Retrieve a high-speed public URL for your media assets.
+                        Retrieve a high-speed public URL for your media assets stored in public buckets.
                         <div className="space-y-6 mt-4">
                             <div className="space-y-2">
                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
-                                <CodeBlock code={`const { data } = afribase.storage
-  .from('avatars')
-  .getPublicUrl('profiles/avatar-1.png');
-
-console.log(data.publicUrl);`} language="typescript" />
+                                <CodeBlock code={`const { data } = afribase.storage.from('avatars').getPublicUrl('avatar-1.png');`} language="typescript" />
                             </div>
 
                             <div className="space-y-2">
                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
-                                <CodeBlock code={`url = client.storage.from_("avatars").get_public_url("profiles/avatar-1.png")
-print(url)`} language="python" />
+                                <CodeBlock code={`url = client.storage.from_("avatars").get_public_url("avatar-1.png")`} language="python" />
                             </div>
 
                             <div className="space-y-2">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart / Flutter</h4>
-                                <CodeBlock code={`final publicUrl = client.storage.from('avatars').getPublicUrl('profiles/avatar-1.png');
-print(publicUrl);`} language="dart" />
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart</h4>
+                                <CodeBlock code={`final url = client.storage.from('avatars').getPublicUrl('avatar-1.png');`} language="dart" />
+                            </div>
+                        </div>
+                    </Step>
+
+                    <Step number="04" title="Transform & Sign">
+                        Optimize images on the fly or generate temporary signed URLs for private files.
+                        <div className="space-y-6 mt-4">
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                <CodeBlock code={`// Generate a signed URL valid for 60 seconds
+const { data, error } = await afribase.storage.from('docs').createSignedUrl('private.pdf', 60);
+
+// Optimize image via CDN transformations
+const { data: img } = afribase.storage.from('avatars').getPublicUrl('user.png', {
+  transform: { width: 200, height: 200, resize: 'cover' }
+});`} language="typescript" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                <CodeBlock code={`# Signed URL
+signed_url = client.storage.from_("docs").create_signed_url("private.pdf", expires_in=60)
+
+# Image Transform
+url = client.storage.from_("avatars").get_public_url("user.png", transform={"width": 200})`} language="python" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart</h4>
+                                <CodeBlock code={`// Signed URL
+final signedUrl = await client.storage.from('docs').createSignedUrl('private.pdf', expiresIn: 60);
+
+// Image Transform
+final url = client.storage.from('avatars').getPublicUrl('user.png',
+  transform: TransformOptions(width: 200, height: 200, resize: 'cover')
+);`} language="dart" />
                             </div>
                         </div>
                     </Step>

@@ -10,13 +10,13 @@ export default function ArchitectureDocsPage() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3 text-emerald-500 mb-2">
                     <Layers size={24} />
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">System Design</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Regional Sovereignty</span>
                 </div>
                 <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
                     System <span className="text-emerald-500">Architecture</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase is a modular collection of open-source tools designed to work together seamlessly. Understand the components that power your cloud infrastructure.
+                    Built for the unique infrastructure landscape of Africa. Afribase utilizes a distributed mesh of regional nodes across Lagos, Nairobi, and Johannesburg to ensure data residency and sub-100ms latency for African businesses.
                 </p>
             </section>
 

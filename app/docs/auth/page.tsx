@@ -119,6 +119,31 @@ final url = await client.auth.signInWithOAuth(provider: 'google');`} language="d
                                 </div>
                             </div>
                         </Step>
+
+                        <Step number="03" title="Session Management">
+                            Listen to authentication state changes across your application to handle navigation and session persistence.
+                            <div className="space-y-6 mt-4">
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript</h4>
+                                    <CodeBlock code={`afribase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth Event:', event); // 'SIGNED_IN', 'SIGNED_OUT'
+});`} language="typescript" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                                    <CodeBlock code={`def on_auth_change(event, session):
+    print(f"Auth state changed: {event}")
+
+client.auth.on_auth_state_change(on_auth_change)`} language="python" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dart</h4>
+                                    <CodeBlock code={`client.auth.onAuthStateChange((event, session) => {
+  print('Auth state changed to: $event');
+});`} language="dart" />
+                                </div>
+                            </div>
+                        </Step>
                     </div>
                 </div>
             </section>
