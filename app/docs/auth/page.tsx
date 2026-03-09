@@ -52,7 +52,7 @@ export default function AuthDocsPage() {
                     <div className="space-y-4">
                         <Step number="01" title="Initial Sign-in">
                             Users sign in using their chosen provider. The server validates credentials and returns a short-lived Access Token.
-                            <CodeBlock code={`const { user, token } = await api.login({
+                            <CodeBlock code={`const { data, error } = await afribase.auth.signIn({
   email: 'dev@afribase.com',
   password: 'secure-infrastructure'
 });`} language="typescript" />

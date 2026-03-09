@@ -102,6 +102,26 @@ CREATE POLICY "Users can see only their own profile"
                 </Callout>
             </section>
 
+            <section className="space-y-8 border-t border-white/5 pt-12">
+                <h2 className="text-2xl font-black text-white tracking-tight">Application Integration</h2>
+                <p className="text-sm text-zinc-400 font-medium leading-relaxed">Query your database from any supported platform using our official client libraries.</p>
+
+                <div className="space-y-6">
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">JavaScript / TypeScript</h4>
+                        <CodeBlock code={`const { data, error } = await afribase
+  .from('posts')
+  .select('*')
+  .eq('id', '1');`} language="typescript" />
+                    </div>
+
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Python</h4>
+                        <CodeBlock code={`data = client.from_("posts").select("*").eq("id", "1").execute()`} language="python" />
+                    </div>
+                </div>
+            </section>
+
             <div className="flex items-center justify-center p-12 border-t border-white/5">
                 <a href="/docs/auth" className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group">
                     <span className="text-sm font-black uppercase tracking-[0.2em]">Next: Authentication</span>

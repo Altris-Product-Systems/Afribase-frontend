@@ -53,18 +53,18 @@ export default function StorageDocsPage() {
 
                     <Step number="02" title="Upload an Image">
                         Use our SDK to securely upload files from your user's devices.
-                        <CodeBlock code={`import { storage } from '@/lib/afribase';
-
-const { data, error } = await storage
+                        <CodeBlock code={`const { data, error } = await afribase.storage
   .from('avatars')
   .upload('profiles/avatar-1.png', file);`} language="typescript" />
                     </Step>
 
                     <Step number="03" title="Generate Public Link">
                         Retrieve a high-speed public URL for your media assets.
-                        <CodeBlock code={`const { publicUrl } = storage
+                        <CodeBlock code={`const { data } = afribase.storage
   .from('avatars')
-  .getPublicUrl('profiles/avatar-1.png');`} language="typescript" />
+  .getPublicUrl('profiles/avatar-1.png');
+
+console.log(data.publicUrl);`} language="typescript" />
                     </Step>
                 </div>
             </section>

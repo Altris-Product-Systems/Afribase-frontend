@@ -62,6 +62,13 @@ serve(async (req) => {
                         Instantly deploy your function to our global infrastructure.
                         <CodeBlock code="afribase functions deploy hello-world" language="bash" />
                     </Step>
+
+                    <Step number="03" title="Invoke from Client">
+                        Invoke your serverless function from any client library.
+                        <CodeBlock code={`const { data, error } = await afribase.functions.invoke('hello-world', {
+  body: { name: 'Afribase User' }
+});`} language="typescript" />
+                    </Step>
                 </div>
             </section>
 

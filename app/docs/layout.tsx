@@ -26,6 +26,14 @@ const docsNavigation = [
     ],
   },
   {
+    title: 'Client Libraries',
+    links: [
+      { name: 'JavaScript / TypeScript', href: '/docs/sdks/js', icon: Zap },
+      { name: 'Python SDK', href: '/docs/sdks/python', icon: Activity },
+      { name: 'Dart / Flutter', href: '/docs/sdks/dart', icon: Zap },
+    ],
+  },
+  {
     title: 'Core Features',
     links: [
       { name: 'Database', href: '/docs/database', icon: Database },
