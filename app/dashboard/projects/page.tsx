@@ -4,13 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getProjects, getOrganizations, Organization, Project } from '@/lib/api';
 import ProjectModal from '@/components/ProjectModal';
-import StatCard from '@/components/StatCard';
-import { LayoutGrid, Users, Globe, Zap, Plus, ChevronRight, Activity } from 'lucide-react';
+import { LayoutGrid, Users, Plus, ChevronRight } from 'lucide-react';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function ProjectsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orgId = searchParams.get('orgId');
+  const { setIsLoading: setGlobalLoading } = useLoader();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -24,6 +25,8 @@ export default function ProjectsPage() {
   }, [orgId]);
 
   const loadData = async () => {
+    setGlobalLoading(true, 'Accessing Environments');
+    setIsLoading(true);
     try {
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
@@ -35,9 +38,9 @@ export default function ProjectsPage() {
       } else if (orgs.length > 0) {
         targetOrg = orgs[0];
       }
-      
+
       setSelectedOrg(targetOrg);
-      
+
       if (targetOrg) {
         const projectsData = await getProjects(targetOrg.id);
         setProjects(Array.isArray(projectsData) ? projectsData : []);
@@ -46,6 +49,7 @@ export default function ProjectsPage() {
       setError('Failed to load projects');
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -54,7 +58,7 @@ export default function ProjectsPage() {
       const projectsData = await getProjects(id);
       setProjects(Array.isArray(projectsData) ? projectsData : []);
     } catch (err) {
-      console.error('Failed to reload projects');
+      // console.error('Failed to reload projects');
     }
   };
 
@@ -89,7 +93,7 @@ export default function ProjectsPage() {
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Active Environments</h2>
         </div>
-        
+
         {projects.length === 0 ? (
           <div className="py-20 border border-zinc-800/50 border-dashed rounded-3xl bg-zinc-900/20 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-6 border border-white/5">
@@ -111,7 +115,7 @@ export default function ProjectsPage() {
                 key={project.id}
                 className="group glass-card rounded-2xl p-6 relative overflow-hidden flex flex-col h-full cursor-pointer animate-fade-in"
                 style={{ animationDelay: `${idx * 0.1}s` }}
-                onClick={() => router.push(`/project/${project.id}`)}
+                onClick={() => router.push(`/dashboard/project/${project.id}`)}
               >
                 <div className="flex items-start justify-between mb-8 relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-lg font-black text-white group-hover:border-emerald-500/50 transition-colors">

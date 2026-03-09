@@ -24,13 +24,8 @@ export default function Navbar() {
             )}
         >
             <div className="container mx-auto flex items-center justify-between">
-                <Link href="/" className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
-                        <span className="text-black font-black text-xl">A</span>
-                    </div>
-                    <span className="text-xl font-black text-white tracking-tighter uppercase">
-                        Afribase
-                    </span>
+                <Link href="/" className="flex items-center shrink-0">
+                    <img src="/AFR.png" alt="Afribase Logo" className="h-10 md:h-12 w-auto object-contain drop-shadow-md" />
                 </Link>
 
                 <div className="hidden md:flex items-center space-x-8">
@@ -48,14 +43,14 @@ export default function Navbar() {
                     </Link>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                    <Link href="/auth/sign-in">
-                        <Button variant="ghost" className="text-white hover:bg-white/10 font-bold">
+                <div className="flex items-center space-x-1 md:space-x-4">
+                    <Link href="/auth/sign-in" className="hidden min-[380px]:block">
+                        <Button variant="ghost" className="text-white hover:bg-white/10 font-bold px-3 py-1 text-xs md:text-sm">
                             Log In
                         </Button>
                     </Link>
                     <Link href="/auth/sign-up">
-                        <Button className="bg-white text-black hover:bg-white/90 font-bold px-6 rounded-full">
+                        <Button className="bg-white text-black hover:bg-white/90 font-bold px-4 md:px-6 py-2 text-[10px] md:text-sm rounded-full whitespace-nowrap">
                             Sign Up
                         </Button>
                     </Link>

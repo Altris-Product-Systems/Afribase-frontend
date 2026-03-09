@@ -30,9 +30,9 @@ export default function EdgeFunctionsPage() {
           description="Scale your logic to the edge. Edge Functions are Deno-based and triggered via HTTP requests or database hooks."
           icon={Zap}
           actionLabel="Create Function"
-          onAction={() => console.log('Create function')}
+          onAction={() => {}}
           secondaryActionLabel="Deno Docs"
-          onSecondaryAction={() => console.log('Deno docs')}
+          onSecondaryAction={() => {}}
         />
       </div>
 

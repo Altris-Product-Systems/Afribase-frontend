@@ -11,13 +11,13 @@ interface ModalProps {
   showCloseButton?: boolean;
 }
 
-export default function Modal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
   size = 'lg',
-  showCloseButton = true 
+  showCloseButton = true
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -43,29 +43,29 @@ export default function Modal({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div 
-          className={`relative w-full ${sizeClasses[size]} bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl`}
+        <div
+          className={`relative w-full ${sizeClasses[size]} bg-[#111111] border border-[#222222] rounded-lg shadow-xl`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#222222]">
               {title && (
-                <h2 className="text-xl font-semibold text-black dark:text-white">
+                <h2 className="text-xl font-semibold text-white">
                   {title}
                 </h2>
               )}
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors"
+                  className="p-2 hover:bg-[#222222] rounded-lg transition-colors"
                 >
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -74,7 +74,7 @@ export default function Modal({
               )}
             </div>
           )}
-          
+
           {/* Content */}
           <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
             {children}

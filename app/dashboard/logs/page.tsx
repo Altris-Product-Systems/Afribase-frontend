@@ -33,9 +33,9 @@ export default function LogsPage() {
           description="Your platform is running smoothly. Logs will appear here as your services are accessed and infrastructure events occur."
           icon={Activity}
           actionLabel="Real-time Stream"
-          onAction={() => console.log('Stream')}
+          onAction={() => {}}
           secondaryActionLabel="Log Settings"
-          onSecondaryAction={() => console.log('Log settings')}
+          onSecondaryAction={() => {}}
         />
       </div>
 

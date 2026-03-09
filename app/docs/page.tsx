@@ -57,30 +57,6 @@ export default function DocsPage() {
                 </div>
             </section>
 
-            <section className="space-y-6 pt-6 border-t border-white/5">
-                <h2 className="text-xs font-black text-zinc-600 uppercase tracking-widest">Client Libraries</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FeatureCard
-                        title="JavaScript / TypeScript"
-                        description="Universal client for Web, Node.js, and React Native applications."
-                        icon={Zap}
-                        href="/docs/sdks/js"
-                    />
-                    <FeatureCard
-                        title="Python SDK"
-                        description="Ideal for backend scripts, AI integration, and Python web frameworks."
-                        icon={Activity}
-                        href="/docs/sdks/python"
-                    />
-                    <FeatureCard
-                        title="Dart / Flutter"
-                        description="For cross-platform Mobile, Desktop, and Flutter Web development."
-                        icon={Zap}
-                        href="/docs/sdks/dart"
-                    />
-                </div>
-            </section>
-
             <section className="space-y-8">
                 <h2 className="text-2xl font-black text-white tracking-tight">Getting Started</h2>
                 <p className="text-sm text-zinc-400 font-medium leading-relaxed">
@@ -99,7 +75,7 @@ export default function DocsPage() {
                     </Step>
 
                     <Step number="03" title="Initialize the Client">
-                        Import the Afribase client and start interacting with your infrastructure. For more detailed guides, check out our [JavaScript](/docs/sdks/js), [Python](/docs/sdks/python), or [Dart](/docs/sdks/dart) documentation.
+                        Import the Afribase client and start interacting with your infrastructure. Our official SDKs are available for JavaScript, Python, and Dart.
                         <CodeBlock code={`import { createClient } from '@afribase/afribase-js';
 
 const client = createClient(

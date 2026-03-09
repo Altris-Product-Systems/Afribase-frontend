@@ -42,24 +42,36 @@ export default function AuthDocsPage() {
             </section>
 
             <section className="space-y-8 border-t border-white/5 pt-12">
-                <h2 className="text-2xl font-black text-white tracking-tight">Session Management</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Implementation</h2>
 
                 <div className="space-y-6">
                     <p className="text-sm text-zinc-400 font-medium leading-relaxed">
-                        Afribase uses JSON Web Tokens (JWT) for secure, stateless authentication. Every request to your infrastructure is validated against these specialized cryptographic tokens.
+                        Afribase provides a strongly-typed interface for managing authentication. Below are the core methods available in our SDKs (JavaScript, Python, Dart).
                     </p>
 
                     <div className="space-y-4">
-                        <Step number="01" title="Initial Sign-in">
-                            Users sign in using their chosen provider. The server validates credentials and returns a short-lived Access Token.
-                            <CodeBlock code={`const { data, error } = await afribase.auth.signIn({
-  email: 'dev@afribase.com',
-  password: 'secure-infrastructure'
+                        <Step number="01" title="Sign Up / Sign In">
+                            Users can sign up for a new account or sign in with their existing credentials.
+                            <CodeBlock code={`// Sign Up
+const { data, error } = await afribase.auth.signUp({
+  email: 'user@example.com',
+  password: 'securePassword123'
+});
+
+// Sign In with Password
+const { data, error } = await afribase.auth.signInWithPassword({
+  email: 'user@example.com',
+  password: 'securePassword123'
 });`} language="typescript" />
                         </Step>
 
-                        <Step number="02" title="Inactivity Protection">
-                            To ensure production-grade security, Afribase projects feature a built-in **10-minute inactivity logout**. Sessions are automatically invalidated if no user interaction is detected.
+                        <Step number="02" title="Passwordless & OAuth">
+                            Send one-time passwords (OTP) or magic links, and handle Social Logins like Google or GitHub.
+                            <CodeBlock code={`// Send OTP / Magic Link
+await afribase.auth.signInWithOtp({ email: 'user@example.com' });
+
+// Social Login
+const { url } = await afribase.auth.signInWithOAuth({ provider: 'google' });`} language="typescript" />
                         </Step>
                     </div>
                 </div>

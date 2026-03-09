@@ -10,7 +10,8 @@ import {
     Zap,
     Box,
     Table2,
-    CheckCircle2
+    CheckCircle2,
+    GitMerge
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "@/components/lightswind/border-beam";
@@ -82,19 +83,43 @@ const features = [
         color: "#2E7D32", // Success Green
         glow: "rgba(46, 125, 50, 0.2)",
         className: "md:col-span-1",
+    },
+    {
+        title: "Self-host Super Easy",
+        description: "Deploy Afribase on your own infrastructure with a single command.",
+        icon: <HardDrive className="w-6 h-6" />,
+        color: "#1A237E", // Indigo
+        glow: "rgba(26, 35, 126, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Explicit Free Tier",
+        description: "Fair limits that let you grow without surprise bills.",
+        icon: <Zap className="w-6 h-6" />,
+        color: "#FF9800", // Orange
+        glow: "rgba(255, 152, 0, 0.2)",
+        className: "md:col-span-1",
+    },
+    {
+        title: "Supabase Migration",
+        description: "Seamlessly migrate your data and config from Supabase to Afribase.",
+        icon: <GitMerge className="w-6 h-6" />,
+        color: "#EF5350", // Coral/Red
+        glow: "rgba(239, 83, 80, 0.2)",
+        className: "md:col-span-1",
     }
 ];
 
 export default function Features() {
     return (
-        <section className="py-24 bg--brand-background">
+        <section className="py-12 md:py-24 bg--brand-background">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-black text-white mb-4"
+                        className="text-3xl md:text-5xl font-black text-white mb-4"
                     >
                         EVERYTHING YOU NEED TO <span className="text-sage">SCALE</span>
                     </motion.h2>
@@ -103,14 +128,14 @@ export default function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-lg text-white/60 max-w-2xl mx-auto font-medium"
+                        className="text-base md:text-lg text-white/60 max-w-2xl mx-auto font-medium"
                     >
                         Afribase provides all the enterprise-grade tools required to build,
                         launch, and grow your digital business in Africa.
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[280px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min md:auto-rows-[280px]">
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
@@ -126,7 +151,7 @@ export default function Features() {
                             <InteractiveGradient
                                 color={feature.glow}
                                 glowColor={feature.glow}
-                                className="w-full h-full p-8 flex flex-col items-start text-left bg-transparent border-none"
+                                className="w-full h-full p-6 md:p-8 flex flex-col items-start text-left bg-transparent border-none"
                                 hoverOnly={true}
                                 intensity={100}
                                 backgroundColor="transparent"

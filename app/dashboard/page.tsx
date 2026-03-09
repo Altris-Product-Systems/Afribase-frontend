@@ -1,45 +1,63 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getProjects, getOrganizations, isAuthenticated, Project, Organization } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
 import StatCard from '@/components/StatCard';
-import { LayoutGrid, Users, Globe, Zap, ChevronRight } from 'lucide-react';
+import { LayoutGrid, Users, Zap, ChevronRight, Activity } from 'lucide-react';
+
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
+  const { setIsLoading: setGlobalLoading } = useLoader();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [orgId]);
 
   const loadData = async () => {
+    setGlobalLoading(true, 'Accessing Infrastructure');
+    setIsLoading(true);
     try {
       const orgsData = await getOrganizations();
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
-      
-      // Fetch total projects for all orgs to fill stats correctly
-      let totalProjects = 0;
-      for (const org of orgs) {
-        try {
-          const projs = await getProjects(org.id);
-          if (Array.isArray(projs)) totalProjects += projs.length;
-        } catch (e) {
-          console.error(`Failed to load projects for org ${org.id}`);
+
+      if (orgId) {
+        const found = orgs.find(o => o.id === orgId);
+        setSelectedOrg(found || null);
+        if (found) {
+          const projs = await getProjects(found.id);
+          setProjects(Array.isArray(projs) ? projs : []);
         }
+      } else {
+        setSelectedOrg(null);
+        // Global stats
+        let allProjectsCount = 0;
+        for (const org of orgs) {
+          try {
+            const projs = await getProjects(org.id);
+            if (Array.isArray(projs)) allProjectsCount += projs.length;
+          } catch (e) { }
+        }
+        setProjects(new Array(allProjectsCount).fill({ id: 'temp' } as Project));
       }
-      setProjects(new Array(totalProjects).fill({ id: 'temp' } as Project));
     } catch (err) {
       setError('Failed to load dashboard data');
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
     }
   };
 
@@ -62,7 +80,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="My Projects" value={projects.length} icon={LayoutGrid} trend="12%" />
         <StatCard label="My Organizations" value={organizations.length} icon={Users} trend="0%" />
-        <StatCard label="My Domains" value={0} icon={Globe} trend="new" />
+        <StatCard label="API Requests" value="48.2k" icon={Activity} trend="24%" />
         <StatCard label="Service Health" value="99.9%" icon={Zap} trend="stable" />
       </div>
 
@@ -71,7 +89,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Your Organizations</h2>
         </div>
-        
+
         {organizations.length === 0 ? (
           <div className="py-20 border border-zinc-800/50 border-dashed rounded-3xl bg-zinc-900/20 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-6 border border-white/5">

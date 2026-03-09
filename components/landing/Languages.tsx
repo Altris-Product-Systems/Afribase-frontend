@@ -36,14 +36,14 @@ const languages = [
 
 export default function Languages() {
     return (
-        <section id="languages" className="py-24 bg--brand-background relative overflow-hidden">
+        <section id="languages" className="py-12 md:py-24 bg--brand-background relative overflow-hidden">
             <div className="container mx-auto px-6 relative z-10">
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 md:mb-16">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 uppercase tracking-tighter"
+                        className="text-2xl md:text-5xl lg:text-6xl font-black text-white mb-6 uppercase tracking-tighter"
                     >
                         NATIVE SUPPORT FOR <span className="text-sage">EVERY STACK</span>
                     </motion.h2>
@@ -52,7 +52,7 @@ export default function Languages() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-lg text-white/50 max-w-2xl mx-auto font-medium"
+                        className="text-sm md:text-lg text-white/50 max-w-2xl mx-auto font-medium"
                     >
                         Afribase works with any language and framework. Our client SDKs and
                         auto-generated APIs allow you to build with the tools you already love.
@@ -71,14 +71,14 @@ export default function Languages() {
                             className="group relative"
                         >
                             <div
-                                className="relative z-10 flex flex-col items-center justify-center p-8 rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm transition-all duration-500 overflow-hidden min-h-[160px]"
+                                className="relative z-10 flex flex-col items-center justify-center p-4 md:p-8 rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm transition-all duration-500 overflow-hidden min-h-[120px] md:min-h-[160px]"
                             >
                                 {/* Logo with color transition */}
                                 <div
                                     className="mb-4 flex items-center justify-center transition-all duration-500 transform group-hover:scale-110"
                                     style={{ color: "rgba(255, 255, 255, 0.4)" }}
                                 >
-                                    <div className="group-hover:text-[var(--lang-color)] transition-colors duration-500" style={{ "--lang-color": lang.color } as React.CSSProperties}>
+                                    <div className="group-hover:text-[var(--lang-color)] transition-colors duration-500 scale-75 md:scale-100" style={{ "--lang-color": lang.color } as React.CSSProperties}>
                                         {lang.icon}
                                     </div>
                                 </div>

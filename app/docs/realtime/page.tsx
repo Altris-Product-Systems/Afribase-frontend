@@ -48,21 +48,33 @@ export default function RealtimeDocsPage() {
                 <h2 className="text-2xl font-black text-white tracking-tight">Implementation</h2>
                 <div className="space-y-8">
                     <Step number="01" title="Initialize a Channel">
-                        Connect to a specific topic or database table.
+                        Create a channel targeting a specific "room" or topic.
                         <CodeBlock code={`const channel = afribase.channel('room-1');`} language="typescript" />
                     </Step>
 
-                    <Step number="02" title="Subscribe to Events">
-                        Define exactly what events you want to listen for.
-                        <CodeBlock code={`channel
-  .on('postgres_changes', { 
-    event: 'INSERT', 
-    schema: 'public', 
-    table: 'messages' 
-  }, (payload) => {
-    console.log('New message!', payload);
-  })
-  .subscribe();`} language="typescript" />
+                    <Step number="02" title="Broadcast Messages">
+                        Send and listen for custom broadcast messages between clients.
+                        <CodeBlock code={`// 1. Listen for Broadcasts
+channel.on('broadcast', { event: 'message' }, (payload) => {
+  console.log('Received broadcast payload:', payload);
+});
+
+// 2. Commit the subscription
+channel.subscribe();
+
+// 3. Send a Broadcast
+channel.send('broadcast', { event: 'message', payload: { text: 'Hello!' } });`} language="typescript" />
+                    </Step>
+
+                    <Step number="03" title="Listen for Database Changes">
+                        Receive real-time events for table operations (INSERT, UPDATE, DELETE).
+                        <CodeBlock code={`channel.on('postgres_changes', { 
+  event: 'INSERT', 
+  schema: 'public', 
+  table: 'messages' 
+}, (payload) => {
+  console.log('New database message:', payload.new);
+});`} language="typescript" />
                     </Step>
                 </div>
             </section>
@@ -79,13 +91,15 @@ export default function RealtimeDocsPage() {
 
                 <p className="text-sm text-zinc-400 font-medium leading-relaxed">Track user online status and synchronize metadata across instances. Perfect for "Who's online" lists or shared cursors in collaborative tools.</p>
 
-                <CodeBlock code={`channel.on('presence', { event: 'sync' }, () => {
+                <CodeBlock code={`// Listen for presence state changes
+channel.on('presence', { event: 'sync' }, () => {
   const presenceState = channel.presenceState();
-  console.log('Users currently online:', presenceState);
+  console.log('Online users:', presenceState);
 });
 
 channel.subscribe(async (status) => {
   if (status === 'SUBSCRIBED') {
+    // Start tracking this user's presence
     await channel.track({ online_at: new Date().toISOString() });
   }
 });`} language="typescript" />

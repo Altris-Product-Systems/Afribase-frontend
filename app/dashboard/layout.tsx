@@ -1,10 +1,35 @@
 'use client';
-
-import React, { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { getOrganizations, isAuthenticated, Organization } from '@/lib/api';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { getOrganizations, isAuthenticated, Organization, getUser, User, getProject, Project } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import OnboardingModal from '@/components/OnboardingModal';
+import { useLoader } from '@/components/ui/GlobalLoaderProvider';
+
+function SearchParamsHandler({
+  organizations,
+  setSelectedOrg,
+  setActiveTab,
+}: {
+  organizations: Organization[];
+  setSelectedOrg: (org: Organization | null) => void;
+  setActiveTab: (tab: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const orgId = searchParams.get('orgId');
+    if (orgId && organizations.length > 0) {
+      const found = organizations.find((o) => o.id === orgId);
+      if (found) setSelectedOrg(found);
+    }
+
+    const tab = searchParams.get('tab');
+    setActiveTab(tab);
+  }, [searchParams, organizations, setSelectedOrg, setActiveTab]);
+
+  return null;
+}
 
 export default function DashboardLayout({
   children,
@@ -13,43 +38,157 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { setIsLoading: setGlobalLoading } = useLoader();
+
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const dataLoadedRef = useRef(false);
+
+
+
+  useEffect(() => {
+    const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
+    const projectIdFromPath = projectMatch ? projectMatch[1] : null;
+
+    if (projectIdFromPath) {
+      if (!project || project.id !== projectIdFromPath) {
+        setProject(null); // Clear stale project
+        loadProjectData(projectIdFromPath);
+      }
+    } else {
+      setProject(null);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/auth/sign-in');
       return;
     }
-    loadSidebarData();
+    if (!dataLoadedRef.current) {
+      loadSidebarData();
+      dataLoadedRef.current = true;
+    }
   }, [router]);
+
+  const loadProjectData = async (id: string) => {
+    try {
+      const found = await getProject(id);
+      setProject(found);
+    } catch (err) {
+      // console.error('Failed to load project context for sidebar:', err);
+      setProject(null);
+    }
+  };
 
   const loadSidebarData = async () => {
     try {
-      const orgsData = await getOrganizations();
+      setGlobalLoading(true, 'Accessing Grid Console');
+
+      // Load user and organizations in parallel
+      const [userData, orgsData] = await Promise.all([
+        getUser(),
+        getOrganizations()
+      ]);
+
+      setUser(userData);
       const orgs = Array.isArray(orgsData) ? orgsData : [];
       setOrganizations(orgs);
-      if (orgs.length > 0 && !selectedOrg) {
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlOrgId = searchParams.get('orgId');
+
+      if (urlOrgId) {
+        const found = orgs.find(o => o.id === urlOrgId);
+        if (found) setSelectedOrg(found);
+        else if (orgs.length > 0) setSelectedOrg(orgs[0]);
+      } else if (orgs.length > 0 && !selectedOrg) {
         setSelectedOrg(orgs[0]);
       }
     } catch (err) {
-      console.error('Failed to load organizations', err);
+      // console.error('Failed to load organizations', err);
     } finally {
       setIsLoading(false);
+      setGlobalLoading(false);
+    }
+  };
+
+  const handleOrgChange = (org: Organization) => {
+    setSelectedOrg(org);
+
+    if (pathname.startsWith('/dashboard/project/')) {
+      // Switching orgs while in a project detail should go to the projects list of the new org
+      router.push(`/dashboard/projects?orgId=${org.id}`);
+    } else {
+      // Maintain current path but update the orgId
+      router.push(`${pathname}?orgId=${org.id}`);
     }
   };
 
   const getActiveId = () => {
+    if (activeTab) return activeTab;
     if (pathname === '/dashboard') return 'dashboard';
     if (pathname.startsWith('/dashboard/projects')) return 'projects';
+
+    if (pathname === '/dashboard/libraries') return 'libraries';
+
     return pathname.split('/').pop() || 'dashboard';
   };
 
   const handleNavigate = (id: string) => {
+    // Detect if we are in a project context
+    const projectMatch = pathname.match(/^\/dashboard\/project\/([^\/]+)/);
+    const projectId = projectMatch ? projectMatch[1] : null;
+
+    if (projectId) {
+      // If in project context, certain IDs should stay within the project detail tabs
+      const projectTabs: Record<string, string> = {
+        overview: 'overview',
+        tables: 'tables',
+        sql: 'sql',
+        api: 'api',
+        libraries: 'libraries',
+        'api-keys': 'api-keys',
+        auth: 'auth',
+        users: 'users',
+        policies: 'policies',
+        sso: 'sso',
+        storage: 'storage',
+        'edge-functions': 'edge-functions',
+        realtime: 'realtime',
+        migrations: 'migrations',
+        backups: 'backups',
+        branches: 'branches',
+        webhooks: 'webhooks',
+        pooler: 'pooler',
+        cron: 'cron',
+        logs: 'logs',
+        'log-drains': 'log-drains',
+        usage: 'usage',
+        domains: 'domains',
+        network: 'network',
+        vault: 'vault',
+        advanced: 'advanced',
+        forum: 'forum',
+        health: 'health',
+        nocode: 'nocode',
+        deeplinks: 'deeplinks',
+        settings: 'settings',
+      };
+
+      if (projectTabs[id]) {
+        router.push(`/dashboard/project/${projectId}?tab=${projectTabs[id]}${selectedOrg ? `&orgId=${selectedOrg.id}` : ''}`);
+        return;
+      }
+    }
+
     const routes: Record<string, string> = {
       dashboard: '/dashboard',
       projects: '/dashboard/projects',
@@ -57,36 +196,49 @@ export default function DashboardLayout({
       tables: '/dashboard/database/tables',
       sql: '/dashboard/database/sql',
       api: '/dashboard/database/api',
+      migrations: '/dashboard/database/migrations',
+      backups: '/dashboard/database/backups',
+      branches: '/dashboard/database/branches',
+      webhooks: '/dashboard/database/webhooks',
+      pooler: '/dashboard/database/pooler',
+      auth: '/dashboard/auth',
       users: '/dashboard/auth/users',
       policies: '/dashboard/auth/policies',
+      sso: '/dashboard/auth/sso',
       storage: '/dashboard/storage',
       'edge-functions': '/dashboard/edge-functions',
+      realtime: '/dashboard/realtime',
+      cron: '/dashboard/cron',
       logs: '/dashboard/logs',
+      'log-drains': '/dashboard/log-drains',
+      usage: '/dashboard/usage',
+      libraries: '/dashboard/libraries',
+      domains: '/dashboard/domains',
+      network: '/dashboard/network',
+      vault: '/dashboard/vault',
+      advanced: '/dashboard/advanced',
+      forum: '/dashboard/forum',
+      health: '/dashboard/health',
+      nocode: '/dashboard/nocode',
+      deeplinks: '/dashboard/deeplinks',
       settings: '/dashboard/settings',
     };
-    router.push(routes[id] || '/dashboard');
+
+    const baseRoute = routes[id] || '/dashboard';
+    const finalRoute = selectedOrg ? `${baseRoute}?orgId=${selectedOrg.id}` : baseRoute;
+    router.push(finalRoute);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-xl bg-emerald-500/20 animate-pulse" />
-          <svg className="animate-spin h-12 w-12 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-10" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-            <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-      </div>
-    );
-  }
+  // While the global loader handles the initial technical reveal, we check isLoading here
+  // to avoid rendering the heavy dashboard UI before sidebar data is ready.
+  if (isLoading) return null;
 
   return (
     <div className="min-h-screen bg-[#09090b] flex overflow-hidden">
       <Sidebar
         organizations={organizations}
         selectedOrg={selectedOrg}
-        onOrgChange={setSelectedOrg}
+        onOrgChange={handleOrgChange}
         activeId={getActiveId()}
         onNavigate={handleNavigate}
         isCollapsed={isSidebarCollapsed}
@@ -94,13 +246,18 @@ export default function DashboardLayout({
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         onNewOrganization={() => setShowOnboardingModal(true)}
+        projectId={project?.id}
+        projectName={project?.name}
+        projectPlan={project?.plan}
+        projectRegion={project?.region}
+        projectStatus={project?.status}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Shared Top Header */}
         <header className="h-16 flex items-center justify-between px-8 border-b border-white/5 bg-[#09090b]/50 backdrop-blur-xl z-20">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsMobileSidebarOpen(true)}
               className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors"
             >
@@ -112,15 +269,7 @@ export default function DashboardLayout({
               {selectedOrg?.name || 'Afribase'}
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-lg">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Platform Healthy</span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-[10px] font-bold text-zinc-400">
-              RY
-            </div>
-          </div>
+
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#09090b]">
@@ -133,6 +282,13 @@ export default function DashboardLayout({
         onClose={() => setShowOnboardingModal(false)}
         onSuccess={loadSidebarData}
       />
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          organizations={organizations}
+          setSelectedOrg={setSelectedOrg}
+          setActiveTab={setActiveTab}
+        />
+      </Suspense>
     </div>
   );
 }
