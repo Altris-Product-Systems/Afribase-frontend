@@ -126,7 +126,7 @@ export default function AuthPolicies({ projectId }: AuthPoliciesProps) {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-4">
-                    <h2 className="text-3xl font-black tracking-tighter text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-black tracking-tighter text-white flex items-center gap-3">
                         <ShieldCheck className="text-emerald-500" size={32} />
                         Auth Policies (RLS)
                     </h2>

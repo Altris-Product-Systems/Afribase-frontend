@@ -98,7 +98,7 @@ export default function MembersPage() {
 
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-4">
-                    <h1 className="text-4xl font-black tracking-tighter text-white flex items-center gap-4">
+                    <h1 className="text-2xl font-black tracking-tighter text-white flex items-center gap-4">
                         <Users className="text-emerald-500" size={36} />
                         Team Members
                     </h1>

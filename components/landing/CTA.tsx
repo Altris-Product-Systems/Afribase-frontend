@@ -26,7 +26,7 @@ export default function CTA() {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-8 leading-[1.1]"
+                            className="text-2xl md:text-2xl lg:text-4xl font-black text-white mb-8 leading-[1.1]"
                         >
                             Start Building Today
                         </motion.h2>

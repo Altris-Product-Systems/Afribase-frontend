@@ -115,8 +115,8 @@ export default function SdkDocs({ sdkId }: SdkDocsProps) {
                                     key={method.id}
                                     onClick={() => setActiveMethod(method.id)}
                                     className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-[11px] font-bold rounded-xl transition-all duration-200 group ${activeMethod === method.id
-                                            ? 'bg-white/5 text-emerald-400 shadow-xl'
-                                            : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.02]'
+                                        ? 'bg-white/5 text-emerald-400 shadow-xl'
+                                        : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.02]'
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 truncate">
@@ -161,7 +161,7 @@ export default function SdkDocs({ sdkId }: SdkDocsProps) {
                                             v1.0.4 - Official
                                         </span>
                                     </div>
-                                    <h1 className="text-4xl lg:text-6xl font-black text-white italic tracking-tighter leading-none">
+                                    <h1 className="text-2xl lg:text-4xl font-black text-white italic tracking-tighter leading-none">
                                         {currentMethod.name}
                                     </h1>
                                     <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-xl">

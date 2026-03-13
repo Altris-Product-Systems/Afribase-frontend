@@ -176,7 +176,7 @@ export default function ClientLibraries() {
                         <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-emerald-500/10 animate-pulse">
                             <Zap size={14} /> New Functional-Fluent API is Live
                         </div>
-                        <h1 className="text-5xl lg:text-7xl font-black text-white italic tracking-tighter leading-none pl-1">
+                        <h1 className="text-2xl lg:text-4xl font-black text-white italic tracking-tighter leading-none pl-1">
                             Client <span className="text-emerald-500 not-italic uppercase tracking-normal">Libraries</span>
                         </h1>
                         <p className="text-lg lg:text-xl text-zinc-400 font-medium leading-relaxed pl-1">

@@ -72,7 +72,7 @@ export default function ProjectsPage() {
             <Users size={12} />
             {selectedOrg?.name || 'Organization'}
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-white">
+          <h1 className="text-2xl font-black tracking-tighter text-white">
             Projects
           </h1>
           <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">

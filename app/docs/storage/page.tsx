@@ -12,7 +12,7 @@ export default function StorageDocsPage() {
                     <HardDrive size={24} />
                     <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Object Storage</span>
                 </div>
-                <h1 className="text-5xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
+                <h1 className="text-2xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
                     Enterprise <span className="text-emerald-500">Asset Storage</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">

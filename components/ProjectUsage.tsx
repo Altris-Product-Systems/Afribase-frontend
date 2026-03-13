@@ -77,7 +77,7 @@ export default function ProjectUsage({ project }: ProjectUsageProps) {
 
             <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                    <h4 className="text-3xl font-black text-white tracking-tighter">{value}</h4>
+                    <h4 className="text-2xl font-black text-white tracking-tighter">{value}</h4>
                     <span className="text-[10px] font-bold text-zinc-500">/ {limit}</span>
                 </div>
 

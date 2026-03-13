@@ -20,7 +20,7 @@ export default function TermsPage() {
 
             <main className="max-w-4xl mx-auto px-6 pt-32 pb-24">
                 <div className="mb-12">
-                    <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">Terms of Service</h1>
+                    <h1 className="text-2xl font-bold text-white mb-4 tracking-tight">Terms of Service</h1>
                     <p className="text-zinc-500">Last updated: March 1, 2026</p>
                 </div>
 

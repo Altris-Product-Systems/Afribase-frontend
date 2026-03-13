@@ -243,7 +243,7 @@ export default function ProjectDetailsPage() {
                       <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">DB Size</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-black text-white tracking-tight">12.4</span>
+                      <span className="text-2xl font-black text-white tracking-tight">12.4</span>
                       <span className="text-xs font-bold text-zinc-500">MB</span>
                     </div>
                   </div>
@@ -259,7 +259,7 @@ export default function ProjectDetailsPage() {
                       <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Requests</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-black text-white tracking-tight">842</span>
+                      <span className="text-2xl font-black text-white tracking-tight">842</span>
                       <span className="text-xs font-bold text-zinc-500">/ 24h</span>
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export default function ProjectDetailsPage() {
                       <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Total Users</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-black text-white tracking-tight">24</span>
+                      <span className="text-2xl font-black text-white tracking-tight">24</span>
                       <span className="text-xs font-bold text-zinc-500">Active</span>
                     </div>
                   </div>

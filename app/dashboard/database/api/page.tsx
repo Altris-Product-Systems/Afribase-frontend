@@ -9,7 +9,7 @@ export default function ApiDocsPage() {
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tighter text-white">
+          <h1 className="text-2xl font-black tracking-tighter text-white">
             API Documentation
           </h1>
           <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">
@@ -31,9 +31,9 @@ export default function ApiDocsPage() {
             description="Your API is automatically generated based on your table schema. Create your first table to see interactive documentation and code snippets."
             icon={Code}
             actionLabel="View Table Editor"
-            onAction={() => window.location.href='/dashboard/database/tables'}
+            onAction={() => window.location.href = '/dashboard/database/tables'}
             secondaryActionLabel="API Reference"
-            onSecondaryAction={() => {}}
+            onSecondaryAction={() => { }}
           />
         </div>
 

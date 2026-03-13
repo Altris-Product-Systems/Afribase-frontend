@@ -5,9 +5,6 @@ import Languages from "@/components/landing/Languages";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Footer from "@/components/landing/Footer";
 import AIFeatures from "@/components/landing/AIFeatures";
-import AfricaFirst from "@/components/landing/AfricaFirst";
-import OfflineFirst from "@/components/landing/OfflineFirst";
-import Pricing from "@/components/landing/Pricing";
 import CTA from "@/components/landing/CTA";
 
 export default function Home() {
@@ -19,15 +16,12 @@ export default function Home() {
         <Features />
       </div>
       <AIFeatures />
-      <AfricaFirst />
-      <OfflineFirst />
       <div id="how-it-works">
         <HowItWorks />
       </div>
       <div id="languages">
         <Languages />
       </div>
-      <Pricing />
       <CTA />
       <Footer />
     </main>

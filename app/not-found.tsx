@@ -31,7 +31,7 @@ export default function NotFound() {
           <h1 className="text-8xl md:text-[10rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/80 to-white/20 drop-shadow-sm">
             404
           </h1>
-          <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight uppercase">
+          <h2 className="text-2xl md:text-2xl font-black text-white tracking-tight uppercase">
             Page Not Found
           </h2>
           <p className="text-zinc-400 max-w-sm mx-auto text-base md:text-lg leading-relaxed font-medium">
@@ -48,7 +48,7 @@ export default function NotFound() {
             <ArrowLeft size={16} className="text-zinc-400 group-hover:text-white group-hover:-translate-x-1 transition-all" />
             <span className="mt-0.5">Go Back</span>
           </button>
-          
+
           <Link
             href="/dashboard"
             className="w-full sm:w-auto px-8 py-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3 group backdrop-blur-xl shadow-[0_0_30px_rgba(16,185,129,0.15)] hover:shadow-[0_0_40px_rgba(16,185,129,0.25)] relative overflow-hidden"

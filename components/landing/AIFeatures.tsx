@@ -34,9 +34,9 @@ export default function AIFeatures() {
                                 <div className="text-[10px] uppercase font-black tracking-widest text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity">AI Generator</div>
                             </div>
 
-                            <div className="space-y-4 font-mono text-sm">
+                            <div className="space-y-4 font-mono text-sm relative z-10">
                                 <div className="flex items-start space-x-3 text-white/60">
-                                    <span className="text-forest shrink-0">prompt&gt;</span>
+                                    <span className="text-emerald-500 shrink-0 filter drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]">prompt&gt;</span>
                                     <span>Build me a logistics platform with real-time tracking, auth, and fleet management.</span>
                                 </div>
                                 <div className="pl-12 space-y-2">
@@ -45,29 +45,29 @@ export default function AIFeatures() {
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 0.5 }}
-                                        className="text-sage"
+                                        className="text-emerald-400"
                                     >✓ Initializing schema for 'logistics_db'...</motion.div>
                                     <motion.div
                                         initial={{ opacity: 0, x: -10 }}
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 1.0 }}
-                                        className="text-sage"
+                                        className="text-emerald-400"
                                     >✓ Generating Auth rules for 'drivers' and 'clients'...</motion.div>
                                     <motion.div
                                         initial={{ opacity: 0, x: -10 }}
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 1.5 }}
-                                        className="text-white font-bold"
+                                        className="text-white font-bold drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                                     >✓ Backend ready in 4.2 seconds.</motion.div>
                                 </div>
                             </div>
 
-                            <div className="mt-8 flex justify-end">
-                                <div className="h-2 w-24 bg-forest/20 rounded-full overflow-hidden">
+                            <div className="mt-8 flex justify-end relative z-10">
+                                <div className="h-2 w-24 bg-emerald-500/20 rounded-full overflow-hidden shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                                     <motion.div
-                                        className="h-full bg-forest"
+                                        className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
                                         initial={{ width: 0 }}
                                         whileInView={{ width: "100%" }}
                                         transition={{ duration: 1.5 }}
@@ -78,12 +78,12 @@ export default function AIFeatures() {
                     </div>
 
                     <div className="flex-1 order-1 lg:order-2 text-center lg:text-left">
-                        
+
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-8 leading-[1.1]"
+                            className="text-2xl md:text-2xl lg:text-4xl font-black text-white mb-8 leading-[1.1]"
                         >
                             Your AI <br />
                             <span className="text-forest">Backend Engineer</span>

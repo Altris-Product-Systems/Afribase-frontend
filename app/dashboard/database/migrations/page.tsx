@@ -58,7 +58,7 @@ export default function MigrationsPage() {
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-12 animate-fade-in">
       <div className="space-y-4">
-        <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">
+        <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">
           Migrations
         </h1>
         <p className="text-zinc-400 text-sm max-w-xl leading-relaxed font-medium">

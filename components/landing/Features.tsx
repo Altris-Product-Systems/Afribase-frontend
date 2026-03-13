@@ -96,7 +96,7 @@ export default function Features() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl font-black text-white mb-4"
+                        className="text-2xl md:text-2xl font-black text-white mb-4"
                     >
                         Everything You Need to Build <span className="text-sage">Modern Apps</span>
                     </motion.h2>

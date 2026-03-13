@@ -9,7 +9,7 @@ export default function EdgeFunctionsPage() {
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tighter text-white">
+          <h1 className="text-2xl font-black tracking-tighter text-white">
             Edge Functions
           </h1>
           <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">
@@ -30,9 +30,9 @@ export default function EdgeFunctionsPage() {
           description="Scale your logic to the edge. Edge Functions are Deno-based and triggered via HTTP requests or database hooks."
           icon={Zap}
           actionLabel="Create Function"
-          onAction={() => {}}
+          onAction={() => { }}
           secondaryActionLabel="Deno Docs"
-          onSecondaryAction={() => {}}
+          onSecondaryAction={() => { }}
         />
       </div>
 

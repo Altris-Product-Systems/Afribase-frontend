@@ -108,7 +108,7 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
                 <div>
-                    <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">Custom Domains</h2>
+                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Custom Domains</h2>
                     <p className="text-zinc-500 text-sm font-medium mt-1">
                         White-label your project by mapping your own domain to our edge network.
                     </p>

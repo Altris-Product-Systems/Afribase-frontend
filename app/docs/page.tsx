@@ -13,7 +13,7 @@ export default function DocsPage() {
                     <BookOpen size={24} />
                     <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Documentation</span>
                 </div>
-                <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
+                <h1 className="text-2xl md:text-6xl font-black text-white tracking-tighter mb-4 animate-gelatinous-in">
                     The Pulse of <br />
                     <span className="text-emerald-500 font-black">African Innovation</span>
                 </h1>
@@ -138,7 +138,7 @@ final client = AfribaseClient('https://your-project.useafribase.app', 'your-anon
             {/* ── Official Client Libraries ── */}
             <section className="space-y-12 pt-12 border-t border-white/5">
                 <div className="space-y-4">
-                    <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Official Client Libraries</h2>
+                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Official Client Libraries</h2>
                     <p className="text-sm text-zinc-400 font-medium leading-relaxed max-w-2xl">
                         Connect your application to Afribase using our official and community-driven client libraries. We provide strongly-typed, performant SDKs for every major platform.
                     </p>

@@ -43,7 +43,7 @@ export default function Languages() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-2xl md:text-4xl lg:text-5xl font-black text-white mb-6 uppercase tracking-tighter"
+                        className="text-2xl md:text-2xl lg:text-2xl font-black text-white mb-6 uppercase tracking-tighter"
                     >
                         NATIVE SUPPORT FOR <span className="text-sage">EVERY STACK</span>
                     </motion.h2>

@@ -81,7 +81,7 @@ export default function SettingsPage() {
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
       <div className="space-y-2">
-        <h1 className="text-4xl font-black tracking-tighter text-white">
+        <h1 className="text-2xl font-black tracking-tighter text-white">
           Settings {org && <span className="text-zinc-600 font-medium">/ {org.name}</span>}
         </h1>
         <p className="text-zinc-400 text-sm max-w-md leading-relaxed font-medium">

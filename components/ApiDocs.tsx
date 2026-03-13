@@ -63,7 +63,7 @@ export default function ApiDocs({ projectId, projectSlug, anonKey }: ApiDocsProp
             {/* Elegant Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-2">
-                    <h2 className="text-4xl font-black tracking-tighter text-white flex items-center gap-4">
+                    <h2 className="text-2xl font-black tracking-tighter text-white flex items-center gap-4">
                         <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
                             <Library className="text-emerald-500" size={32} />
                         </div>
@@ -90,8 +90,8 @@ export default function ApiDocs({ projectId, projectSlug, anonKey }: ApiDocsProp
                                 key={sdk.id}
                                 onClick={() => setActiveSdk(sdk.id)}
                                 className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all duration-300 ${activeSdk === sdk.id
-                                        ? `bg-white/5 border-emerald-500/30 text-white shadow-[0_0_20px_rgba(0,0,0,0.2)]`
-                                        : 'bg-transparent border-white/5 text-zinc-500 hover:text-zinc-300 hover:border-white/10'
+                                    ? `bg-white/5 border-emerald-500/30 text-white shadow-[0_0_20px_rgba(0,0,0,0.2)]`
+                                    : 'bg-transparent border-white/5 text-zinc-500 hover:text-zinc-300 hover:border-white/10'
                                     }`}
                             >
                                 <sdk.icon className={`transition-colors ${activeSdk === sdk.id ? sdk.color : 'text-zinc-600'}`} size={18} />

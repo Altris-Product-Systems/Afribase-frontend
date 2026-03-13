@@ -27,7 +27,7 @@ export default function Hero() {
                 <div className="container mx-auto h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-6 relative z-20 gap-12 pt-44 lg:pt-0">
                     {/* Left Side: Centered on mobile, Left-aligned on Desktop */}
                     <div className="flex-1 flex flex-col items-center text-center lg:items-start lg:text-left max-w-2xl">
-                        
+
 
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}

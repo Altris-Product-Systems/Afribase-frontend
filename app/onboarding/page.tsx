@@ -151,7 +151,7 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="animate-fade-in space-y-8">
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">
+                <h1 className="text-2xl font-black text-white tracking-tighter italic uppercase">
                   Establish Org
                 </h1>
                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -198,7 +198,7 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="animate-fade-in space-y-8">
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">
+                <h1 className="text-2xl font-black text-white tracking-tighter italic uppercase">
                   Init Environment
                 </h1>
                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-3">
-                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+                <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">
                   Node Live
                 </h1>
                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] max-w-xs mx-auto">

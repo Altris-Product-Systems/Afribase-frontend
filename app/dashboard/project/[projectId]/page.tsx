@@ -396,7 +396,7 @@ export default function ProjectDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">
+                <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">
                   {tabTitles[activeTab] || project.name}
                 </h1>
                 <span
@@ -1057,7 +1057,7 @@ export default function ProjectDetailPage() {
         activeTab === 'api-keys' && (
           <div className="space-y-10 max-w-5xl animate-fade-in pb-20">
             <div className="flex flex-col gap-2">
-              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
+              <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Project API Keys</h2>
               <p className="text-zinc-500 text-sm font-medium">
                 Use these keys to authenticate your client-side and server-side requests.
                 Your project comes with two keys: a public <span className="text-zinc-300 font-bold">anon</span> key and a secret <span className="text-red-400 font-bold uppercase tracking-tighter italic">service_role</span> key.

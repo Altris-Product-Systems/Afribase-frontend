@@ -339,7 +339,7 @@ export default function ForumManager({ projectId }: ForumManagerProps) {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-white tracking-tight">Community Forum</h2>
+                    <h2 className="text-2xl font-black text-white tracking-tight">Community Forum</h2>
                     <p className="text-zinc-500 text-sm font-medium">Discuss, share and learn with other Afribase developers.</p>
                 </div>
                 <button
