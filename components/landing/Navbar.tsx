@@ -32,6 +32,9 @@ export default function Navbar() {
                     <Link href="#features" className="text-sm font-bold text-white/70 hover:text-white transition-colors">
                         Features
                     </Link>
+                    <Link href="/docs" className="text-sm font-bold text-white/70 hover:text-white transition-colors">
+                        Docs
+                    </Link>
                     <Link href="/projects" className="text-sm font-bold text-white/70 hover:text-white transition-colors">
                         Projects
                     </Link>

@@ -12,8 +12,7 @@ export default function Footer() {
                             <img src="/AFR.png" alt="Afribase Logo" className="h-10 w-auto object-contain drop-shadow-lg" />
                         </div>
                         <p className="text-zinc-500 text-sm max-w-sm leading-relaxed font-medium">
-                            The high-performance platform for modern applications.
-                            Build, scale, and manage your infrastructure with absolute confidence.
+                            Build from the Source. The intelligent backend platform for African innovation.
                         </p>
                     </div>
 
