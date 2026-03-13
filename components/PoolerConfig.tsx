@@ -82,9 +82,9 @@ export default function PoolerConfig({ projectId }: PoolerConfigProps) {
                         <label className="text-xs font-medium text-zinc-500 block mb-1">Pool Mode</label>
                         <select value={config.poolMode || 'transaction'} onChange={e => setConfig((c: any) => ({ ...c, poolMode: e.target.value }))}
                             className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 text-sm rounded focus:outline-none focus:border-indigo-500">
-                            <option value="session">Session — full session lifetime</option>
-                            <option value="transaction">Transaction — pooled per transaction (recommended)</option>
-                            <option value="statement">Statement — pooled per statement</option>
+                            <option value="session">Session  full session lifetime</option>
+                            <option value="transaction">Transaction  pooled per transaction (recommended)</option>
+                            <option value="statement">Statement  pooled per statement</option>
                         </select>
                     </div>
 

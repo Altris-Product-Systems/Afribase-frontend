@@ -23,8 +23,8 @@ const features = [
         description: "Every project is a full Postgres database, the world's most trusted relational database.",
         icon: <Database className="w-6 h-6" />,
         className: "md:col-span-2 md:row-span-1 lg:col-span-2",
-        color: "#2C5F2D", // Forest
-        glow: "rgba(44, 95, 45, 0.2)",
+        color: "#10b981", // Emerald
+        glow: "rgba(16, 185, 129, 0.2)",
         details: [
             "100% portable",
             "Built-in Auth with RLS",
@@ -32,7 +32,7 @@ const features = [
         ],
         image: (
             <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-center justify-center opacity-10 pointer-events-none">
-                <Database size={180} strokeWidth={0.5} className="text-forest" />
+                <Database size={180} strokeWidth={0.5} className="text-emerald-500" />
             </div>
         )
     },
@@ -40,74 +40,51 @@ const features = [
         title: "Authentication",
         description: "Add user sign ups and logins, securing your data with Row Level Security.",
         icon: <Lock className="w-6 h-6" />,
-        color: "#8BA888", // Sage
-        glow: "rgba(139, 168, 136, 0.2)",
+        color: "#f43f5e", // Rose
+        glow: "rgba(244, 63, 94, 0.2)",
         className: "md:col-span-1",
     },
     {
         title: "Edge Functions",
         description: "Easily write custom code without deploying or scaling servers.",
         icon: <Code2 className="w-6 h-6" />,
-        color: "#4A6B5B", // Moss
-        glow: "rgba(74, 107, 91, 0.2)",
+        color: "#8b5cf6", // Violet
+        glow: "rgba(139, 92, 246, 0.2)",
         className: "md:col-span-1",
     },
     {
         title: "Storage",
         description: "Store, organize, and serve large files, from videos to images.",
         icon: <HardDrive className="w-6 h-6" />,
-        color: "#6B7F4C", // Olive
-        glow: "rgba(107, 127, 76, 0.2)",
+        color: "#0ea5e9", // Sky Blue
+        glow: "rgba(14, 165, 233, 0.2)",
         className: "md:col-span-1",
     },
     {
         title: "Realtime",
         description: "Build multiplayer experiences with real-time data synchronization.",
         icon: <Zap className="w-6 h-6" />,
-        color: "#C5E0D4", // Mint
-        glow: "rgba(197, 224, 212, 0.2)",
+        color: "#f59e0b", // Amber
+        glow: "rgba(245, 158, 11, 0.2)",
         className: "md:col-span-1",
     },
     {
         title: "Vector",
         description: "Integrate your favorite ML-models to store, index and search vector embeddings.",
         icon: <Box className="w-6 h-6" />,
-        color: "#D1F0E3", // Seafoam
-        glow: "rgba(209, 240, 227, 0.2)",
+        color: "#ec4899", // Pink
+        glow: "rgba(236, 72, 153, 0.2)",
         className: "md:col-span-1",
     },
     {
         title: "Data APIs",
         description: "Instant ready-to-use Restful APIs.",
         icon: <Table2 className="w-6 h-6" />,
-        color: "#2E7D32", // Success Green
-        glow: "rgba(46, 125, 50, 0.2)",
+        color: "#14b8a6", // Teal
+        glow: "rgba(20, 184, 166, 0.2)",
         className: "md:col-span-1",
     },
-    {
-        title: "Self-host Super Easy",
-        description: "Deploy Afribase on your own infrastructure with a single command.",
-        icon: <HardDrive className="w-6 h-6" />,
-        color: "#1A237E", // Indigo
-        glow: "rgba(26, 35, 126, 0.2)",
-        className: "md:col-span-1",
-    },
-    {
-        title: "Explicit Free Tier",
-        description: "Fair limits that let you grow without surprise bills.",
-        icon: <Zap className="w-6 h-6" />,
-        color: "#FF9800", // Orange
-        glow: "rgba(255, 152, 0, 0.2)",
-        className: "md:col-span-1",
-    },
-    {
-        title: "Supabase Migration",
-        description: "Seamlessly migrate your data and config from Supabase to Afribase.",
-        icon: <GitMerge className="w-6 h-6" />,
-        color: "#EF5350", // Coral/Red
-        glow: "rgba(239, 83, 80, 0.2)",
-        className: "md:col-span-1",
-    }
+
 ];
 
 export default function Features() {
@@ -130,7 +107,7 @@ export default function Features() {
                         transition={{ delay: 0.1 }}
                         className="text-base md:text-lg text-white/60 max-w-2xl mx-auto font-medium"
                     >
-                        Authentication, database, realtime, storage, and AI—all integrated,
+                        Authentication, database, realtime, storage, and AIall integrated,
                         all hosted in Africa.
                     </motion.p>
                 </div>

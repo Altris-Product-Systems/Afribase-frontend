@@ -10,14 +10,7 @@ export default function AfricaFirst() {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="flex flex-col lg:flex-row items-center gap-16">
                     <div className="flex-1 text-center lg:text-left">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sage/10 border border-sage/20 text-sage text-[10px] uppercase font-bold tracking-widest mb-6"
-                        >
-                            <span>Africa First</span>
-                        </motion.div>
+                    
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

@@ -53,10 +53,11 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         <div className="max-w-[1440px] mx-auto h-full px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center transition-transform group-hover:scale-110">
-                <span className="text-black font-black text-lg">A</span>
-              </div>
-              <span className="text-white font-black tracking-tighter text-lg uppercase">Afribase <span className="text-emerald-500">Docs</span></span>
+              <img
+                src="/AFR.png"
+                alt="Afribase Logo"
+                className="h-8 object-contain transition-transform group-hover:scale-110"
+              />
             </Link>
 
             <div className="hidden md:flex items-center gap-6">

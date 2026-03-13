@@ -27,15 +27,7 @@ export default function Hero() {
                 <div className="container mx-auto h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-6 relative z-20 gap-12 pt-44 lg:pt-0">
                     {/* Left Side: Centered on mobile, Left-aligned on Desktop */}
                     <div className="flex-1 flex flex-col items-center text-center lg:items-start lg:text-left max-w-2xl">
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                            className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-forest/20 border border-forest/30 text-sage text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-8"
-                        >
-                            <span className="w-1.5 h-1.5 bg-sage rounded-full" />
-                            <span>Build from the Source</span>
-                        </motion.div>
+                        
 
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}

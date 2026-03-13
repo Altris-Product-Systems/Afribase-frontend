@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Terminal, Code2 } from "lucide-react";
+import { BorderBeam } from "@/components/lightswind/border-beam";
 
 export default function AIFeatures() {
     return (
@@ -14,13 +15,23 @@ export default function AIFeatures() {
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
                             viewport={{ once: true }}
-                            className="p-8 rounded-3xl bg-zinc-900 border border-white/5 shadow-2xl relative overflow-hidden group"
+                            className="p-8 rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.1)] relative overflow-hidden group"
                         >
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-forest/20 blur-[60px] rounded-full group-hover:bg-forest/40 transition-colors" />
+                            <BorderBeam
+                                size={400}
+                                duration={12}
+                                delay={0}
+                                colorFrom="#10b981"
+                                colorTo="#FFFFFF"
+                                borderThickness={3}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                glowIntensity={3}
+                            />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-[60px] rounded-full group-hover:bg-emerald-500/40 transition-colors" />
 
-                            <div className="flex items-center space-x-3 mb-6">
-                                <Terminal size={20} className="text-white/40" />
-                                <div className="text-[10px] uppercase font-black tracking-widest text-white/40">AI Generator</div>
+                            <div className="flex items-center space-x-3 mb-6 relative z-10">
+                                <Terminal size={20} className="text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <div className="text-[10px] uppercase font-black tracking-widest text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity">AI Generator</div>
                             </div>
 
                             <div className="space-y-4 font-mono text-sm">
@@ -67,15 +78,7 @@ export default function AIFeatures() {
                     </div>
 
                     <div className="flex-1 order-1 lg:order-2 text-center lg:text-left">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-forest/10 border border-forest/20 text-sage text-[10px] uppercase font-bold tracking-widest mb-6"
-                        >
-                            <Sparkles size={12} className="text-sage" />
-                            <span>AI Native</span>
-                        </motion.div>
+                        
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

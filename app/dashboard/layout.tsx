@@ -222,6 +222,11 @@ export default function DashboardLayout({
       nocode: '/dashboard/nocode',
       deeplinks: '/dashboard/deeplinks',
       settings: '/dashboard/settings',
+      'org-settings': '/dashboard/settings', // fallback to settings or a specific org-settings page if it exists
+      members: '/dashboard/settings/members',
+      billing: '/dashboard/settings/billing',
+      docs: '/docs',
+      support: '/support',
     };
 
     const baseRoute = routes[id] || '/dashboard';

@@ -18,10 +18,10 @@ export default function DocsPage() {
                     <span className="text-emerald-500 font-black">African Innovation</span>
                 </h1>
                 <p className="text-xl text-zinc-400 font-medium leading-relaxed max-w-2xl">
-                    Afribase is the unified business platform built specifically for the African continent. We provide mission-critical infrastructure optimized for low-latency performance across regional nodes—empowering both <strong>high-code engineers</strong> and <strong>no-code innovators</strong> to build and scale without limits.
+                    Afribase is the unified business platform built specifically for the African continent. We provide mission-critical infrastructure optimized for low-latency performance across regional nodesempowering both <strong>high-code engineers</strong> and <strong>no-code innovators</strong> to build and scale without limits.
                 </p>
 
-                <div className="flex flex-wrap gap-4 pt-4">
+                {/* <div className="flex flex-wrap gap-4 pt-4">
                     <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Lagos Node Active</span>
@@ -34,7 +34,7 @@ export default function DocsPage() {
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Johannesburg Node Active</span>
                     </div>
-                </div>
+                </div> */}
             </section>
 
             {/* ── Key Capabilities ── */}
@@ -221,10 +221,10 @@ final client = AfribaseClient('https://your-project.useafribase.app', 'your-anon
                                     </div>
                                     <div className="flex flex-col items-end">
                                         <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border ${sdk.status === 'Official'
-                                                ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5'
-                                                : sdk.status === 'Alpha'
-                                                    ? 'text-orange-500 border-orange-500/20 bg-orange-500/5'
-                                                    : 'text-zinc-500 border-white/5 bg-white/5'
+                                            ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5'
+                                            : sdk.status === 'Alpha'
+                                                ? 'text-orange-500 border-orange-500/20 bg-orange-500/5'
+                                                : 'text-zinc-500 border-white/5 bg-white/5'
                                             }`}>
                                             {sdk.status}
                                         </span>

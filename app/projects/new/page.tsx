@@ -275,7 +275,7 @@ export default function NewProjectPage() {
                   Generate
                 </button>
               </div>
-              <p className="mt-2 text-xs text-gray-500">Save this password — it cannot be recovered once set.</p>
+              <p className="mt-2 text-xs text-gray-500">Save this password  it cannot be recovered once set.</p>
             </div>
 
             {/* Region */}

@@ -173,7 +173,7 @@ export default function ProjectUsage({ project }: ProjectUsageProps) {
                         </div>
                         <h4 className="text-2xl font-black text-white tracking-tight">Optimized for Scale</h4>
                         <p className="text-zinc-400 text-sm leading-relaxed font-medium">
-                            Your Free plan offers <span className="text-white">600MB Database</span> and <span className="text-white">6GB Bandwidth</span> —
+                            Your Free plan offers <span className="text-white">600MB Database</span> and <span className="text-white">6GB Bandwidth</span>
                             that's 20% more than industry leaders. We calculate usage daily based on stored primitives and egress packets.
                         </p>
                         <div className="pt-4 flex gap-4">

@@ -269,7 +269,7 @@ export default function OnboardingPage() {
                       Generate
                     </button>
                   </div>
-                  <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Save this password — it cannot be recovered.</p>
+                  <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Save this password  it cannot be recovered.</p>
                 </div>
 
                 <div className="flex gap-4 pt-4">
