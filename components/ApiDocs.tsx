@@ -10,9 +10,11 @@ import { getProjectAPIDocs } from '@/lib/api';
 
 interface APIDocsProps {
   projectId: string;
+  projectSlug: string;
+  anonKey?: string;
 }
 
-export default function APIDocs({ projectId }: APIDocsProps) {
+export default function APIDocs({ projectId, projectSlug, anonKey }: APIDocsProps) {
   const [docs, setDocs] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,6 +33,10 @@ export default function APIDocs({ projectId }: APIDocsProps) {
       setIsLoading(false);
     }
   };
+
+  const restUrl = typeof window !== 'undefined' 
+    ? `${window.location.protocol}//${window.location.host}/rest/v1/${projectSlug}`
+    : `https://api.useafribase.app/rest/v1/${projectSlug}`;
 
   return (
     <div className="space-y-10 animate-fade-in pb-32">
@@ -66,7 +72,7 @@ export default function APIDocs({ projectId }: APIDocsProps) {
                     Interactive Swagger UI
                 </h3>
                 <p className="text-zinc-400 text-sm leading-relaxed mb-10 max-w-md">
-                    Explore your PostgREST endpoints, test queries, and view detailed request/response schemas in our full-featured Swagger playground.
+                    Explore your PostgREST endpoints, test queries, and view detailed request/response schemas for <span className="text-emerald-400 font-mono">{projectSlug}</span> in our full-featured Swagger playground.
                 </p>
                 
                 <div className="flex flex-wrap gap-4">
@@ -82,7 +88,12 @@ export default function APIDocs({ projectId }: APIDocsProps) {
             <div className="space-y-4">
                 <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-2">Endpoint Summaries</h4>
                 <div className="space-y-4">
-                    {['GET /rest/v1/auth', 'POST /rest/v1/query', 'GET /rest/v1/tables', 'PATCH /rest/v1/metadata'].map(endpoint => (
+                    {[
+                      `GET ${restUrl}/auth`, 
+                      `POST ${restUrl}/query`, 
+                      `GET ${restUrl}/tables`, 
+                      `PATCH ${restUrl}/metadata`
+                    ].map(endpoint => (
                         <div key={endpoint} className="p-5 bg-zinc-900/40 border border-white/5 rounded-2xl flex items-center justify-between group hover:border-white/10 transition-all">
                             <div className="flex items-center gap-4">
                                 <div className="p-2.5 bg-black/40 border border-white/5 rounded-xl text-emerald-500 font-mono text-[10px] font-black">

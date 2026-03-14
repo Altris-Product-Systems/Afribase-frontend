@@ -1099,6 +1099,8 @@ export default function ProjectDetailPage() {
           <div className="animate-fade-in">
             <ApiDocs
               projectId={project.id}
+              projectSlug={project.slug}
+              anonKey={keys?.anon_key}
             />
           </div>
         )
