@@ -75,15 +75,108 @@ export interface EmailTemplatesConfig {
 export interface ProjectAuthConfig {
   emailEnabled: boolean;
   emailAutoConfirm: boolean;
+  magicLinkEnabled: boolean;
   phoneEnabled: boolean;
+  smsEnabled: boolean;
+  anonymousEnabled: boolean;
   smtp: SmtpConfig;
   templates: EmailTemplatesConfig;
   google: OAuthProviderConfig;
   github: OAuthProviderConfig;
+  gitlab: OAuthProviderConfig;
   facebook: OAuthProviderConfig;
   apple: OAuthProviderConfig;
   twitter: OAuthProviderConfig;
   discord: OAuthProviderConfig;
+  twitch: OAuthProviderConfig;
+  slack: OAuthProviderConfig;
+  linkedin: OAuthProviderConfig;
+  notion: OAuthProviderConfig;
+  zoom: OAuthProviderConfig;
+  bitbucket: OAuthProviderConfig;
+  snapchat: OAuthProviderConfig;
+  figma: OAuthProviderConfig;
+  flyio: OAuthProviderConfig;
+  workos: OAuthProviderConfig;
+  kakao: OAuthProviderConfig;
+  keycloak: OAuthProviderConfig;
+  azuread: OAuthProviderConfig;
+  customOAuth?: Record<string, OAuthProviderConfig>;
+  mfa: {
+    enabled: boolean;
+    totpEnabled: boolean;
+    recoveryEnabled: boolean;
+  };
+  saml: { enabled: boolean };
+  web3: { enabled: boolean };
+  hooks: {
+    customAccessToken?: string;
+    preSignUp?: string;
+    postSignUp?: string;
+    mfaChallenge?: string;
+  };
+  rateLimitPerMinute: number;
+  auditLoggingEnabled: boolean;
+}
+
+// ─── Background Jobs ─────────────────────────────────────────────────────────
+
+export type JobStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'retrying' | 'dead';
+
+export interface Job {
+  id: string;
+  projectId: string;
+  name: string;
+  payload: any;
+  status: JobStatus;
+  attempts: number;
+  maxAttempts: number;
+  error?: string;
+  runAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EnqueueJobRequest {
+  name: string;
+  payload: any;
+  runAt?: string;
+  maxAttempts?: number;
+}
+
+export interface JobListResponse {
+  jobs: Job[];
+  total: number;
+}
+
+// ─── Env Config ──────────────────────────────────────────────────────────────
+
+export interface EnvConfig {
+  key: string;
+  value: string;
+  updatedAt: string;
+}
+
+export interface SetEnvConfigRequest {
+  key: string;
+  value: string;
+}
+
+// ─── Project Transfer ────────────────────────────────────────────────────────
+
+export interface TransferProjectRequest {
+  targetUserId?: string;
+  targetOrgId?: string;
+}
+
+// ─── Org Roles ───────────────────────────────────────────────────────────────
+
+export type OrgRole = 'owner' | 'admin' | 'developer' | 'billing' | 'viewer' | 'member';
+
+// OrgMember is defined below with rich user detail
+
+export interface UpdateOrgMemberRoleRequest {
+  role: OrgRole;
 }
 
 export interface SmtpSummary {
@@ -100,10 +193,28 @@ export interface SmtpSummary {
 export interface AuthConfigResponse {
   emailEnabled: boolean;
   emailAutoConfirm: boolean;
+  magicLinkEnabled: boolean;
   phoneEnabled: boolean;
+  smsEnabled: boolean;
+  anonymousEnabled: boolean;
   smtp: SmtpSummary;
   templates: EmailTemplatesConfig;
   providers: Record<string, ProviderSummary>;
+  mfa: {
+    enabled: boolean;
+    totpEnabled: boolean;
+    recoveryEnabled: boolean;
+  };
+  saml: { enabled: boolean };
+  web3: { enabled: boolean };
+  hooks: {
+    customAccessToken?: string;
+    preSignUp?: string;
+    postSignUp?: string;
+    mfaChallenge?: string;
+  };
+  rateLimitPerMinute: number;
+  auditLoggingEnabled: boolean;
   sdkSnippet: {
     javascript: string;
     dart: string;
@@ -113,18 +224,62 @@ export interface AuthConfigResponse {
   };
 }
 
+export interface OrgMember {
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+    avatarUrl?: string;
+  };
+  role: OrgRole;
+  joinedAt: string;
+}
+
 export interface UpdateAuthConfigRequest {
   emailEnabled?: boolean;
   emailAutoConfirm?: boolean;
+  magicLinkEnabled?: boolean;
   phoneEnabled?: boolean;
+  smsEnabled?: boolean;
+  anonymousEnabled?: boolean;
   smtp?: Partial<SmtpConfig>;
   templates?: Partial<EmailTemplatesConfig>;
   google?: OAuthProviderConfig;
   github?: OAuthProviderConfig;
+  gitlab?: OAuthProviderConfig;
   facebook?: OAuthProviderConfig;
   apple?: OAuthProviderConfig;
   twitter?: OAuthProviderConfig;
   discord?: OAuthProviderConfig;
+  twitch?: OAuthProviderConfig;
+  slack?: OAuthProviderConfig;
+  linkedin?: OAuthProviderConfig;
+  notion?: OAuthProviderConfig;
+  zoom?: OAuthProviderConfig;
+  bitbucket?: OAuthProviderConfig;
+  snapchat?: OAuthProviderConfig;
+  figma?: OAuthProviderConfig;
+  flyio?: OAuthProviderConfig;
+  workos?: OAuthProviderConfig;
+  kakao?: OAuthProviderConfig;
+  keycloak?: OAuthProviderConfig;
+  azuread?: OAuthProviderConfig;
+  customOAuth?: Record<string, OAuthProviderConfig>;
+  mfa?: {
+    enabled?: boolean;
+    totpEnabled?: boolean;
+    recoveryEnabled?: boolean;
+  };
+  saml?: { enabled?: boolean };
+  web3?: { enabled?: boolean };
+  hooks?: {
+    customAccessToken?: string;
+    preSignUp?: string;
+    postSignUp?: string;
+    mfaChallenge?: string;
+  };
+  rateLimitPerMinute?: number;
+  auditLoggingEnabled?: boolean;
 }
 
 export interface ProjectIdentity {
@@ -426,12 +581,12 @@ export interface Organization {
 
 export interface MemberResponse {
   user: User;
-  role: 'owner' | 'admin' | 'member';
+  role: OrgRole;
 }
 
 export interface InviteMemberRequest {
   email: string;
-  role: 'admin' | 'member';
+  role: OrgRole;
 }
 
 export interface CreateOrganizationRequest {
@@ -2681,4 +2836,142 @@ export async function deleteDeepLinkConfig(projectId: string): Promise<void> {
     const data = await response.json().catch(() => ({}));
     throw new APIError(response.status, data.error || 'Failed to delete deep link config');
   }
+}
+// ── Background Jobs ─────────────────────────────────────────────────────────
+
+export async function listJobs(projectId: string, status?: string): Promise<JobListResponse> {
+  const token = getAuthToken();
+  const url = status 
+    ? `${API_BASE_URL}/api/projects/${projectId}/jobs?status=${status}` 
+    : `${API_BASE_URL}/api/projects/${projectId}/jobs`;
+  const response = await apiFetch(url, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list jobs');
+  return data;
+}
+
+export async function enqueueJob(projectId: string, req: EnqueueJobRequest): Promise<Job> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/jobs`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to enqueue job');
+  return data;
+}
+
+export async function retryJob(projectId: string, jobId: string): Promise<Job> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/jobs/${jobId}/retry`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to retry job');
+  return data;
+}
+
+export async function cancelJob(projectId: string, jobId: string): Promise<void> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/jobs/${jobId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to cancel job');
+  }
+}
+
+// ── Env Config ──────────────────────────────────────────────────────────────
+
+export async function listEnvConfig(projectId: string): Promise<EnvConfig[]> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/config`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to list config');
+  return data;
+}
+
+export async function setEnvConfig(projectId: string, req: SetEnvConfigRequest): Promise<EnvConfig> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/config`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to set config');
+  return data;
+}
+
+export async function deleteEnvConfig(projectId: string, key: string): Promise<void> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/config/${key}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to delete config');
+  }
+}
+
+// ── Project Transfer ────────────────────────────────────────────────────────
+
+export async function transferProject(projectId: string, req: TransferProjectRequest): Promise<void> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/transfer`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to transfer project');
+  }
+}
+
+export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
+  const token = getAuthToken();
+  if (!token) throw new APIError(401, 'Not authenticated');
+  const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}/members`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch members');
+  return data;
+}
+
+// ── Org Member Roles ────────────────────────────────────────────────────────
+
+export async function updateOrgMemberRole(orgId: string, userId: string, role: OrgRole): Promise<void> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/organizations/${orgId}/members/${userId}/role`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new APIError(response.status, data.error || 'Failed to update member role');
+  }
+}
+
+// ── API Docs ────────────────────────────────────────────────────────────────
+
+export async function getProjectAPIDocs(projectId: string): Promise<any> {
+  const token = getAuthToken();
+  const response = await apiFetch(`${API_BASE_URL}/api/projects/${projectId}/api-docs`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new APIError(response.status, data.error || 'Failed to fetch API docs');
+  return data;
 }

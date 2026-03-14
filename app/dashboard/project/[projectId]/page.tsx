@@ -16,6 +16,9 @@ import {
   TableInfo,
   ProjectUsage,
   QueryResult,
+  listOrgMembers,
+  transferProject,
+  updateOrgMemberRole,
 } from '@/lib/api';
 import {
   Database,
@@ -45,6 +48,8 @@ import {
   Search,
   Filter,
   XCircle,
+  Mail,
+  AlertCircle,
 } from 'lucide-react';
 
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
@@ -73,6 +78,9 @@ import ForumManager from '@/components/ForumManager';
 import HealthMonitor from '@/components/HealthMonitor';
 import NocodeManager from '@/components/NocodeManager';
 import DeepLinkManager from '@/components/DeepLinkManager';
+import JobQueue from '@/components/JobQueue';
+import EnvConfig from '@/components/EnvConfig';
+import AuthConfig from '@/components/AuthConfig';
 import toast from 'react-hot-toast';
 import { Modal } from '@/components/ui/Modal';
 import DataTable from '@/components/DataTable';
@@ -109,8 +117,8 @@ function parseSizeToBytes(sizeStr?: string | number): number {
 }
 
 const TABS = [
-  'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'users', 'policies', 'sso',
-  'api-keys', 'storage', 'edge-functions', 'realtime',
+  'overview', 'tables', 'sql', 'api', 'libraries', 'auth', 'auth-config', 'users', 'policies', 'sso',
+  'api-keys', 'storage', 'edge-functions', 'realtime', 'jobs', 'config', 'api-docs',
   'migrations', 'backups', 'branches', 'webhooks', 'pooler',
   'cron', 'logs', 'log-drains', 'usage', 'domains', 'network', 'vault', 'advanced', 'forum', 'health', 'nocode', 'deeplinks', 'settings',
 ] as const;
@@ -143,11 +151,15 @@ export default function ProjectDetailPage() {
     overview: project?.name || 'Project Overview',
     database: 'Table Editor',
     sql: 'SQL Editor',
-    auth: 'Authentication',
+    auth: 'Auth Logs',
+    'auth-config': 'Authentication Settings',
     users: 'Users',
     policies: 'RLS Policies',
     storage: 'Storage',
     'edge-functions': 'Edge Functions',
+    jobs: 'Background Job Queue',
+    config: 'Environment Config',
+    'api-docs': 'API Documentation',
     nocode: 'No-Code Hub',
     health: 'Health & Monitoring',
     forum: 'Developer Forum',
@@ -193,6 +205,12 @@ export default function ProjectDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
+  
+  const [transferTarget, setTransferTarget] = useState('');
+  const [transferring, setTransferring] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [members, setMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // ── Load project + keys ──────────────────────────────────────────────────
@@ -333,6 +351,47 @@ export default function ProjectDetailPage() {
   const handleDeleteTable = (schema: string, tableName: string) => {
     setTableToDelete({ schema, name: tableName });
     setIsTableModalOpen(true);
+  };
+
+  const loadMembers = async () => {
+    if (!project?.organizationId) return;
+    setLoadingMembers(true);
+    try {
+      const data = await listOrgMembers(project.organizationId);
+      setMembers(data);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to load team members');
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!project) return;
+    setTransferring(true);
+    try {
+      await transferProject(project.id, { 
+        targetUserId: transferTarget,
+        targetOrgId: '' 
+      });
+      toast.success('Project transfer initiated');
+      router.push('/dashboard');
+    } catch (err: any) {
+      toast.error(err.message || 'Transfer failed');
+    } finally {
+      setTransferring(false);
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, role: any) => {
+    if (!project?.organizationId) return;
+    try {
+      await updateOrgMemberRole(project.organizationId, userId, role);
+      toast.success('Member role updated');
+      loadMembers();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update role');
+    }
   };
 
   const confirmDeleteTable = async () => {
@@ -1001,6 +1060,14 @@ export default function ProjectDetailPage() {
       }
 
       {
+        activeTab === 'auth-config' && (
+          <div className="animate-fade-in">
+            <AuthConfig projectId={project.id} />
+          </div>
+        )
+      }
+
+      {
         activeTab === 'users' && (
           <div className="animate-fade-in">
             <AuthUsers projectId={project.id} />
@@ -1032,8 +1099,6 @@ export default function ProjectDetailPage() {
           <div className="animate-fade-in">
             <ApiDocs
               projectId={project.id}
-              projectSlug={project.slug}
-              anonKey={keys?.anon_key || project.anonKey || ''}
             />
           </div>
         )
@@ -1530,6 +1595,66 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
+            {/* Team Roles & Permissions */}
+            <div className="glass-card p-8 rounded-3xl border border-white/5 space-y-8">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">Team Roles</h3>
+                        <p className="text-zinc-500 text-xs font-medium mt-1">Manage team access and granular permissions.</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                    <div className="p-4 bg-zinc-950 border border-white/5 rounded-2xl flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                                <Users size={18} />
+                            </div>
+                            <div>
+                                <p className="text-white font-bold text-sm">Organization Members</p>
+                                <p className="text-zinc-500 text-[10px] font-medium uppercase tracking-widest">Manage roles (Admin, Developer, Viewer)</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setShowTeamModal(true);
+                                loadMembers();
+                            }}
+                            className="px-4 py-2 bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all"
+                        >
+                            Manage Team
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Project Transfer */}
+            <div className="glass-card p-8 rounded-3xl border border-white/5 space-y-6">
+                <div className="flex items-center gap-3">
+                    <RefreshCw size={16} className="text-zinc-400" />
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Transfer Project</h4>
+                </div>
+                <p className="text-xs text-zinc-500 font-medium">
+                    Move this project to another user or organziation. You will lose access unless you are a member of the destination.
+                </p>
+                <div className="flex gap-3 max-w-md">
+                    <input 
+                        type="text" 
+                        value={transferTarget}
+                        onChange={(e) => setTransferTarget(e.target.value)}
+                        placeholder="Destination Email or Org ID"
+                        className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white focus:border-emerald-500/50 outline-none"
+                    />
+                    <button 
+                        onClick={handleTransfer}
+                        disabled={!transferTarget || transferring}
+                        className="px-5 py-2.5 bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                    >
+                        {transferring ? <RefreshCw size={12} className="animate-spin" /> : 'Transfer'}
+                    </button>
+                </div>
+            </div>
+
             {/* Danger Zone */}
             <div className="p-8 border border-red-500/20 bg-red-500/5 rounded-3xl space-y-6">
               <div className="flex items-center gap-3">
@@ -1675,6 +1800,62 @@ export default function ProjectDetailPage() {
         <p className="text-zinc-400 text-sm leading-relaxed">
           Are you sure you want to delete the table <span className="text-white font-bold">{tableToDelete?.schema}.{tableToDelete?.name}</span>? This action is irreversible and all data within this table will be lost forever.
         </p>
+      </Modal>
+
+      {/* Team Management Modal */}
+      <Modal 
+        isOpen={showTeamModal} 
+        onClose={() => setShowTeamModal(false)}
+        title="Team Roles & Permissions"
+      >
+        <div className="space-y-6">
+            <p className="text-zinc-500 text-xs">
+                Manage roles for users in the organization. 
+                Roles define access levels across all projects in this organization.
+            </p>
+
+            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
+                {loadingMembers ? (
+                    <div className="flex justify-center py-10">
+                        <RefreshCw className="animate-spin text-emerald-500" />
+                    </div>
+                ) : (
+                    members.map(member => (
+                        <div key={member.user.id} className="p-4 bg-zinc-900/50 border border-white/5 rounded-2xl flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-black text-white">
+                                    {member.user.fullName?.[0] || member.user.email?.[0]?.toUpperCase() || 'U'}
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-white">{member.user.fullName || 'User'}</p>
+                                    <p className="text-[10px] text-zinc-500">{member.user.email}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <select 
+                                    value={member.role}
+                                    onChange={(e) => handleUpdateRole(member.user.id, e.target.value)}
+                                    className="bg-black border border-white/10 rounded-lg text-[10px] text-zinc-400 px-2 py-1 outline-none focus:border-emerald-500/50"
+                                >
+                                    <option value="owner">Owner</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="developer">Developer</option>
+                                    <option value="viewer">Viewer</option>
+                                    <option value="member">Member</option>
+                                </select>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <button 
+                onClick={() => setShowTeamModal(false)}
+                className="w-full py-3 bg-zinc-900 border border-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all font-mono"
+            >
+                Close Manager
+            </button>
+        </div>
       </Modal>
 
     </div>

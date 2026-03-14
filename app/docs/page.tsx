@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookOpen, Database, Users, HardDrive, Zap, Globe, Activity } from 'lucide-react';
+import { BookOpen, Database, Users, HardDrive, Zap, Globe, Activity, Terminal } from 'lucide-react';
 import { FeatureCard, CodeBlock, Callout, Step } from '@/components/DocsComponents';
 
 export default function DocsPage() {
@@ -64,6 +64,12 @@ export default function DocsPage() {
                         description="Execute server-side logic globally on the edge for ultra-low latency compute."
                         icon={Zap}
                         href="/docs/edge-functions"
+                    />
+                    <FeatureCard
+                        title="CLI Tool"
+                        description="A professional-grade terminal interface to manage projects, deploy code, and more."
+                        icon={Terminal}
+                        href="/docs/cli"
                     />
                 </div>
             </section>

@@ -203,61 +203,47 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                                         <div className="space-y-4">
                                             <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Required DNS Records</h5>
 
-                                            {/* TXT Record */}
-                                            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="flex items-center gap-2 text-xs font-black text-white">
-                                                        <span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[10px]">TXT</span> verification
-                                                    </span>
-                                                    {d.txtVerified ? (
-                                                        <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold uppercase"><CheckCircle2 size={10} /> Found</span>
-                                                    ) : (
-                                                        <span className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase"><Clock size={10} /> Missing</span>
-                                                    )}
-                                                </div>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    <div className="col-span-1 space-y-1">
-                                                        <p className="text-[9px] text-zinc-600 uppercase font-black">Host</p>
-                                                        <div onClick={() => copyToClipboard(`_afribase-verify.${d.domain}`)} className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20">
-                                                            _afribase-verify
-                                                        </div>
+                                            {/* Dynamic DNS Records from Backend */}
+                                            {(d.dns_records || []).map((record: any, idx: number) => (
+                                                <div key={idx} className="p-4 rounded-xl border border-white/5 bg-white/[0.02] space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="flex items-center gap-2 text-xs font-black text-white">
+                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                                record.type === 'TXT' ? 'bg-blue-500/20 text-blue-400' : 
+                                                                record.type === 'A' ? 'bg-orange-500/20 text-orange-400' :
+                                                                'bg-purple-500/20 text-purple-400'
+                                                            }`}>{record.type}</span> {record.type === 'TXT' ? 'verification' : 'routing'}
+                                                        </span>
+                                                        {record.status === 'verified' ? (
+                                                            <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold uppercase"><CheckCircle2 size={10} /> Found</span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase"><Clock size={10} /> Missing</span>
+                                                        )}
                                                     </div>
-                                                    <div className="col-span-2 space-y-1">
-                                                        <p className="text-[9px] text-zinc-600 uppercase font-black">Value</p>
-                                                        <div onClick={() => copyToClipboard(d.verificationTxt || d.verificationTXT)} className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20">
-                                                            {d.verificationTxt || d.verificationTXT}
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="col-span-1 space-y-1">
+                                                            <p className="text-[9px] text-zinc-600 uppercase font-black">Host</p>
+                                                            <div 
+                                                                onClick={() => copyToClipboard(record.name.replace(`.${d.domain}`, '') || '@')} 
+                                                                className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20"
+                                                                title={record.name}
+                                                            >
+                                                                {record.name.includes(d.domain) ? (record.name.replace(`.${d.domain}`, '') || '@') : record.name}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* CNAME Record */}
-                                            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="flex items-center gap-2 text-xs font-black text-white">
-                                                        <span className="bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded text-[10px]">CNAME</span> alias
-                                                    </span>
-                                                    {d.cnameVerified ? (
-                                                        <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold uppercase"><CheckCircle2 size={10} /> Found</span>
-                                                    ) : (
-                                                        <span className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase"><Clock size={10} /> Missing</span>
-                                                    )}
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] text-zinc-600 uppercase font-black">Host</p>
-                                                        <div onClick={() => copyToClipboard(d.domain)} className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20">
-                                                            {d.domain.split('.')[0] === 'api' ? 'api' : '@'}
-                                                        </div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <p className="text-[9px] text-zinc-600 uppercase font-black">Target</p>
-                                                        <div onClick={() => copyToClipboard(d.cnameTarget || 'api.useafribase.app')} className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20">
-                                                            {d.cnameTarget || 'api.useafribase.app'}
+                                                        <div className="col-span-2 space-y-1">
+                                                            <p className="text-[9px] text-zinc-600 uppercase font-black">Value</p>
+                                                            <div 
+                                                                onClick={() => copyToClipboard(record.value)} 
+                                                                className="bg-black/50 p-2 rounded border border-white/5 text-[11px] font-mono text-zinc-300 truncate cursor-pointer hover:border-white/20"
+                                                                title={record.value}
+                                                            >
+                                                                {record.value}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            ))}
                                         </div>
 
                                         {/* Instructions Column */}
@@ -268,8 +254,7 @@ export default function DomainsManager({ projectId }: DomainsManagerProps) {
                                                     <h5 className="text-xs font-black text-white uppercase tracking-widest">Verification Status</h5>
                                                 </div>
                                                 <p className="text-sm text-zinc-400 leading-relaxed mb-4">
-                                                    DNS changes usually propagate within minutes, but can take up to 24-48 hours.
-                                                    Your project will be served over HTTPS automatically once the domain is verified.
+                                                    {d.instructions || "DNS changes usually propagate within minutes, but can take up to 24-48 hours. Your project will be served over HTTPS automatically once the domain is verified."}
                                                 </p>
                                                 {d.lastCheckError && (
                                                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl mb-4">

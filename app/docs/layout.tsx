@@ -14,7 +14,9 @@ import {
   X,
   ChevronRight,
   Search,
-  Github
+  Github,
+  Terminal,
+  Command as CommandIcon 
 } from 'lucide-react';
 
 const docsNavigation = [
@@ -23,6 +25,7 @@ const docsNavigation = [
     links: [
       { name: 'Introduction', href: '/docs', icon: BookOpen },
       { name: 'Architecture', href: '/docs/architecture', icon: Activity },
+      { name: 'CLI Tool', href: '/docs/cli', icon: Terminal },
     ],
   },
   {
@@ -40,11 +43,37 @@ const docsNavigation = [
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
+
+  // Keyboard shortcut CMD+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Search Results
+  const allLinks = docsNavigation.flatMap(section => 
+    section.links.map(link => ({ ...link, section: section.title }))
+  );
+
+  const filteredResults = searchQuery.trim() === '' 
+    ? allLinks.slice(0, 5) // Show top items if search is empty
+    : allLinks.filter(link => 
+        link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        link.section.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-emerald-500/30 selection:text-emerald-400">
@@ -69,12 +98,72 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 group hover:border-emerald-500/30 transition-all cursor-text">
+          <div className="flex items-center gap-4 relative">
+            <div 
+              onClick={() => setIsSearchOpen(true)}
+              className="hidden sm:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 group hover:border-emerald-500/30 transition-all cursor-text"
+            >
               <Search size={14} className="text-zinc-500 group-hover:text-emerald-400" />
               <span className="text-xs text-zinc-500 group-hover:text-white font-medium">Search documentation...</span>
               <kbd className="text-[10px] bg-white/5 border border-white/10 px-1 rounded text-zinc-600">⌘K</kbd>
             </div>
+
+            {/* Implementation of Search Results / Modal could go here if we want a separate component */}
+            {isSearchOpen && (
+              <div className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 sm:px-6">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsSearchOpen(false)} />
+                <div className="relative w-full max-w-xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-zoom-in">
+                  <div className="p-4 border-b border-white/5 flex items-center gap-3">
+                    <Search size={18} className="text-zinc-500" />
+                    <input 
+                      autoFocus
+                      type="text"
+                      placeholder="Search for topics, features, or commands..."
+                      className="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder:text-zinc-600"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setIsSearchOpen(false);
+                      }}
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <kbd className="text-[10px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-zinc-500">ESC</kbd>
+                    </div>
+                  </div>
+
+                  <div className="max-h-[60vh] overflow-y-auto p-2">
+                    {filteredResults.length > 0 ? (
+                      <div className="space-y-1">
+                        {filteredResults.map((result, idx) => {
+                          const Icon = result.icon;
+                          return (
+                            <Link
+                              key={idx}
+                              href={result.href}
+                              onClick={() => setIsSearchOpen(false)}
+                              className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 group transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-colors">
+                                <Icon size={16} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-semibold text-white truncate">{result.name}</h4>
+                                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">{result.section}</p>
+                              </div>
+                              <ChevronRight size={14} className="text-zinc-700 group-hover:text-zinc-400" />
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-12 text-center">
+                        <p className="text-sm text-zinc-500">No results found for "{searchQuery}"</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
