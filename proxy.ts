@@ -12,7 +12,7 @@ const protectedRoutes = [
 // Routes that should redirect to dashboard if already authenticated
 const authRoutes = ['/auth/sign-in', '/auth/sign-up'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('authToken')?.value;
   const pathname = request.nextUrl.pathname;
 
