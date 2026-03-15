@@ -42,6 +42,27 @@ function SignInContent() {
       // Store the JWT token
       setAuthToken(data.token);
 
+      // Check for a post-login redirect (e.g. from org invite link)
+      const redirectTo = searchParams.get('redirect');
+      if (redirectTo) {
+        // Clear any stored invite redirect
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('invite_redirect');
+        }
+        router.push(redirectTo);
+        return;
+      }
+
+      // Also check localStorage for invite redirects (set by org landing page)
+      if (typeof window !== 'undefined') {
+        const storedRedirect = localStorage.getItem('invite_redirect');
+        if (storedRedirect) {
+          localStorage.removeItem('invite_redirect');
+          router.push(storedRedirect);
+          return;
+        }
+      }
+
       // Check if user already has organizations
       try {
         const orgs = await getOrganizations();
@@ -54,9 +75,9 @@ function SignInContent() {
         }
       } catch (orgErr) {
         // If we can't check organizations, default to onboarding
-        // console.error('Failed to check organizations:', orgErr);
         router.push('/onboarding');
       }
+
     } catch (err) {
       // Login failed - DO NOT redirect, just show error
       if (err instanceof APIError) {
