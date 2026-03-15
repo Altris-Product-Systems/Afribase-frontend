@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signUp, setAuthToken, getOrganizations, APIError } from '@/lib/api';
+import { signUp, signInWithGitHub, setAuthToken, getOrganizations, APIError } from '@/lib/api';
 import AfricaMapAnimation from '@/components/auth/AfricaMapAnimation';
 
 export default function SignUpPage() {
@@ -184,7 +184,7 @@ export default function SignUpPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => { }}
+              onClick={() => signInWithGitHub()}
               className="flex items-center justify-center gap-3 px-4 py-3 border border-white/5 bg-white/[0.02] rounded-xl hover:bg-white/[0.05] transition-all duration-300 hover:border-white/10"
             >
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
