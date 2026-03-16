@@ -19,6 +19,8 @@ import {
   listOrgMembers,
   transferProject,
   updateOrgMemberRole,
+  pauseProject,
+  reactivateProject,
 } from '@/lib/api';
 import {
   Database,
@@ -47,9 +49,11 @@ import {
   Settings,
   Search,
   Filter,
-  XCircle,
-  Mail,
   AlertCircle,
+  Pause,
+  Download,
+  ArrowRight,
+  XCircle,
 } from 'lucide-react';
 
 import { useLoader } from '@/components/ui/GlobalLoaderProvider';
@@ -212,6 +216,35 @@ export default function ProjectDetailPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [lifecycleLoading, setLifecycleLoading] = useState(false);
+
+  const handlePause = async () => {
+    if (!project) return;
+    setLifecycleLoading(true);
+    try {
+      await pauseProject(projectId);
+      toast.success('Project paused');
+      loadProject();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to pause project');
+    } finally {
+      setLifecycleLoading(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!project) return;
+    setLifecycleLoading(true);
+    try {
+      await reactivateProject(projectId);
+      toast.success('Project reactivated');
+      loadProject();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reactivate project');
+    } finally {
+      setLifecycleLoading(false);
+    }
+  };
 
   // ── Load project + keys ──────────────────────────────────────────────────
   useEffect(() => {
@@ -443,6 +476,85 @@ export default function ProjectDetailPage() {
       </div>
     );
 
+  if (project.status === 'archived') {
+    return (
+      <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
+        {/* Header for archived project */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-lg">
+                <Database className="text-red-400" size={24} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">
+                    {project.name}
+                  </h1>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-red-500/10 text-red-500 border border-red-500/20">
+                    Archived
+                  </span>
+                </div>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">
+                  ID: <span className="text-zinc-400">{project.id}</span> • Region:{' '}
+                  <span className="text-zinc-400">{project.region}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-400 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2 active:scale-95 uppercase tracking-widest"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+
+        <div className="glass-card p-12 rounded-[2rem] border border-red-500/10 bg-gradient-to-br from-red-500/5 to-transparent flex flex-col items-center text-center space-y-8">
+          <div className="w-20 h-20 rounded-3xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_50px_-12px_rgba(239,68,68,0.3)]">
+            <AlertTriangle size={40} className="text-red-500" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+              Project Permanently Archived
+            </h2>
+            <p className="text-zinc-500 max-w-xl text-lg font-medium leading-relaxed">
+              Due to 30 days of inactivity, this project is no longer active. You can no longer access the online version, but your data is safe.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            <button
+              onClick={() => toast.success('Backend backup preparation started...')}
+              className="glass-card p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group flex flex-col items-center space-y-4"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Download size={28} className="text-emerald-400" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-white font-black uppercase tracking-widest text-sm">Download Backend</h4>
+                <p className="text-zinc-500 text-xs font-medium">Get a full backup to setup locally on your machine.</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => toast.success('Migration wizard opening...')}
+              className="glass-card p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group flex flex-col items-center space-y-4"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ArrowRight size={28} className="text-cyan-400" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-white font-black uppercase tracking-widest text-sm">Migrate Data</h4>
+                <p className="text-zinc-500 text-xs font-medium">Create a new project and transfer your existing data.</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-10 animate-gelatinous-in">
@@ -459,10 +571,13 @@ export default function ProjectDetailPage() {
                   {tabTitles[activeTab] || project.name}
                 </h1>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${project.status === 'active'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-zinc-800 text-zinc-500 border border-white/5'
-                    }`}
+                  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
+                    project.status === 'active'
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : project.status === 'paused'
+                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      : 'bg-zinc-800 text-zinc-500 border border-white/5'
+                  }`}
                 >
                   {project.status || 'Active'}
                 </span>
@@ -479,15 +594,35 @@ export default function ProjectDetailPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {project.status === 'active' && (
+            <button
+              onClick={handlePause}
+              disabled={lifecycleLoading}
+              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-amber-500/20 text-amber-500 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 active:scale-95 uppercase tracking-widest disabled:opacity-50"
+            >
+              <Pause size={16} strokeWidth={3} />
+              Pause
+            </button>
+          )}
+          {project.status === 'paused' && (
+            <button
+              onClick={handleReactivate}
+              disabled={lifecycleLoading}
+              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] active:scale-95 uppercase tracking-widest disabled:opacity-50"
+            >
+              <Play size={16} strokeWidth={3} />
+              Reactivate
+            </button>
+          )}
           <button
             onClick={() => loadProject()}
             className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-400 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2 active:scale-95 uppercase tracking-widest"
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
           </button>
           <button className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 text-xs font-black rounded-lg transition-all duration-300 flex items-center gap-2.5 active:scale-95 uppercase tracking-widest">
             <Zap size={16} className="text-amber-500" />
-            Upgrade Plan
+            Upgrade
           </button>
         </div>
       </div>

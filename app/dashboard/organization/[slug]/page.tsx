@@ -272,7 +272,7 @@ export default function OrganizationLandingPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${
-                        project.status === 'active' || project.status === 'ACTIVE'
+                        project.status === 'active'
                           ? 'bg-emerald-500 animate-pulse'
                           : 'bg-zinc-600'
                       }`} />

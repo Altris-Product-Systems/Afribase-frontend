@@ -753,7 +753,7 @@ export interface Project {
   realtimeUrl?: string;
   storageUrl?: string;
   authUrl?: string;
-  status?: string;
+  status?: 'creating' | 'active' | 'paused' | 'archived' | 'failed' | 'deleted';
   createdAt?: string;
   updatedAt?: string;
 }

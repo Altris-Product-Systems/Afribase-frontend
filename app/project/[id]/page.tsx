@@ -133,7 +133,7 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  const statusColor = project.status === 'active' || project.status === 'ACTIVE'
+  const statusColor = project.status === 'active'
     ? 'bg-green-500'
     : project.status === 'paused'
       ? 'bg-yellow-500'
