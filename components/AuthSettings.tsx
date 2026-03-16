@@ -37,6 +37,11 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
     const [editingSmtp, setEditingSmtp] = useState(false);
     const [smtpForm, setSmtpForm] = useState<Partial<SmtpConfig>>({});
 
+    // Site URL state
+    const [siteURL, setSiteURL] = useState('');
+    const [redirectURLs, setRedirectURLs] = useState('');
+    const [isSavingSiteURL, setIsSavingSiteURL] = useState(false);
+
     // Template Form state
     const [editingTemplate, setEditingTemplate] = useState<keyof EmailTemplatesConfig | null>(null);
     const [templateForm, setTemplateForm] = useState<EmailTemplate>({ subject: '', content: '' });
@@ -51,8 +56,9 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
         try {
             const data = await getAuthConfig(projectId);
             setConfig(data);
+            setSiteURL((data as any).siteUrl || '');
+            setRedirectURLs(((data as any).redirectUrls || []).join('\n'));
         } catch (err) {
-            // console.error('Failed to load auth config:', err);
             setMessage({ type: 'error', text: 'Failed to load authentication settings.' });
         } finally {
             setIsLoading(false);
@@ -127,6 +133,22 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
         }
     };
 
+    const handleSaveSiteURL = async () => {
+        setIsSavingSiteURL(true);
+        try {
+            const urls = redirectURLs.split('\n').map(u => u.trim()).filter(Boolean);
+            await updateAuthConfig(projectId, {
+                siteUrl: siteURL,
+                redirectUrls: urls,
+            } as any);
+            setMessage({ type: 'success', text: 'Site URL updated. Restart the auth container to apply.' });
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to update Site URL.' });
+        } finally {
+            setIsSavingSiteURL(false);
+        }
+    };
+
     const handleSaveTemplate = async () => {
         if (!editingTemplate) return;
         setIsSaving(true);
@@ -154,6 +176,14 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
             </div>
         );
     }
+
+    const TEMPLATE_META: Record<keyof EmailTemplatesConfig, { label: string; desc: string; when: string }> = {
+        invite:       { label: 'Invite User',        desc: 'Sent when a user is invited to join your application.', when: 'On invitation' },
+        confirmation: { label: 'Confirm Signup',     desc: 'Sent when a user signs up and must verify their email.', when: 'On signup' },
+        recovery:     { label: 'Reset Password',     desc: 'Sent when a user requests a password reset.', when: 'On password reset' },
+        magicLink:    { label: 'Magic Link',         desc: 'Sent when a user requests passwordless sign-in.', when: 'On magic link request' },
+        emailChange:  { label: 'Confirm Email Change', desc: 'Sent when a user requests to change their email.', when: 'On email change' },
+    };
 
     const providers = [
         { id: 'google', name: 'Google', icon: FaGoogle, color: 'text-rose-500', portal: 'https://console.cloud.google.com/' },
@@ -189,6 +219,49 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
             <div className="space-y-8">
                 {/* Email and OAuth Sections - Full Width */}
                 <div className="space-y-8">
+                    {/* ------- SITE URL SECTION ------- */}
+                    <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                            <Globe className="text-blue-400" size={18} />
+                            <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Site URL &amp; Redirect Config</span>
+                            <span className="ml-auto text-[10px] font-black text-blue-400 bg-blue-400/10 border border-blue-400/20 px-2 py-1 rounded-full uppercase tracking-widest">Required for email confirmation</span>
+                        </div>
+                        <div className="p-6 space-y-5">
+                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                                <span className="text-white font-bold">Site URL</span> is your application's URL — GoTrue embeds it inside every confirmation and recovery email link. Without it, confirmation emails will redirect to the wrong place.
+                            </p>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Site URL</label>
+                                <input
+                                    type="url"
+                                    value={siteURL}
+                                    onChange={(e) => setSiteURL(e.target.value)}
+                                    placeholder="https://myapp.com  or  http://localhost:3000"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500/50 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Additional Redirect URLs <span className="text-zinc-600 normal-case">— one per line</span></label>
+                                <textarea
+                                    rows={3}
+                                    value={redirectURLs}
+                                    onChange={(e) => setRedirectURLs(e.target.value)}
+                                    placeholder={`https://myapp.com/auth/callback\nhttps://staging.myapp.com/**`}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-blue-500/50 transition-colors resize-none"
+                                />
+                                <p className="text-[10px] text-zinc-600 font-medium">Wildcards supported: <code className="text-zinc-400">https://myapp.com/**</code></p>
+                            </div>
+                            <button
+                                disabled={isSavingSiteURL}
+                                onClick={handleSaveSiteURL}
+                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                            >
+                                {isSavingSiteURL ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save size={14} />}
+                                Save Site URL
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Email Settings */}
                     <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
                         <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
@@ -380,26 +453,26 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-white font-bold text-sm uppercase flex items-center gap-2 italic">
                                             <PenTool size={14} className="text-emerald-500" />
-                                            Editing {editingTemplate} Template
+                                            {TEMPLATE_META[editingTemplate]?.label} Template
                                         </h4>
                                         <div className="flex items-center gap-1 bg-zinc-900 border border-white/5 p-1 rounded-lg">
                                             <button
                                                 onClick={() => setPreviewMode(false)}
                                                 className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!previewMode ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-zinc-300'}`}
                                             >
-                                                Code
+                                                Source
                                             </button>
                                             <button
                                                 onClick={() => setPreviewMode(true)}
                                                 className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${previewMode ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-zinc-300'}`}
                                             >
-                                                Visual Preview
+                                                Preview
                                             </button>
                                         </div>
                                     </div>
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Subject Line</label>
+                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Subject</label>
                                             <input
                                                 type="text"
                                                 value={templateForm.subject}
@@ -409,14 +482,19 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Email Content (HTML)</label>
-                                                <span className="text-[10px] text-zinc-600 font-medium italic">Standard supah-template syntax enabled</span>
+                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Body (HTML)</label>
+                                                <span className="text-[10px] text-zinc-600 font-medium italic">GoTrue template syntax</span>
                                             </div>
 
                                             {previewMode ? (
                                                 <div className="w-full h-[300px] bg-white rounded-xl overflow-hidden border border-white/10 p-1">
                                                     <iframe
-                                                        srcDoc={templateForm.content.replace(/\{\{\s*\.ConfirmationURL\s*\}\}/g, '#').replace(/\{\{\s*\.Email\s*\}\}/g, 'user@example.com')}
+                                                        srcDoc={templateForm.content
+                                                            .replace(/{{\.ConfirmationURL}}/g, '#')
+                                                            .replace(/{{\.Email}}/g, 'user@example.com')
+                                                            .replace(/{{\.Token}}/g, '123456')
+                                                            .replace(/{{\.SiteURL}}/g, siteURL || 'https://myapp.com')
+                                                        }
                                                         className="w-full h-full border-none rounded-lg"
                                                         title="Email Preview"
                                                     />
@@ -424,10 +502,10 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                             ) : (
                                                 <div className="relative group">
                                                     <div className="absolute left-0 top-0 bottom-0 w-8 bg-zinc-900/50 border-r border-white/5 rounded-l-xl flex flex-col items-center pt-3 text-[10px] text-zinc-600 font-mono select-none pointer-events-none">
-                                                        {Array.from({ length: 12 }).map((_, i) => <div key={i} className="h-[21px]">{i + 1}</div>)}
+                                                        {Array.from({ length: 16 }).map((_, i) => <div key={i} className="h-[21px]">{i + 1}</div>)}
                                                     </div>
                                                     <textarea
-                                                        rows={12}
+                                                        rows={16}
                                                         value={templateForm.content}
                                                         onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
                                                         className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-[13px] text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 transition-colors resize-none leading-[21px]"
@@ -435,7 +513,19 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                                 </div>
                                             )}
 
-                                            <p className="text-[10px] text-zinc-600 font-medium">Available variables: {'{ .ConfirmationURL }'}, {'{ .Email }'}, {'{ .Token }'}</p>
+                                            {/* Variable reference */}
+                                            <div className="flex flex-wrap gap-2">
+                                                {['{{ .ConfirmationURL }}','{{ .Token }}','{{ .TokenHash }}','{{ .SiteURL }}','{{ .Email }}','{{ .NewEmail }}'].map(v => (
+                                                    <button
+                                                        key={v}
+                                                        onClick={() => setTemplateForm({ ...templateForm, content: templateForm.content + v })}
+                                                        className="px-2 py-1 bg-zinc-900 border border-white/5 rounded-lg text-[10px] font-mono text-emerald-400 hover:bg-zinc-800 hover:border-emerald-500/30 transition-all"
+                                                        title={`Insert ${v}`}
+                                                    >
+                                                        {v}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -457,22 +547,27 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {(['invite', 'confirmation', 'recovery', 'magicLink', 'emailChange'] as const).map((key) => (
+                                    {(Object.keys(TEMPLATE_META) as Array<keyof EmailTemplatesConfig>).map((key) => (
                                         <button
                                             key={key}
                                             onClick={() => {
                                                 setEditingTemplate(key);
                                                 setTemplateForm(config?.templates?.[key] || { subject: '', content: '' });
+                                                setPreviewMode(false);
                                             }}
-                                            className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 hover:border-white/10 transition-all group group relative"
+                                            className="flex items-start gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 hover:border-white/10 transition-all group text-left"
                                         >
-                                            <div className="text-left">
-                                                <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">{key}</h5>
-                                                <p className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">
-                                                    {config?.templates?.[key]?.subject || `Default ${key} subject`}
-                                                </p>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h5 className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{TEMPLATE_META[key].label}</h5>
+                                                    <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{TEMPLATE_META[key].when}</span>
+                                                </div>
+                                                <p className="text-[10px] text-zinc-500 leading-relaxed">{TEMPLATE_META[key].desc}</p>
+                                                {config?.templates?.[key]?.subject && (
+                                                    <p className="text-[10px] text-emerald-500/70 mt-1 truncate font-mono">Subject: {config.templates[key].subject}</p>
+                                                )}
                                             </div>
-                                            <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors" size={16} />
+                                            <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors shrink-0 mt-0.5" size={16} />
                                         </button>
                                     ))}
                                 </div>
