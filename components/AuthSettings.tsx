@@ -228,7 +228,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                         </div>
                         <div className="p-6 space-y-5">
                             <p className="text-xs text-zinc-500 font-medium leading-relaxed">
-                                <span className="text-white font-bold">Site URL</span> is your application's URL — GoTrue embeds it inside every confirmation and recovery email link. Without it, confirmation emails will redirect to the wrong place.
+                                <span className="text-white font-bold">Site URL</span> is your application's URL — Afribase embeds it inside every confirmation and recovery email link. Without it, confirmation emails will redirect to the wrong place.
                             </p>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Site URL</label>
@@ -483,7 +483,7 @@ export default function AuthSettings({ projectId }: AuthSettingsProps) {
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Body (HTML)</label>
-                                                <span className="text-[10px] text-zinc-600 font-medium italic">GoTrue template syntax</span>
+                                                <span className="text-[10px] text-zinc-600 font-medium italic">Afribase template syntax</span>
                                             </div>
 
                                             {previewMode ? (
